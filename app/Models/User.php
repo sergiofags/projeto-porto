@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'tipo_perfil',
     ];
 
     /**
@@ -44,5 +45,15 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function isCandidato(): bool
+    {
+        return $this->tipo_perfil === 'Candidato';
+    }
+
+    public function isAdmin(): bool
+    {
+        return in_array($this->tipo_perfil, ['Administrador', 'Super Administrador']);
     }
 }

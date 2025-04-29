@@ -11,17 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('processos', function (Blueprint $table) {
+        Schema::create('hiring', function (Blueprint $table) {
             $table->id();
 
             $table->foreignId('id_vaga')->constrained('vagas');
+            $table->foreignId('id_pessoa')->constrained('pessoas');
             $table->foreignId('id_candidatura')->constrained('candidaturas');
+            $table->foreignId('id_classificacao')->constrained('classificacao');
 
-            $table->enum('status', ['Pendente', 'Aberto', 'Fechado']);
-            $table->date('data_inicio');
-            $table->date('data_fim');
-            $table->string('numero_processo')->unique();
-            $table->string('edital');
+            $table->date('data_contratacao');
+            $table->date('data_exame');
+            $table->string('professor_orientador');
+            $table->string('registro_academico');
+            $table->string('numero_contrato');
+            $table->string('apolice_seguro');
 
             $table->timestamps();
         });
@@ -32,6 +35,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('processos');
+        Schema::dropIfExists('hiring');
     }
 };
