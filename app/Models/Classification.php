@@ -17,8 +17,13 @@ class Classification extends Model
         'motivo_situacao'
     ];
 
-    public function candidacy(): BelongsTo
+    public function candidacy()
     {
-        return $this->belongsTo(Candidacy::class, 'id_candidatura');
+        return $this->belongsTo(Candidacy::class, 'id_candidacy');
+    }
+
+    public function process()
+    {
+        return $this->belongsTo(Process::class, 'id_process');
     }
 }

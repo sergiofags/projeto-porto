@@ -22,23 +22,23 @@ class Hiring extends Model
         'apolice_seguro',
     ];
 
-    public function vacancy(): BelongsTo
+    public function vacancy()
     {
-        return $this->belongsTo(Vacancy::class, 'id_vaga');
+        return $this->belongsTo(Vacancy::class, 'id_vacancy');
     }
 
-    public function person(): BelongsTo
+    public function person()
     {
-        return $this->belongsTo(Person::class, 'id_pessoa');
+        return $this->belongsTo(Person::class, 'id_person');
     }
 
-    public function candidacy(): BelongsTo
+    public function candidacy()
     {
-        return $this->belongsTo(Candidacy::class, 'id_candidatura');
+        return $this->belongsTo(Candidacy::class, 'id_candidacy');
     }
 
-    public function classification(): BelongsTo
+    public function classification()
     {
-        return $this->belongsTo(Classification::class, 'id_classificacao');
+        return $this->belongsTo(Classification::class, 'id_classification');
     }
 }

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('interview', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('id_candidatura')->constrained('candidaturas');
+            $table->foreignId('id_candidacy')->constrained('candidacy');
 
             $table->dateTime('data_hora');
             $table->enum('status', ['Cancelada', 'Agendada', 'Finalizada']);

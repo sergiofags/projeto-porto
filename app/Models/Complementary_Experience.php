@@ -21,8 +21,8 @@ class Complementary_Experience extends Model
         'instituicao',
     ];
 
-    public function person(): BelongsTo
+    public function person()
     {
-        return $this->belongsTo(Person::class, 'id_pessoa');
+        return $this->belongsTo(Person::class, 'id_person');
     }
 }

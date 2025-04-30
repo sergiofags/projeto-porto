@@ -16,13 +16,33 @@ class Candidacy extends Model
         'data_candidatura',
     ];
 
-    public function person(): BelongsTo
+    public function person()
     {
-        return $this->belongsTo(Person::class, 'id_pessoa');
+        return $this->belongsTo(Person::class, 'id_person');
     }
 
-    public function vacancy(): BelongsTo
+    public function vacancy()
     {
-        return $this->belongsTo(Vacancy::class, 'id_vaga');
+        return $this->belongsTo(Vacancy::class, 'id_vacancy');
+    }
+
+    public function process()
+    {
+        return $this->belongsTo(Process::class, 'id_process');
+    }
+
+    public function interview()
+    {
+        return $this->hasOne(Interview::class, 'id_candidacy');
+    }
+
+    public function classification()
+    {
+        return $this->hasOne(Classification::class, 'id_candidacy');
+    }
+
+    public function hiring()
+    {
+        return $this->hasOne(Hiring::class, 'id_candidacy');
     }
 }

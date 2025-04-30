@@ -22,8 +22,18 @@ class Vacancy extends Model
         'tipo_vaga',
     ];
 
-    public function candidacy(): HasMany
+    public function process()
     {
-        return $this->hasMany(Candidacy::class, 'id_vaga');
+        return $this->belongsTo(Process::class, 'id_process');
+    }
+
+    public function candidacies()
+    {
+        return $this->hasMany(Candidacy::class, 'id_vacancy');
+    }
+
+    public function hirings()
+    {
+        return $this->hasMany(Hiring::class, 'id_vacancy');
     }
 }

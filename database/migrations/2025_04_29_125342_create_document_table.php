@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('document', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('id_pessoa')->constrained('pessoas');
+            $table->foreignId('id_person')->constrained('person');
 
             $table->enum('tipo_documento', ['Candidatura', 'Contratacao']);
             $table->string('documento')->nullable();

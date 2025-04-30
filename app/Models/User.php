@@ -47,6 +47,11 @@ class User extends Authenticatable
         ];
     }
 
+    public function person()
+    {
+        return $this->hasOne(Person::class, 'id_user');
+    }
+
     public function isCandidato(): bool
     {
         return $this->tipo_perfil === 'Candidato';

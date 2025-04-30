@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('classification', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('id_candidatura')->constrained('candidaturas');
+            $table->foreignId('id_candidacy')->constrained('candidacy');
+            $table->foreignId('id_process')->constrained('process');
             
             $table->float('nota_coeficiente_rendimento');
             $table->float('nota_entrevista');

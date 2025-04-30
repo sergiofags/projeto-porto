@@ -10,8 +10,7 @@ class Process extends Model
     protected $table = 'process';
 
     protected $fillable = [
-        'id_vaga',
-        'id_candidatura',
+        'descricao',
         'status',
         'data_inicio',
         'data_fim',
@@ -19,13 +18,18 @@ class Process extends Model
         'edital',
     ];
 
-    public function vacancy(): BelongsTo
+    public function vacancies()
     {
-        return $this->belongsTo(Vacancy::class, 'id_vaga');
+        return $this->hasMany(Vacancy::class, 'id_process');
     }
 
-    public function candidacy(): BelongsTo
+    public function candidacies()
     {
-        return $this->belongsTo(Candidacy::class, 'id_candidatura');
+        return $this->hasMany(Candidacy::class, 'id_process');
+    }
+
+    public function classifications()
+    {
+        return $this->hasMany(Classification::class, 'id_process');
     }
 }

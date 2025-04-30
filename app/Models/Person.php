@@ -32,36 +32,33 @@ class Person extends Model
         'referencia'
     ];
 
-    // BelongsTo = pertence a um registro de outra tabela
-    // HasMany = tem muitos registros de outra tabela
-
-    public function user(): BelongsTo
+    public function user()
     {
         return $this->belongsTo(User::class, 'id_user');
     }
 
-    public function candidacy(): HasMany
+    public function experiences()
     {
-        return $this->hasMany(Candidacy::class, 'id_pessoa');
+        return $this->hasMany(Experience::class, 'id_person');
     }
 
-    public function experience(): HasMany
+    public function complementaryExperiences()
     {
-        return $this->hasMany(Experience::class, 'id_pessoa');
+        return $this->hasMany(Complementary_Experience::class, 'id_person');
     }
 
-    public function complementary_experience(): HasMany
+    public function candidacies()
     {
-        return $this->hasMany(Complementary_Experience::class, 'id_pessoa');
+        return $this->hasMany(Candidacy::class, 'id_person');
     }
 
-    public function document(): HasMany
+    public function documents()
     {
-        return $this->hasMany(Document::class, 'id_pessoa');
+        return $this->hasMany(Document::class, 'id_person');
     }
 
-    public function hiring(): HasMany
+    public function hirings()
     {
-        return $this->hasMany(Hiring::class, 'id_pessoa');
+        return $this->hasMany(Hiring::class, 'id_person');
     }
 }
