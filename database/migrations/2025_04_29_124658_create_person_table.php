@@ -16,7 +16,6 @@ return new class extends Migration
             
             $table->foreignId('id_user')->constrained('users');
 
-            $table->string('nome');
             $table->string('foto_perfil')->nullable();
             $table->string('sobre')->nullable();
             $table->string('linkedin')->nullable();
