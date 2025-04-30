@@ -12,7 +12,6 @@ class Person extends Model
 
     protected $fillable = [
         'id_user',
-        'nome',
         'foto_perfil',
         'sobre',
         'linkedin',
