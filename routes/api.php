@@ -10,3 +10,4 @@ Route::get('/user', function (Request $request) {
 
 Route::get('/process', [ProcessController::class, 'index'])->name('process.index');
 Route::post('/process', [ProcessController::class, 'store'])->name('process.store');
+Route::put('/process/{id}', [ProcessController::class, 'update'])->name('process.update');
