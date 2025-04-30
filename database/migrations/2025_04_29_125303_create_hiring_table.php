@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('hiring', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('id_vaga')->constrained('vagas');
-            $table->foreignId('id_pessoa')->constrained('pessoas');
-            $table->foreignId('id_candidatura')->constrained('candidaturas');
-            $table->foreignId('id_classificacao')->constrained('classificacao');
+            $table->foreignId('id_vacancy')->constrained('vacancy');
+            $table->foreignId('id_person')->constrained('person');
+            $table->foreignId('id_candidacy')->constrained('candidacy');
+            $table->foreignId('id_classification')->constrained('classification');
 
             $table->date('data_contratacao');
             $table->date('data_exame');

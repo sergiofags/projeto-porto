@@ -22,8 +22,8 @@ class Experience extends Model
         'data_fim',
     ];
 
-    public function person(): BelongsTo
+    public function person()
     {
-        return $this->belongsTo(Person::class, 'id_pessoa');
+        return $this->belongsTo(Person::class, 'id_person');
     }
 }

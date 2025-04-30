@@ -14,8 +14,9 @@ return new class extends Migration
         Schema::create('candidacy', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('id_pessoa')->constrained('pessoas');
-            $table->foreignId('id_vaga')->constrained('vagas');
+            $table->foreignId('id_person')->constrained('person');
+            $table->foreignId('id_vacancy')->constrained('vacancy');
+            $table->foreignId('id_process')->constrained('process');
             
             $table->enum('status', ['Cancelado', 'Analise', 'Completo']);
             $table->date('data_candidatura');

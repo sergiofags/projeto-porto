@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('complementary_experience', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('id_pessoa')->constrained('pessoas');
+            $table->foreignId('id_person')->constrained('person');
 
             $table->enum('tipo_experiencia', ['Idioma', 'Curso']);
             $table->string('titulo');

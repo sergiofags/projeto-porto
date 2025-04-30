@@ -14,14 +14,14 @@ return new class extends Migration
         Schema::create('process', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('id_vaga')->constrained('vagas');
-            $table->foreignId('id_candidatura')->constrained('candidaturas');
+            // $table->foreignId('id_user')->constrained('users'); Id do adm que criou
 
+            $table->string('descricao');
             $table->enum('status', ['Pendente', 'Aberto', 'Fechado']);
-            $table->date('data_inicio');
-            $table->date('data_fim');
             $table->string('numero_processo')->unique();
-            $table->string('edital');
+            $table->string('edital')->nullable();
+            $table->date('data_inicio');
+            $table->date('data_fim')->nullable();
 
             $table->timestamps();
         });

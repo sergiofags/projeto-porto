@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('vacancy', function (Blueprint $table) {
             $table->id();
+
+            $table->foreignId('id_process')->constrained('process');
+            // $table->foreignId('id_user')->constrained('users'); Id do adm que criou
+
             $table->string('titulo');
             $table->text('responsabilidades')->nullable();
             $table->text('requisitos')->nullable();

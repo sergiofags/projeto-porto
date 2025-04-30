@@ -16,8 +16,8 @@ class Interview extends Model
         'localizacao',
     ];
 
-    public function candidacy(): BelongsTo
+    public function candidacy()
     {
-        return $this->belongsTo(Candidacy::class, 'id_candidatura');
+        return $this->belongsTo(Candidacy::class, 'id_candidacy');
     }
 }
