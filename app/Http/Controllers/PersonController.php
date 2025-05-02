@@ -128,4 +128,33 @@ class PersonController extends Controller
 
         return response()->json($person, 201);
     }
+
+    public function update(Request $request, $id)
+    {
+        $validatedData = $request->validate([
+            'foto_perfil' => 'nullable|string|max:255',
+            'sobre' => 'nullable|string|max:255',
+            'linkedin' => 'nullable|string|max:255',
+            'cpf' => 'required|string|max:14',
+            'data_nascimento' => 'required|date',
+            'genero' => 'required|in:Masculino,Feminino,Outro',
+            'deficiencia' => 'nullable|boolean|max:255',
+            'servico_militar' => 'nullable|boolean|max:255',
+            'telefone' => 'nullable|string|max:20',
+            'rua' => 'nullable|string|max:255',
+            'bairro' => 'nullable|string|max:255',
+            'cidade' => 'nullable|string|max:255',
+            'estado' => 'nullable|string|max:255',
+            'numero' => 'nullable|string|max:10',
+            'complemento' => 'nullable|string|max:255',
+            'cep' => 'nullable|string|max:10',
+            'referencia' => 'nullable|string|max:255',
+        ]);
+
+        $person = Person::findOrFail($id);
+
+        $person->update($validatedData);
+
+        return response()->json($person, 200);
+    }
 }
