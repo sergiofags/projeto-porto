@@ -15,7 +15,7 @@ class ProcessController extends Controller
         return response()->json($process);
     }
 
-    public function show(Request $request, $id)
+    public function show(Request $request, $processId)
     {
         $process = Process::findOrFail($id);
         return response()->json($process);
@@ -37,7 +37,7 @@ class ProcessController extends Controller
         return response()->json($process, 201);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, $processId)
     {
         $validatedData = $request->validate([
             'descricao' => 'required|string|max:255',

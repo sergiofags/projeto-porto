@@ -10,6 +10,7 @@ class Vacancy extends Model
     protected $table = 'vacancy';
 
     protected $fillable = [
+        'id_process',
         'titulo',
         'responsabilidades',
         'requisitos',
@@ -27,12 +28,12 @@ class Vacancy extends Model
         return $this->belongsTo(Process::class, 'id_process');
     }
 
-    public function candidacies()
+    public function candidacy()
     {
         return $this->hasMany(Candidacy::class, 'id_vacancy');
     }
 
-    public function hirings()
+    public function hiring()
     {
         return $this->hasMany(Hiring::class, 'id_vacancy');
     }

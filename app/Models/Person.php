@@ -36,27 +36,27 @@ class Person extends Model
         return $this->belongsTo(User::class, 'id_user');
     }
 
-    public function experiences()
+    public function experience()
     {
         return $this->hasMany(Experience::class, 'id_person');
     }
 
-    public function complementaryExperiences()
+    public function complementary_Experience()
     {
         return $this->hasMany(Complementary_Experience::class, 'id_person');
     }
 
-    public function candidacies()
+    public function candidacy()
     {
         return $this->hasMany(Candidacy::class, 'id_person');
     }
 
-    public function documents()
+    public function document()
     {
         return $this->hasMany(Document::class, 'id_person');
     }
 
-    public function hirings()
+    public function hiring()
     {
         return $this->hasMany(Hiring::class, 'id_person');
     }

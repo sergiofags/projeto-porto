@@ -18,17 +18,17 @@ class Process extends Model
         'edital',
     ];
 
-    public function vacancies()
+    public function vacancy()
     {
         return $this->hasMany(Vacancy::class, 'id_process');
     }
 
-    public function candidacies()
+    public function candidacy()
     {
         return $this->hasMany(Candidacy::class, 'id_process');
     }
 
-    public function classifications()
+    public function classification()
     {
         return $this->hasMany(Classification::class, 'id_process');
     }
