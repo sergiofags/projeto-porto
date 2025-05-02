@@ -70,7 +70,7 @@ class PersonController extends Controller
         return response()->json($array, 200, [], JSON_PRETTY_PRINT);
     }
 
-    public function show(Request $request, $id)
+    public function show(Request $request, $personId)
     {
         $user = User::findOrFail($id);
         $person = Person::where('id_user', $user->id)->first();
@@ -129,7 +129,7 @@ class PersonController extends Controller
         return response()->json($person, 201);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, $personId)
     {
         $validatedData = $request->validate([
             'foto_perfil' => 'nullable|string|max:255',

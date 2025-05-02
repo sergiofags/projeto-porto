@@ -26,7 +26,7 @@ return new class extends Migration
             $table->integer('quantidade');
             $table->date('data_inicio');
             $table->date('data_fim');
-            $table->string('tipo_vaga');
+            $table->enum('tipo_vaga', ['Graduacao', 'Pos-Graduacao']);
             $table->timestamps();
         });
     }
