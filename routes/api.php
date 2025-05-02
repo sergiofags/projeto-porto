@@ -16,4 +16,5 @@ Route::get('/process/{id}', [ProcessController::class, 'show'])->name('process.s
 
 Route::get('/person', [PersonController::class, 'index'])->name('person.index');
 Route::post('/person', [PersonController::class, 'store'])->name('person.store');
+Route::put('/person/{id}', [PersonController::class, 'update'])->name('person.update');
 Route::get('/person/{id}', [PersonController::class, 'show'])->name('person.show');
