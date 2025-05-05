@@ -6,6 +6,7 @@ use App\Http\Controllers\ProcessController;
 use App\Http\Controllers\PersonController;
 use App\Http\Controllers\VacancyController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\ExperienceController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -30,3 +31,8 @@ Route::get('/person/{personId}/document', [DocumentController::class, 'index'])-
 Route::post('/person/{personId}/document', [DocumentController::class, 'store'])->name('document.store');
 Route::get('/person/{personId}/document/{documentId}', [DocumentController::class, 'show'])->name('document.show');
 Route::put('/person/{personId}/document/{documentId}', [DocumentController::class, 'update'])->name('document.update');
+
+Route::get('/person/{personId}/experience', [ExperienceController::class, 'index'])->name('experience.index');
+Route::post('/person/{personId}/experience', [ExperienceController::class, 'store'])->name('experience.store');
+Route::get('/person/{personId}/experience/{experienceId}', [ExperienceController::class, 'show'])->name('experience.show');
+Route::put('/person/{personId}/experience/{experienceId}', [ExperienceController::class, 'update'])->name('experience.update');
