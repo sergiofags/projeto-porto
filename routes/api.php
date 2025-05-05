@@ -7,6 +7,7 @@ use App\Http\Controllers\PersonController;
 use App\Http\Controllers\VacancyController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ExperienceController;
+use App\Http\Controllers\ComplementaryExperienceController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -36,3 +37,8 @@ Route::get('/person/{personId}/experience', [ExperienceController::class, 'index
 Route::post('/person/{personId}/experience', [ExperienceController::class, 'store'])->name('experience.store');
 Route::get('/person/{personId}/experience/{experienceId}', [ExperienceController::class, 'show'])->name('experience.show');
 Route::put('/person/{personId}/experience/{experienceId}', [ExperienceController::class, 'update'])->name('experience.update');
+
+Route::get('/person/{personId}/complementaryexperience', [ComplementaryExperienceController::class, 'index'])->name('complementaryexperience.index');
+Route::post('/person/{personId}/complementaryexperience', [ComplementaryExperienceController::class, 'store'])->name('complementaryexperience.store');
+Route::get('/person/{personId}/complementaryexperience/{complementaryExperienceId}', [ComplementaryExperienceController::class, 'show'])->name('complementaryexperience.show');
+Route::put('/person/{personId}/complementaryexperience/{complementaryExperienceId}', [ComplementaryExperienceController::class, 'update'])->name('complementaryexperience.update');

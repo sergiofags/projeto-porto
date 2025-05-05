@@ -1,10 +1,10 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Models\Person;
-use App\Models\Experience;
 
 use Illuminate\Http\Request;
+use App\Models\Person;
+use App\Models\Experience;
 
 class ExperienceController extends Controller
 {
