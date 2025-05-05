@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProcessController;
 use App\Http\Controllers\PersonController;
 use App\Http\Controllers\VacancyController;
+use App\Http\Controllers\DocumentController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -24,3 +25,8 @@ Route::get('/process/{processId}/vacancy', [VacancyController::class, 'index'])-
 Route::post('/process/{processId}/vacancy', [VacancyController::class, 'store'])->name('vacancy.store');
 Route::get('/process/{processId}/vacancy/{vacancyId}', [VacancyController::class, 'show'])->name('vacancy.show');
 Route::put('/process/{processId}/vacancy/{vacancyId}', [VacancyController::class, 'update'])->name('vacancy.update');
+
+Route::get('/person/{personId}/document', [DocumentController::class, 'index'])->name('document.index');
+Route::post('/person/{personId}/document', [DocumentController::class, 'store'])->name('document.store');
+Route::get('/person/{personId}/document/{documentId}', [DocumentController::class, 'show'])->name('document.show');
+Route::put('/person/{personId}/document/{documentId}', [DocumentController::class, 'update'])->name('document.update');
