@@ -10,7 +10,7 @@ class Experience extends Model
     protected $table = 'experience';
 
     protected $fillable = [
-        'id_pessoa',
+        'id_person',
         'tipo_experiencia',
         'status',
         'empresa_instituicao',
