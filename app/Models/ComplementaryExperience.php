@@ -5,12 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Complementary_Experience extends Model
+class ComplementaryExperience extends Model
 {
     protected $table = 'complementary_experience';
 
     protected $fillable = [
-        'id_pessoa',
+        'id_person',
         'tipo_experiencia',
         'titulo',
         'descricao',

@@ -41,9 +41,9 @@ class Person extends Model
         return $this->hasMany(Experience::class, 'id_person');
     }
 
-    public function complementary_Experience()
+    public function complementaryExperience()
     {
-        return $this->hasMany(Complementary_Experience::class, 'id_person');
+        return $this->hasMany(ComplementaryExperience::class, 'id_person');
     }
 
     public function candidacy()
