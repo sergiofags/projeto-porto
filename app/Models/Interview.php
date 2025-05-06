@@ -10,11 +10,11 @@ class Interview extends Model
     protected $table = 'interview';
 
     protected $fillable = [
-        'id_candidatura',
+        'id_candidacy',
         'data_hora',
         'status',
         'localizacao',
-    ];
+    ]; 
 
     public function candidacy()
     {

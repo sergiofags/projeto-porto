@@ -9,6 +9,7 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\ComplementaryExperienceController;
 use App\Http\Controllers\CandidacyController;
+use App\Http\Controllers\InterviewController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -50,3 +51,7 @@ Route::get('/vacancy/{vacancyId}/candidacy', [CandidacyController::class, 'allCa
 Route::get('/vacancy/{vacancyId}/candidacy/{candidacyId}', [CandidacyController::class, 'specificCandidacyByVacancy'])->name('candidacy.specificCandidacyByVacancy');
 Route::post('/person/{personId}/vacancy/{vacancyId}/candidacy', [CandidacyController::class, 'store'])->name('candidacy.store');
 Route::put('/person/{personId}/candidacy/{candidacyId}', [CandidacyController::class, 'update'])->name('candidacy.update');
+
+Route::get('/candidacy/{candidacyId}/interview', [InterviewController::class, 'index'])->name('interview.index');
+Route::post('/candidacy/{candidacyId}/interview', [InterviewController::class, 'store'])->name('interview.store');
+Route::put('/candidacy/{candidacyId}/interview/{interviewId}', [InterviewController::class, 'update'])->name('interview.update');
