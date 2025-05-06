@@ -10,8 +10,9 @@ class Candidacy extends Model
     protected $table = 'candidacy';
 
     protected $fillable = [
-        'id_pessoa',
-        'id_vaga',
+        'id_person',
+        'id_vacancy',
+        'id_process',
         'status',
         'data_candidatura',
     ];
