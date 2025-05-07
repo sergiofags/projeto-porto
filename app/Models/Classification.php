@@ -10,9 +10,11 @@ class Classification extends Model
     protected $table = 'classification';
 
     protected $fillable = [
-        'id_candidatura',
+        'id_candidacy',
+        'id_vacancy',
         'nota_coeficiente_rendimento',
         'nota_entrevista',
+        'nota_historico',
         'situacao',
         'motivo_situacao'
     ];
@@ -22,8 +24,8 @@ class Classification extends Model
         return $this->belongsTo(Candidacy::class, 'id_candidacy');
     }
 
-    public function process()
+    public function vacancy()
     {
-        return $this->belongsTo(Process::class, 'id_process');
+        return $this->belongsTo(Process::class, 'id_vacancy');
     }
 }

@@ -37,4 +37,9 @@ class Vacancy extends Model
     {
         return $this->hasMany(Hiring::class, 'id_vacancy');
     }
+
+    public function classification()
+    {
+        return $this->hasMany(Classification::class, 'id_vacancy');
+    }
 }
