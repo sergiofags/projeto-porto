@@ -17,7 +17,7 @@ class ProcessController extends Controller
 
     public function show(Request $request, $processId)
     {
-        $process = Process::findOrFail($id);
+        $process = Process::findOrFail($processId);
         return response()->json($process);
     }
 
@@ -48,7 +48,7 @@ class ProcessController extends Controller
             'data_fim' => 'nullable|date',
         ]);
 
-        $process = Process::findOrFail($id);
+        $process = Process::findOrFail($processId);
 
         $process->update($validatedData);
 
