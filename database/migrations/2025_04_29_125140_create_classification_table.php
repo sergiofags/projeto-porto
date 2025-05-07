@@ -15,10 +15,11 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('id_candidacy')->constrained('candidacy');
-            $table->foreignId('id_process')->constrained('process');
+            $table->foreignId('id_vacancy')->constrained('vacancy');
             
-            $table->float('nota_coeficiente_rendimento');
-            $table->float('nota_entrevista');
+            $table->float('nota_coeficiente_rendimento')->nullable();
+            $table->float('nota_entrevista')->nullable();
+            $table->float('nota_historico')->nullable();
             $table->enum('situacao', ['Habilitado', 'Inabilitado', 'Desclassificado']);
             $table->enum('motivo_situacao', ['Esperar RH']);
 

@@ -27,9 +27,4 @@ class Process extends Model
     {
         return $this->hasMany(Candidacy::class, 'id_process');
     }
-
-    public function classification()
-    {
-        return $this->hasMany(Classification::class, 'id_process');
-    }
 }
