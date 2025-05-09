@@ -100,14 +100,16 @@ class PersonController extends Controller
 
         } catch (ModelNotFoundException $e) {
             return response()->json([
-                'message' => 'Usuário ou pessoa não encontrada.'
+                'message' => 'Usuário ou pessoa não encontrada.',
+                'error' => $e->getMessage()
             ], 404);
 
         } catch (Exception $e) {
             Log::error('Erro ao buscar pessoa: ' . $e->getMessage());
 
             return response()->json([
-                'message' => 'Erro interno no servidor'
+                'message' => 'Erro interno no servidor',
+                'error' => $e->getMessage()
             ], 500);
         }
     }
@@ -150,7 +152,8 @@ class PersonController extends Controller
             Log::error('Erro ao criar pessoa: ' . $e->getMessage());
 
             return response()->json([
-                'message' => 'Erro interno no servidor'
+                'message' => 'Erro interno no servidor',
+                'error' => $e->getMessage()
             ], 500);
         }
     }
@@ -192,14 +195,16 @@ class PersonController extends Controller
 
         } catch (ModelNotFoundException $e) {
             return response()->json([
-                'message' => 'Pessoa não encontrada.'
+                'message' => 'Pessoa não encontrada.',
+                'error' => $e->getMessage()
             ], 404);
 
         } catch (Exception $e) {
             Log::error('Erro ao atualizar pessoa: ' . $e->getMessage());
 
             return response()->json([
-                'message' => 'Erro interno no servidor'
+                'message' => 'Erro interno no servidor',
+                'error' => $e->getMessage()
             ], 500);
         }
     }
