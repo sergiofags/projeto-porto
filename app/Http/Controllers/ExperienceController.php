@@ -66,4 +66,12 @@ class ExperienceController extends Controller
 
         return response()->json($experience, 200);
     }
+
+    public function allExperienceByType(Request $request, $personId, $typeExperience)
+    {
+        $person = Person::findOrFail($personId);
+
+        $experiences = $person->experience()->where('tipo_experiencia', $typeExperience)->get();
+        return response()->json($experiences);
+    }
 }
