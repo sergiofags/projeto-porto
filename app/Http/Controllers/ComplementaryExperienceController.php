@@ -65,4 +65,11 @@ class ComplementaryExperienceController extends Controller
         return response()->json($complementaryExperience, 200);
     }
 
+    public function allComplementaryExperienceByType(Request $request, $personId, $typeComplementaryExperience)
+    {
+        $person = Person::findOrFail($personId);
+
+        $complementaryExperiences = $person->complementaryExperience()->where('tipo_experiencia', $typeComplementaryExperience)->get();
+        return response()->json($complementaryExperiences);
+    }
 }

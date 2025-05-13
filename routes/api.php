@@ -32,19 +32,22 @@ Route::put('/person/{personId}', [PersonController::class, 'update'])->name('per
 Route::get('/person/{personId}', [PersonController::class, 'show'])->name('person.show')->middleware('auth:sanctum','candidate'); //Retorna uma pessoa específica (deverá ser utilizado para mostrar o perfil do candidato)
 
 Route::get('/person/{personId}/document', [DocumentController::class, 'index'])->name('document.index'); //Retorna todos os documentos de uma pessoa
-Route::post('/person/{personId}/document', [DocumentController::class, 'store'])->name('document.store')->middleware('auth:sanctum','candidate'); //Cria um novo documento
+Route::post('/person/{personId}/document', [DocumentController::class, 'store'])->name('document.store')->middleware('auth:sanctum','candidate');; //Cria um novo documento
 Route::get('/person/{personId}/document/{documentId}', [DocumentController::class, 'show'])->name('document.show'); //Retorna um documento específico
-Route::put('/person/{personId}/document/{documentId}', [DocumentController::class, 'update'])->name('document.update')->middleware('auth:sanctum','candidate'); //Atualiza um documento
+Route::put('/person/{personId}/document/{documentId}', [DocumentController::class, 'update'])->name('document.update')->middleware('auth:sanctum','candidate');; //Atualiza um documento
+Route::get('/person/{personId}/document/type/{typeDocument}', [DocumentController::class, 'allDocumentByType'])->name('document.allDocumentByType'); //Retorna todos os documentos pelo tipo de documento (Candidatura ou Contratação)
 
 Route::get('/person/{personId}/experience', [ExperienceController::class, 'index'])->name('experience.index'); //Retorna todas as experiências de uma pessoa
-Route::post('/person/{personId}/experience', [ExperienceController::class, 'store'])->name('experience.store')->middleware('auth:sanctum','candidate'); //Cria uma nova experiência
+Route::post('/person/{personId}/experience', [ExperienceController::class, 'store'])->name('experience.store')->middleware('auth:sanctum','candidate'); //Cria uma nova experiência 
 Route::get('/person/{personId}/experience/{experienceId}', [ExperienceController::class, 'show'])->name('experience.show'); //Retorna uma experiência específica
-Route::put('/person/{personId}/experience/{experienceId}', [ExperienceController::class, 'update'])->name('experience.update')->middleware('auth:sanctum','candidate'); //Atualiza uma experiência
+Route::put('/person/{personId}/experience/{experienceId}', [ExperienceController::class, 'update'])->name('experience.update')->middleware('auth:sanctum','candidate'); //Atualiza uma experiência 
+Route::get('/person/{personId}/experience/type/{typeExperience}', [ExperienceController::class, 'allExperienceByType'])->name('experience.allExperienceByType'); //Retorna todas as experiências pelo tipo de experiência (Acadêmica ou Profissional)
 
 Route::get('/person/{personId}/complementaryexperience', [ComplementaryExperienceController::class, 'index'])->name('complementaryexperience.index'); //Retorna todas as experiências complementares de uma pessoa
-Route::post('/person/{personId}/complementaryexperience', [ComplementaryExperienceController::class, 'store'])->name('complementaryexperience.store')->middleware('auth:sanctum','candidate'); //Cria uma nova experiência complementar
+Route::post('/person/{personId}/complementaryexperience', [ComplementaryExperienceController::class, 'store'])->name('complementaryexperience.store')->middleware('auth:sanctum','candidate'); //Cria uma nova experiência complementar 
 Route::get('/person/{personId}/complementaryexperience/{complementaryExperienceId}', [ComplementaryExperienceController::class, 'show'])->name('complementaryexperience.show'); //Retorna uma experiência complementar específica
-Route::put('/person/{personId}/complementaryexperience/{complementaryExperienceId}', [ComplementaryExperienceController::class, 'update'])->name('complementaryexperience.update')->middleware('auth:sanctum','candidate'); //Atualiza uma experiência complementar
+Route::put('/person/{personId}/complementaryexperience/{complementaryExperienceId}', [ComplementaryExperienceController::class, 'update'])->name('complementaryexperience.update')->middleware('auth:sanctum','candidate'); //Atualiza uma experiência complementar 
+Route::get('/person/{personId}/complementaryexperience/type/{typeComplementaryExperience}', [ComplementaryExperienceController::class, 'allComplementaryExperienceByType'])->name('complementaryexperience.allComplementaryExperienceByType'); //Retorna todas as experiências complementares por tipo (Idioma ou Curso)
 
 Route::get('/person/{personId}/candidacy', [CandidacyController::class, 'allCandidacyByPerson'])->name('candidacy.allCandidacyByPerson'); //Retorna toodas as candidaturas por pessoa
 Route::get('/person/{personId}/candidacy/{candidacyId}', [CandidacyController::class, 'specificCandidacyByPerson'])->name('candidacy.specificCandidacyByPerson'); //Retorna uma candidatura especifica de uma pessoa
