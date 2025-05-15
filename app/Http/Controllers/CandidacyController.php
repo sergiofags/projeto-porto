@@ -50,6 +50,14 @@ class CandidacyController extends Controller
             'data_candidatura' => 'required|date',
         ]);
 
+        $existingCandidacy = Candidacy::where('id_person', $person->id)
+            ->where('id_vacancy', $vacancy->id)
+            ->first();
+
+        if ($existingCandidacy) {
+            return response()->json(['message' => 'Essa pessoa já possui uma candidatura para essa vaga'], 409);
+        }
+
         $validatedData['id_person'] = $person->id;
         $validatedData['id_vacancy'] = $vacancy->id;
         $validatedData['id_process'] = $process->id;
