@@ -54,6 +54,10 @@ class CandidacyController extends Controller
             ->where('id_vacancy', $vacancy->id)
             ->first();
 
+        if ($vacancy->data_fim < now()) {
+            return response()->json(['message' => 'A vaga já foi encerrada'], 409);
+        }
+
         if ($existingCandidacy) {
             return response()->json(['message' => 'Essa pessoa já possui uma candidatura para essa vaga'], 409);
         }
