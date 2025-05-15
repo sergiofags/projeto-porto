@@ -40,6 +40,10 @@ class VacancyController extends Controller
             'tipo_vaga' => 'required|in:Graduacao,Pos-Graduacao',
         ]);
 
+        if ($process->data_fim < now()) {
+            return response()->json(['message' => 'O processo já foi encerrado'], 409);
+        }
+
         $validatedData['id_process'] = $process->id;
 
         $vacancy = Vacancy::create($validatedData);
