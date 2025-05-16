@@ -31,14 +31,15 @@ class ProcessController extends Controller
     public function show(Request $request, $processId)
     {
         try {
-            $process = Process::findOrFail($processId);
-            return response()->json($process);
+            $process = Process::find($processId);
 
-        } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'message' => 'Processo não encontrado.',
-                'error' => $e->getMessage()
-            ], 404);
+            if (!$process) {
+                return response()->json([
+                    'message' => 'Processo não encontrado.'
+                ], 404);
+            }
+
+            return response()->json($process);
 
         } catch (Exception $e) {
             return response()->json([
@@ -83,7 +84,7 @@ class ProcessController extends Controller
             ], 422);
 
         } catch (Exception $e) {
-            return response()->json(['message' => 'Erro interno de servidor.'], 500);
+            return response()->json(['message' => 'Erro interno do servidor.'], 500);
         }
     }
 
@@ -99,6 +100,14 @@ class ProcessController extends Controller
                 'data_fim' => 'nullable|date',
             ]);
 
+            $process = Process::find($processId);
+
+            if (!$process) {
+                return response()->json([
+                    'message' => 'Processo não encontrado.'
+                ], 404);
+            }
+
             if (Process::where('numero_processo', $validatedData['numero_processo'])->exists()) {
                 return response()->json([
                     'message' => 'O número do processo já existe.',
@@ -111,8 +120,6 @@ class ProcessController extends Controller
                 ], 422);
             }
 
-            $process = Process::findOrFail($processId);
-
             $process->update($validatedData);
 
             return response()->json($process);
@@ -122,12 +129,6 @@ class ProcessController extends Controller
                 'message' => 'Erro de validação.',
                 'errors' => $e->errors()
             ], 422);
-
-        } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'message' => 'Processo não encontrado.',
-                'error' => $e->getMessage()
-            ], 404);
 
         } catch (Exception $e) {
             return response()->json([
