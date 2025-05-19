@@ -10,68 +10,189 @@ class ExperienceController extends Controller
 {
     public function index(Request $request, $personId)
     {
-        $person = Person::findOrFail($personId);
-        $experience = $person->experience;
-        return response()->json($experience);
+        try {
+            $person = Person::find($personId);
+            if (!$person) {
+                return response()->json([
+                    'message' => 'Pessoa não encontrada.'
+                ], 404);
+            }
+
+            $experience = $person->experience;
+            return response()->json($experience);
+
+        } catch (\Illuminate\Database\QueryException $e) {
+            return response()->json([
+                'message' => 'Erro ao acessar o banco de dados.',
+                'error' => $e->getMessage()
+            ], 500);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erro interno no servidor.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function show(Request $request, $personId, $experienceId)
     {
-        $person = Person::findOrFail($personId);
-        $experience = $person->experience()->findOrFail($experienceId);
-        return response()->json($experience);
+        try {
+            $person = Person::find($personId);
+            if (!$person) {
+                return response()->json([
+                    'message' => 'Pessoa não encontrada.'
+                ], 404);
+            }
+
+            $experience = $person->experience()->find($experienceId);
+            if (!$experience) {
+                return response()->json([
+                    'message' => 'Experiência não encontrada.'
+                ], 404);
+            }
+
+            return response()->json($experience);
+
+        } catch (\Illuminate\Database\QueryException $e) {
+            return response()->json([
+                'message' => 'Erro ao acessar o banco de dados.',
+                'error' => $e->getMessage()
+            ], 500);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erro interno no servidor.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function store(Request $request, $personId)
     {
-        $person = Person::findOrFail($personId);
+        try {
+            $person = Person::find($personId);
+            if (!$person) {
+                return response()->json([
+                    'message' => 'Pessoa não encontrada.'
+                ], 404);
+            }
 
-        $validatedData = $request->validate([
-            'tipo_experiencia' => 'required|in:Acadêmica,Profissional',
-            'status' => 'required|in:Trancado,Cursando,Formado,EmpregoAnterior,EmpregoAtual',
-            'empresa_instituicao' => 'required|string|max:255',
-            'curso_cargo' => 'required|string|max:255',
-            'nivel' => 'required|string|max:255',
-            'atividades' => 'nullable|string|max:1000',
-            'semestre_modulo' => 'nullable|string|max:255',
-            'data_inicio' => 'required|date',
-            'data_fim' => 'nullable|date',
-        ]);
+            $validatedData = $request->validate([
+                'tipo_experiencia' => 'required|in:Acadêmica,Profissional',
+                'status' => 'required|in:Trancado,Cursando,Formado,EmpregoAnterior,EmpregoAtual',
+                'empresa_instituicao' => 'required|string|max:255',
+                'curso_cargo' => 'required|string|max:255',
+                'nivel' => 'required|string|max:255',
+                'atividades' => 'nullable|string|max:1000',
+                'semestre_modulo' => 'nullable|string|max:255',
+                'data_inicio' => 'required|date',
+                'data_fim' => 'nullable|date',
+            ]);
 
-        $validatedData['id_person'] = $person->id;
+            $validatedData['id_person'] = $person->id;
 
-        $experience = Experience::create($validatedData);
+            $experience = Experience::create($validatedData);
 
-        return response()->json($experience, 201);
+            return response()->json($experience, 201);
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Erro de validação.',
+                'error' => $e->error()
+            ], 422);
+
+        } catch (\Illuminate\Database\QueryException $e) {
+            return response()->json([
+                'message' => 'Erro ao acessar o banco de dados.',
+                'error' => $e->getMessage()
+            ], 500);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erro interno no servidor.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function update(Request $request, $personId, $experienceId)
     {
-        $person = Person::findOrFail($personId);
-        $experience = $person->experience()->findOrFail($experienceId);
+        try {
+            $person = Person::find($personId);
+            if (!$person) {
+                return response()->json([
+                    'message' => 'Pessoa não encontrada.'
+                ], 404);
+            }
 
-        $validatedData = $request->validate([
-            'tipo_experiencia' => 'required|in:Acadêmica,Profissional',
-            'status' => 'required|in:Trancado,Cursando,Formado,EmpregoAnterior,EmpregoAtual',
-            'empresa_instituicao' => 'required|string|max:255',
-            'curso_cargo' => 'required|string|max:255',
-            'nivel' => 'required|string|max:255',
-            'atividades' => 'nullable|string|max:1000',
-            'semestre_modulo' => 'nullable|string|max:255',
-            'data_inicio' => 'required|date',
-            'data_fim' => 'nullable|date',
-        ]);
+            $experience = $person->experience()->find($experienceId);
+            if (!$experience) {
+                return response()->json([
+                    'message' => 'Experiência não encontrada.'
+                ], 404);
+            }
 
-        $experience->update($validatedData);
+            $validatedData = $request->validate([
+                'tipo_experiencia' => 'required|in:Acadêmica,Profissional',
+                'status' => 'required|in:Trancado,Cursando,Formado,EmpregoAnterior,EmpregoAtual',
+                'empresa_instituicao' => 'required|string|max:255',
+                'curso_cargo' => 'required|string|max:255',
+                'nivel' => 'required|string|max:255',
+                'atividades' => 'nullable|string|max:1000',
+                'semestre_modulo' => 'nullable|string|max:255',
+                'data_inicio' => 'required|date',
+                'data_fim' => 'nullable|date',
+            ]);
 
-        return response()->json($experience, 200);
+            $experience->update($validatedData);
+
+            return response()->json($experience, 200);
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Erro de validação.',
+                'error' => $e->error()
+            ], 422);
+
+        } catch (\Illuminate\Database\QueryException $e) {
+            return response()->json([
+                'message' => 'Erro ao acessar o banco de dados.',
+                'error' => $e->getMessage()
+            ], 500);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erro interno no servidor.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function allExperienceByType(Request $request, $personId, $typeExperience)
     {
-        $person = Person::findOrFail($personId);
+        try {
+            $person = Person::find($personId);
+            if (!$person) {
+                return response()->json([
+                    'message' => 'Pessoa não encontrada.'
+                ], 404);
+            }
 
-        $experiences = $person->experience()->where('tipo_experiencia', $typeExperience)->get();
-        return response()->json($experiences);
+            $experiences = $person->experience()->where('tipo_experiencia', $typeExperience)->get();
+            return response()->json($experiences);
+
+        } catch (\Illuminate\Database\QueryException $e) {
+            return response()->json([
+                'message' => 'Erro ao acessar o banco de dados.',
+                'error' => $e->getMessage()
+            ], 500);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erro interno no servidor.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

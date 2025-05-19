@@ -56,12 +56,13 @@ class PersonController extends Controller
 
         } catch (\Illuminate\Database\QueryException $e) {
             return response()->json([
-                'message' => 'Erro ao acessar o banco de dados',
+                'message' => 'Erro ao acessar o banco de dados.',
                 'error' => $e->getMessage()
             ], 500);
+
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Erro interno no servidor',
+                'message' => 'Erro interno no servidor.',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -70,7 +71,13 @@ class PersonController extends Controller
     public function show(Request $request, $personId)
     {
         try {
-            $user = User::findOrFail($personId);
+            $user = User::find($personId);
+            if (!$user) {
+                return response()->json([
+                    'message' => 'Usuário não encontrado.'
+                ], 404);
+            }
+
             $person = Person::where('id_user', $user->id)->first();
 
             $result = [
@@ -98,17 +105,15 @@ class PersonController extends Controller
 
             return response()->json($result, 200, [], JSON_PRETTY_PRINT);
 
-        } catch (ModelNotFoundException $e) {
+        } catch (\Illuminate\Database\QueryException $e) {
             return response()->json([
-                'message' => 'Usuário ou pessoa não encontrada.',
+                'message' => 'Erro ao acessar o banco de dados.',
                 'error' => $e->getMessage()
-            ], 404);
+            ], 500);
 
-        } catch (Exception $e) {
-            Log::error('Erro ao buscar pessoa: ' . $e->getMessage());
-
+        } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Erro interno no servidor',
+                'message' => 'Erro interno no servidor.',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -144,15 +149,19 @@ class PersonController extends Controller
 
         } catch (ValidationException $e) {
             return response()->json([
-                'message' => 'Erro de validação',
-                'errors' => $e->errors()
+                'message' => 'Erro de validação.',
+                'error' => $e->error()
             ], 422);
 
-        } catch (Exception $e) {
-            Log::error('Erro ao criar pessoa: ' . $e->getMessage());
-
+        } catch (\Illuminate\Database\QueryException $e) {
             return response()->json([
-                'message' => 'Erro interno no servidor',
+                'message' => 'Erro ao acessar o banco de dados.',
+                'error' => $e->getMessage()
+            ], 500);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erro interno no servidor.',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -181,7 +190,12 @@ class PersonController extends Controller
                 'referencia' => 'nullable|string|max:255',
             ]);
 
-            $person = Person::findOrFail($personId);
+            $person = Person::find($personId);
+            if (!$person) {
+                return response()->json([
+                    'message' => 'Pessoa não encontrada.'
+                ], 404);
+            }
 
             $person->update($validatedData);
 
@@ -189,21 +203,19 @@ class PersonController extends Controller
 
         } catch (ValidationException $e) {
             return response()->json([
-                'message' => 'Erro de validação',
-                'errors' => $e->errors()
+                'message' => 'Erro de validação.',
+                'error' => $e->error()
             ], 422);
 
-        } catch (ModelNotFoundException $e) {
+        } catch (\Illuminate\Database\QueryException $e) {
             return response()->json([
-                'message' => 'Pessoa não encontrada.',
+                'message' => 'Erro ao acessar o banco de dados.',
                 'error' => $e->getMessage()
-            ], 404);
+            ], 500);
 
-        } catch (Exception $e) {
-            Log::error('Erro ao atualizar pessoa: ' . $e->getMessage());
-
+        } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Erro interno no servidor',
+                'message' => 'Erro interno no servidor.',
                 'error' => $e->getMessage()
             ], 500);
         }
