@@ -20,6 +20,7 @@ class ProcessController extends Controller
                 'message' => 'Erro ao acessar o banco de dados.',
                 'error' => $e->getMessage()
             ], 500);
+
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Erro interno no servidor.',
@@ -32,7 +33,6 @@ class ProcessController extends Controller
     {
         try {
             $process = Process::find($processId);
-
             if (!$process) {
                 return response()->json([
                     'message' => 'Processo não encontrado.'
@@ -41,7 +41,13 @@ class ProcessController extends Controller
 
             return response()->json($process);
 
-        } catch (Exception $e) {
+        } catch (\Illuminate\Database\QueryException $e) {
+            return response()->json([
+                'message' => 'Erro ao acessar o banco de dados.',
+                'error' => $e->getMessage()
+            ], 500);
+
+        } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Erro interno no servidor.',
                 'error' => $e->getMessage()
@@ -80,11 +86,20 @@ class ProcessController extends Controller
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Erro de validação.',
-                'errors' => $e->validator->errors(),
+                'error' => $e->error()
             ], 422);
 
-        } catch (Exception $e) {
-            return response()->json(['message' => 'Erro interno do servidor.'], 500);
+        } catch (\Illuminate\Database\QueryException $e) {
+            return response()->json([
+                'message' => 'Erro ao acessar o banco de dados.',
+                'error' => $e->getMessage()
+            ], 500);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erro interno no servidor.',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 
@@ -101,7 +116,6 @@ class ProcessController extends Controller
             ]);
 
             $process = Process::find($processId);
-
             if (!$process) {
                 return response()->json([
                     'message' => 'Processo não encontrado.'
@@ -127,10 +141,16 @@ class ProcessController extends Controller
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Erro de validação.',
-                'errors' => $e->errors()
+                'error' => $e->error()
             ], 422);
 
-        } catch (Exception $e) {
+        } catch (\Illuminate\Database\QueryException $e) {
+            return response()->json([
+                'message' => 'Erro ao acessar o banco de dados.',
+                'error' => $e->getMessage()
+            ], 500);
+
+        } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Erro interno no servidor.',
                 'error' => $e->getMessage()

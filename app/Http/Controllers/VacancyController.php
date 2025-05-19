@@ -55,6 +55,12 @@ class VacancyController extends Controller
 
             return response()->json($vacancy);
 
+        } catch (\Illuminate\Database\QueryException $e) {
+            return response()->json([
+                'message' => 'Erro ao acessar o banco de dados.',
+                'error' => $e->getMessage()
+            ], 500);
+
         } catch (Exception $e) {
             return response()->json([
                 'message' => 'Erro interno no servidor.',
@@ -67,12 +73,12 @@ class VacancyController extends Controller
     {
         try {
             $process = Process::find($processId);
-
             if (!$process) {
                 return response()->json([
                     'message' => 'Processo não encontrado.'
                 ], 404);
             }
+            
             $validatedData = $request->validate([
                 'titulo' => 'required|string|max:255',
                 'responsabilidades' => 'nullable|string',
@@ -105,11 +111,20 @@ class VacancyController extends Controller
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Erro de validação.',
-                'errors' => $e->validator->errors(),
+                'error' => $e->error()
             ], 422);
-            
-        } catch (Exception $e) {
-            return response()->json(['message' => 'Erro interno do servidor.'], 500);
+
+        } catch (\Illuminate\Database\QueryException $e) {
+            return response()->json([
+                'message' => 'Erro ao acessar o banco de dados.',
+                'error' => $e->getMessage()
+            ], 500);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erro interno no servidor.',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 
@@ -156,10 +171,16 @@ class VacancyController extends Controller
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Erro de validação.',
-                'errors' => $e->errors()
+                'error' => $e->error()
             ], 422);
 
-        } catch (Exception $e) {
+        } catch (\Illuminate\Database\QueryException $e) {
+            return response()->json([
+                'message' => 'Erro ao acessar o banco de dados.',
+                'error' => $e->getMessage()
+            ], 500);
+
+        } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Erro interno no servidor.',
                 'error' => $e->getMessage()
