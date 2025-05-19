@@ -143,6 +143,13 @@ class PersonController extends Controller
                 'referencia' => 'nullable|string|max:255',
             ]);
 
+            $cpf = $validatedData['cpf'];
+            if (!$this->validCPF($cpf)) {
+                return response()->json([
+                    'message' => 'CPF inválido.'
+                ], 422);
+            }
+
             $person = Person::create($validatedData);
 
             return response()->json($person, 201);
@@ -174,7 +181,7 @@ class PersonController extends Controller
                 'foto_perfil' => 'nullable|string|max:255',
                 'sobre' => 'nullable|string|max:255',
                 'linkedin' => 'nullable|string|max:255',
-                'cpf' => 'required|string|max:14|unique:person,cpf',
+                'cpf' => 'required|string|max:14',
                 'data_nascimento' => 'required|date',
                 'genero' => 'required|in:Masculino,Feminino,Outro',
                 'deficiencia' => 'nullable|boolean',
@@ -195,6 +202,17 @@ class PersonController extends Controller
                 return response()->json([
                     'message' => 'Pessoa não encontrada.'
                 ], 404);
+            }
+
+            if ($person->cpf !== $validatedData['cpf']) {
+                $cpfExists = Person::where('cpf', $validatedData['cpf'])
+                    ->where('id', '!=', $person->id)
+                    ->exists();
+                if ($cpfExists) {
+                    return response()->json([
+                        'message' => 'CPF já está em uso por outra pessoa.'
+                    ], 422);
+                }
             }
 
             $person->update($validatedData);
@@ -220,5 +238,36 @@ class PersonController extends Controller
             ], 500);
         }
     }
+    
+    public function validatedCpf(Request $request, $cpf)
+    {
+        return response()->json([
+            'valid' => $this->validCPF($cpf)
+        ]);
+    }
 
+    private function validCPF($cpf)
+    {
+        $cpf = preg_replace('/[^0-9]/is', '', $cpf);
+
+        if (strlen($cpf) != 11) {
+            return false;
+        }
+
+        if (preg_match('/(\d)\1{10}/', $cpf)) {
+            return false;
+        }
+
+        for ($t = 9; $t < 11; $t++) {
+            for ($d = 0, $c = 0; $c < $t; $c++) {
+                $d += $cpf[$c] * (($t + 1) - $c);
+            }
+            $d = ((10 * $d) % 11) % 10;
+            if ($cpf[$c] != $d) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }
