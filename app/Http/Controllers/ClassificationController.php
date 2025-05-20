@@ -8,6 +8,7 @@ use App\Models\Candidacy;
 use App\Models\Classification;
 use App\Models\Vacancy;
 use App\Models\Process;
+Use App\Models\User;
 
 class ClassificationController extends Controller
 {
@@ -45,9 +46,16 @@ class ClassificationController extends Controller
         }
     }
 
-    public function store(Request $request, $candidacyId)
+    public function store(Request $request, $candidacyId, $adminId)
     {
         try {
+            $admin = User::where('id', $adminId)->where('tipo_perfil', 'Admin')->first();
+            if (!$admin) {
+                return response()->json([
+                    'message' => 'Administrador não encontrado ou não possui perfil de Admin.'
+                ], 404);
+            }
+
             $candidacy = Candidacy::find($candidacyId);
             if (!$candidacy) {
                 return response()->json([
@@ -87,6 +95,8 @@ class ClassificationController extends Controller
             }
 
             $validatedData['nota_historico'] = $notaHistorico;
+            $validatedData['id_admin'] = $adminId;
+
             $classification = Classification::create($validatedData);
 
             return response()->json($classification, 201);
@@ -114,6 +124,13 @@ class ClassificationController extends Controller
     public function update(Request $request, $candidacyId, $classificationId)
     {
         try {
+            $admin = User::where('id', $adminId)->where('tipo_perfil', 'Admin')->first();
+            if (!$admin) {
+                return response()->json([
+                    'message' => 'Administrador não encontrado ou não possui perfil de Admin.'
+                ], 404);
+            }
+
             $candidacy = Candidacy::find($candidacyId);
             if (!$candidacy) {
                 return response()->json([
@@ -154,6 +171,7 @@ class ClassificationController extends Controller
             }
 
             $validatedData['nota_historico'] = $notaHistorico;
+            $validatedData['id_admin'] = $adminId;
 
             $classification->update($validatedData);
 

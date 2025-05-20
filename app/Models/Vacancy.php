@@ -10,6 +10,7 @@ class Vacancy extends Model
     protected $table = 'vacancy';
 
     protected $fillable = [
+        'id_admin',
         'id_process',
         'titulo',
         'responsabilidades',
@@ -41,5 +42,10 @@ class Vacancy extends Model
     public function classification()
     {
         return $this->hasMany(Classification::class, 'id_vacancy');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'id_admin');
     }
 }

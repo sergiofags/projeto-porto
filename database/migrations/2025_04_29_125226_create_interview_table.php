@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('id_candidacy')->constrained('candidacy');
+            $table->foreignId('id_admin')->constrained('users');
 
             $table->dateTime('data_hora');
             $table->enum('status', ['Cancelada', 'Agendada', 'Finalizada']);

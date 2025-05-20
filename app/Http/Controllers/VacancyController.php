@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 
 use App\Models\Vacancy;
 use App\Models\Process;
+Use App\Models\User;
 
 class VacancyController extends Controller
 {
@@ -69,9 +70,16 @@ class VacancyController extends Controller
         }
     }
 
-    public function store(Request $request, $processId)
+    public function store(Request $request, $processId, $adminId)
     {
         try {
+            $admin = User::where('id', $adminId)->where('tipo_perfil', 'Admin')->first();
+            if (!$admin) {
+                return response()->json([
+                    'message' => 'Administrador não encontrado ou não possui perfil de Admin.'
+                ], 404);
+            }
+
             $process = Process::find($processId);
             if (!$process) {
                 return response()->json([
@@ -103,6 +111,7 @@ class VacancyController extends Controller
             }
 
             $validatedData['id_process'] = $process->id;
+            $validatedData['id_admin'] = $adminId;
 
             $vacancy = Vacancy::create($validatedData);
 
@@ -131,6 +140,13 @@ class VacancyController extends Controller
     public function update(Request $request, $processId, $vacancyId)
     {
         try {
+            $admin = User::where('id', $adminId)->where('tipo_perfil', 'Admin')->first();
+            if (!$admin) {
+                return response()->json([
+                    'message' => 'Administrador não encontrado ou não possui perfil de Admin.'
+                ], 404);
+            }
+
             $process = Process::findOrFail($processId);
             if (!$process) {
                 return response()->json([
@@ -164,6 +180,7 @@ class VacancyController extends Controller
                 ], 422);
             }
 
+            $validatedData['id_admin'] = $adminId;
             $vacancy->update($validatedData);
 
             return response()->json($vacancy);
