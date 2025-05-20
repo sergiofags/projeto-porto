@@ -16,6 +16,7 @@ return new class extends Migration
 
             $table->foreignId('id_candidacy')->constrained('candidacy');
             $table->foreignId('id_vacancy')->constrained('vacancy');
+            $table->foreignId('id_admin')->constrained('users');
             
             $table->float('nota_coeficiente_rendimento')->nullable();
             $table->float('nota_entrevista')->nullable();

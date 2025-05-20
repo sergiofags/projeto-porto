@@ -17,14 +17,14 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::get('/process', [ProcessController::class, 'index'])->name('process.index'); //Retorna todos os processos
-Route::post('/process', [ProcessController::class, 'store'])->name('process.store')->middleware('auth:sanctum','admin'); //Cria um novo processo
-Route::put('/process/{processId}', [ProcessController::class, 'update'])->name('process.update')->middleware('auth:sanctum','admin'); //Atualiza um processo
+Route::post('/admin/{adminId}/process', [ProcessController::class, 'store'])->name('process.store')->middleware('auth:sanctum','admin'); //Cria um novo processo
+Route::put('/admin/{adminId}/process/{processId}', [ProcessController::class, 'update'])->name('process.update')->middleware('auth:sanctum','admin'); //Atualiza um processo
 Route::get('/process/{processId}', [ProcessController::class, 'show'])->name('process.show'); //Retorna um processo específico
 
 Route::get('/process/{processId}/vacancy', [VacancyController::class, 'index'])->name('vacancy.index'); //Retorna todas as vagas de um processo
-Route::post('/process/{processId}/vacancy', [VacancyController::class, 'store'])->name('vacancy.store')->middleware('auth:sanctum','admin'); //Cria uma nova vaga
+Route::post('/admin/{adminId}/process/{processId}/vacancy', [VacancyController::class, 'store'])->name('vacancy.store')->middleware('auth:sanctum','admin'); //Cria uma nova vaga
 Route::get('/process/{processId}/vacancy/{vacancyId}', [VacancyController::class, 'show'])->name('vacancy.show'); //Retorna uma vaga específica
-Route::put('/process/{processId}/vacancy/{vacancyId}', [VacancyController::class, 'update'])->name('vacancy.update')->middleware('auth:sanctum','admin');//Atualiza uma vaga
+Route::put('/admin/{adminId}/process/{processId}/vacancy/{vacancyId}', [VacancyController::class, 'update'])->name('vacancy.update')->middleware('auth:sanctum','admin');//Atualiza uma vaga
 
 Route::get('/person', [PersonController::class, 'index'])->name('person.index')->middleware('auth:sanctum','admin'); //Retorna todas as pessoas (somente para fins de teste, não será utilizado no projeto final)
 Route::post('/person', [PersonController::class, 'store'])->name('person.store')->middleware('auth:sanctum','candidate'); //Cria uma nova pessoa
@@ -57,9 +57,9 @@ Route::post('/person/{personId}/vacancy/{vacancyId}/candidacy', [CandidacyContro
 Route::put('/person/{personId}/candidacy/{candidacyId}', [CandidacyController::class, 'update'])->name('candidacy.update')->middleware('auth:sanctum','candidate'); //Atualiza uma candidatura
 
 Route::get('/candidacy/{candidacyId}/interview', [InterviewController::class, 'index'])->name('interview.index'); //Retorna a entrevista relacionada a candidatura
-Route::post('/candidacy/{candidacyId}/interview', [InterviewController::class, 'store'])->name('interview.store'); //Cria uma nova entrevista
-Route::put('/candidacy/{candidacyId}/interview/{interviewId}', [InterviewController::class, 'update'])->name('interview.update'); //Atualiza uma entrevista
+Route::post('/admin/{adminId}/candidacy/{candidacyId}/interview', [InterviewController::class, 'store'])->name('interview.store'); //Cria uma nova entrevista
+Route::put('/admin/{adminId}/candidacy/{candidacyId}/interview/{interviewId}', [InterviewController::class, 'update'])->name('interview.update'); //Atualiza uma entrevista
 
 Route::get('/vacancy/{vacancyId}/classification', [ClassificationController::class, 'index'])->name('classification.index'); //Retorna todas as classificações de uma vaga
-Route::post('/candidacy/{candidacyId}/classification', [ClassificationController::class, 'store'])->name('classification.store')->middleware('auth:sanctum','admin'); //Cria uma nova classificação para uma candidatura
-Route::put('/candidacy/{candidacyId}/classification/{classificationId}', [ClassificationController::class, 'update'])->name('classification.update')->middleware('auth:sanctum','admin'); //Atualiza uma classificação para uma candidatura
+Route::post('/admin/{adminId}/candidacy/{candidacyId}/classification', [ClassificationController::class, 'store'])->name('classification.store')->middleware('auth:sanctum','admin'); //Cria uma nova classificação para uma candidatura
+Route::put('/admin/{adminId}/candidacy/{candidacyId}/classification/{classificationId}', [ClassificationController::class, 'update'])->name('classification.update')->middleware('auth:sanctum','admin'); //Atualiza uma classificação para uma candidatura

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 
 use App\Models\Candidacy;
 use App\Models\Interview;
+use App\Models\User;
 
 class InterviewController extends Controller
 {
@@ -36,9 +37,16 @@ class InterviewController extends Controller
         }
     }
 
-    public function store(Request $request, $candidacyId)
+    public function store(Request $request, $candidacyId, $adminId)
     {
         try {
+            $admin = User::where('id', $adminId)->where('tipo_perfil', 'Admin')->first();
+            if (!$admin) {
+                return response()->json([
+                    'message' => 'Administrador não encontrado ou não possui perfil de Admin.'
+                ], 404);
+            }
+
             $candidacy = Candidacy::find($candidacyId);
             if (!$candidacy) {
                 return response()->json([
@@ -53,6 +61,7 @@ class InterviewController extends Controller
             ]);
 
             $validatedData['id_candidacy'] = $candidacy->id;
+            $validatedData['id_admin'] = $adminId;
 
             $interview = Interview::create($validatedData);
 
@@ -78,9 +87,16 @@ class InterviewController extends Controller
         }
     }
 
-    public function update(Request $request, $candidacyId, $interviewId)
+    public function update(Request $request, $candidacyId, $interviewId, $adminId)
     {
         try {
+            $admin = User::where('id', $adminId)->where('tipo_perfil', 'Admin')->first();
+            if (!$admin) {
+                return response()->json([
+                    'message' => 'Administrador não encontrado ou não possui perfil de Admin.'
+                ], 404);
+            }
+
             $candidacy = Candidacy::find($candidacyId);
             if (!$candidacy) {
                 return response()->json([
@@ -100,6 +116,8 @@ class InterviewController extends Controller
                 'status' => 'required|in:Cancelada,Agendada,Finalizada',
                 'localizacao' => 'required|string|max:255',
             ]);
+
+            $validatedData['id_admin'] = $adminId;
 
             $interview->update($validatedData);
 

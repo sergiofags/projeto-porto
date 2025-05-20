@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('id_process')->constrained('process');
-            // $table->foreignId('id_user')->constrained('users'); Id do adm que criou
+            $table->foreignId('id_admin')->constrained('users');
 
             $table->string('titulo');
             $table->text('responsabilidades')->nullable();
