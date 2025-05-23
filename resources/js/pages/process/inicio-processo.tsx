@@ -28,7 +28,7 @@ type Props = {
     };
 };
 
-export default function Inicio({ processos = [], user }: Props) {
+export default function Inicio({ processos = [] }: Props) {
     const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
     const segments = pathname.split('/').filter(Boolean);
 
