@@ -5,15 +5,16 @@ use Inertia\Inertia;
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+        return Inertia::render('process/inicio-processo');
+    })->name('inicio-processo');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+    Route::get('inicio-processo', function () {
+        return Inertia::render('process/inicio-processo');
+    })->name('inicio-processo');
 });
+
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

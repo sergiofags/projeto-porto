@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -13,7 +14,12 @@ class ProcessController extends Controller
     {
         try {
             $process = Process::all();
-            return response()->json($process);
+            return Inertia::render('process/inicio-processo', [
+                response()->json($process),
+                'user' => [
+                    'name' => Auth::user()->name,
+                ],
+            ]);
 
         } catch (\Illuminate\Database\QueryException $e) {
             return response()->json([
