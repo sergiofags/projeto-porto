@@ -33,10 +33,15 @@ class PersonController extends Controller
                     'foto_perfil' => optional($person)->foto_perfil,
                     'sobre' => optional($person)->sobre,
                     'linkedin' => optional($person)->linkedin,
+                    'instagram' => optional($person)->instagram,
+                    'facebook' => optional($person)->facebook,
                     'cpf' => optional($person)->cpf,
-                    'data_nascimento' => optional($person)->data_nascimento,
+                    'data_nascimento' => optional($person)->data_nascimento 
+                    ? \Carbon\Carbon::parse($person->data_nascimento)->format('d/m/Y') 
+                    : null,
                     'genero' => optional($person)->genero,
                     'deficiencia' => optional($person)->deficiencia,
+                    'qual_deficiencia' => optional($person)->qual_deficiencia,
                     'servico_militar' => optional($person)->servico_militar,
                     'telefone' => optional($person)->telefone,
                     'rua' => optional($person)->rua,
@@ -87,10 +92,15 @@ class PersonController extends Controller
                 'foto_perfil' => optional($person)->foto_perfil,
                 'sobre' => optional($person)->sobre,
                 'linkedin' => optional($person)->linkedin,
+                'instagram' => optional($person)->instagram,
+                'facebook' => optional($person)->facebook,
                 'cpf' => optional($person)->cpf,
-                'data_nascimento' => optional($person)->data_nascimento,
+                'data_nascimento' => optional($person)->data_nascimento 
+                    ? \Carbon\Carbon::parse($person->data_nascimento)->format('d/m/Y') 
+                    : null,
                 'genero' => optional($person)->genero,
                 'deficiencia' => optional($person)->deficiencia,
+                'qual_deficiencia' => optional($person)->qual_deficiencia,
                 'servico_militar' => optional($person)->servico_militar,
                 'telefone' => optional($person)->telefone,
                 'rua' => optional($person)->rua,
@@ -122,15 +132,29 @@ class PersonController extends Controller
     public function store(Request $request)
     {
         try {
+            if ($request->has('data_nascimento')) {
+                $dataNascimento = \DateTime::createFromFormat('d/m/Y', $request->input('data_nascimento'));
+                if ($dataNascimento) {
+                    $request->merge(['data_nascimento' => $dataNascimento->format('Y-m-d')]);
+                } else {
+                    return response()->json([
+                        'message' => 'Formato de data_nascimento inválido. Use dd/mm/yyyy.'
+                    ], 422);
+                }
+            }
+
             $validatedData = $request->validate([
                 'id_user' => 'required|integer|unique:person,id_user',
                 'foto_perfil' => 'nullable|string|max:255',
                 'sobre' => 'nullable|string|max:255',
                 'linkedin' => 'nullable|string|max:255',
+                'instagram' => 'nullable|string|max:255',
+                'facebook' => 'nullable|string|max:255',
                 'cpf' => 'required|string|max:14|unique:person,cpf',
-                'data_nascimento' => 'required|date',
+                'data_nascimento' => 'nullable|date',
                 'genero' => 'required|in:Masculino,Feminino,Outro',
                 'deficiencia' => 'nullable|boolean',
+                'qual_deficiencia' => 'nullable|string|max:255',
                 'servico_militar' => 'nullable|boolean',
                 'telefone' => 'nullable|string|max:20',
                 'rua' => 'nullable|string|max:255',
@@ -177,14 +201,28 @@ class PersonController extends Controller
     public function update(Request $request, $personId)
     {
         try {
+            if ($request->has('data_nascimento')) {
+                $dataNascimento = \DateTime::createFromFormat('d/m/Y', $request->input('data_nascimento'));
+                if ($dataNascimento) {
+                    $request->merge(['data_nascimento' => $dataNascimento->format('Y-m-d')]);
+                } else {
+                    return response()->json([
+                        'message' => 'Formato de data_nascimento inválido. Use dd/mm/yyyy.'
+                    ], 422);
+                }
+            }
+
             $validatedData = $request->validate([
                 'foto_perfil' => 'nullable|string|max:255',
                 'sobre' => 'nullable|string|max:255',
                 'linkedin' => 'nullable|string|max:255',
+                'instagram' => 'nullable|string|max:255',
+                'facebook' => 'nullable|string|max:255',
                 'cpf' => 'required|string|max:14',
                 'data_nascimento' => 'required|date',
                 'genero' => 'required|in:Masculino,Feminino,Outro',
                 'deficiencia' => 'nullable|boolean',
+                'qual_deficiencia' => 'nullable|string|max:255',
                 'servico_militar' => 'nullable|boolean',
                 'telefone' => 'nullable|string|max:20',
                 'rua' => 'nullable|string|max:255',

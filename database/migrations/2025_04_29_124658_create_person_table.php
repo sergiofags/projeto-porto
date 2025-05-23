@@ -19,10 +19,13 @@ return new class extends Migration
             $table->string('foto_perfil')->nullable();
             $table->string('sobre')->nullable();
             $table->string('linkedin')->nullable();
+            $table->string('instagram')->nullable();
+            $table->string('facebook')->nullable();
             $table->string('cpf')->unique();
             $table->date('data_nascimento');
             $table->enum('genero', ['Masculino', 'Feminino', 'Outro']);
             $table->boolean('deficiencia')->default(false);
+            $table->string('qual_deficiencia')->nullable();
             $table->boolean('servico_militar')->default(false);
             $table->string('telefone');
             $table->string('rua')->nullable();
