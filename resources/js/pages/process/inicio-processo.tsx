@@ -4,7 +4,7 @@ import { SharedData, type BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import TextLink from '@/components/text-link';
 
-import { BreadcrumbAuto } from '@/components/ui/breadcrumb-auto'
+// import { BreadcrumbAuto } from '@/components/ui/breadcrumb-auto'
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 
