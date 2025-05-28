@@ -63,12 +63,12 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
             try {
                 const response = await axios.get(`http://localhost:8000/api/person/${auth.user.id}`);
                 setPessoaData(response.data);
-            } catch (error: any) {
-                if (error.message === 'Erro ao acessar o banco de dados.') {
+            } catch (error: unknown) {
+                if (error instanceof Error && error.message === 'Erro ao acessar o banco de dados.') {
                     alert('Erro ao acessar o banco de dados.');
-                } if (error.message ==='Erro interno no servidor.') {
+                } else if (error instanceof Error && error.message === 'Erro interno no servidor.') {
                     alert('Erro interno no servidor.');
-                } if (error.response && error.response.status === 404) {
+                } if (axios.isAxiosError(error) && error.response && error.response.status === 404) {
                     alert('Pessoa não encontrada. Por favor, verifique o id.');
                 }
             }
@@ -98,22 +98,22 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                 setPessoaRecentlySuccessful(true);
                 setTimeout(() => setPessoaRecentlySuccessful(false), 3000);
             }
-        } catch (error: any) {
-            if (error.response && error.response.status === 404) {
+        } catch (error: unknown) {
+            if (axios.isAxiosError(error) && error.response && error.response.status === 404) {
                 try {
                     const createResponse = await axios.post("http://localhost:8000/api/person", pessoaData);
                     console.log("Created successfully:", createResponse.data);
                     setPessoaRecentlySuccessful(true);
                     setTimeout(() => setPessoaRecentlySuccessful(false), 3000);
-                } catch (createError: any) {
+                } catch (createError: unknown) {
                     console.error("Error creating data:", createError);
-                    if (createError.response && createError.response.data && createError.response.data.errors) {
+                    if (axios.isAxiosError(createError) && createError.response && createError.response.data && createError.response.data.errors) {
                         alert(`Error creating data: ${JSON.stringify(createError.response.data.errors)}`);
                     }
                 }
             } else {
                 console.error("Error checking data:", error);
-                if (error.response && error.response.data && error.response.data.errors) {
+                if (axios.isAxiosError(error) && error.response && error.response.data && error.response.data.errors) {
                     alert(`Error checking data: ${JSON.stringify(error.response.data.errors)}`);
                 }
             }
