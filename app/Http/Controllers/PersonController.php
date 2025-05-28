@@ -175,6 +175,7 @@ class PersonController extends Controller
                 ], 422);
             }
 
+            $validatedData['id'] = $validatedData['id_user'];
             $person = Person::create($validatedData);
 
             return response()->json($person, 201);
