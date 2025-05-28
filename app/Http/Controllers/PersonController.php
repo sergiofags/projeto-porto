@@ -153,9 +153,9 @@ class PersonController extends Controller
                 'cpf' => 'required|string|max:14|unique:person,cpf',
                 'data_nascimento' => 'nullable|date',
                 'genero' => 'required|in:Masculino,Feminino,Outro',
-                'deficiencia' => 'nullable|boolean',
+                'deficiencia' => 'nullable|in:true,false',
                 'qual_deficiencia' => 'nullable|string|max:255',
-                'servico_militar' => 'nullable|boolean',
+                'servico_militar' => 'nullable|in:true,false',
                 'telefone' => 'nullable|string|max:20',
                 'rua' => 'nullable|string|max:255',
                 'bairro' => 'nullable|string|max:255',
@@ -165,6 +165,7 @@ class PersonController extends Controller
                 'complemento' => 'nullable|string|max:255',
                 'cep' => 'nullable|string|max:10',
                 'referencia' => 'nullable|string|max:255',
+                'estou_ciente' => 'nullable|in:true,false',
             ]);
 
             $cpf = $validatedData['cpf'];
@@ -181,7 +182,7 @@ class PersonController extends Controller
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Erro de validação.',
-                'error' => $e->error()
+                'error' => $e->errors()
             ], 422);
 
         } catch (\Illuminate\Database\QueryException $e) {
@@ -218,12 +219,12 @@ class PersonController extends Controller
                 'linkedin' => 'nullable|string|max:255',
                 'instagram' => 'nullable|string|max:255',
                 'facebook' => 'nullable|string|max:255',
-                'cpf' => 'required|string|max:14',
-                'data_nascimento' => 'required|date',
-                'genero' => 'required|in:Masculino,Feminino,Outro',
-                'deficiencia' => 'nullable|boolean',
+                'cpf' => 'nullable|string|max:14',
+                'data_nascimento' => 'nullable|date',
+                'genero' => 'nullable|in:Masculino,Feminino,Outro',
+                'deficiencia' => 'nullable|in:true,false',
                 'qual_deficiencia' => 'nullable|string|max:255',
-                'servico_militar' => 'nullable|boolean',
+                'servico_militar' => 'nullable|in:true,false',
                 'telefone' => 'nullable|string|max:20',
                 'rua' => 'nullable|string|max:255',
                 'bairro' => 'nullable|string|max:255',
@@ -233,6 +234,7 @@ class PersonController extends Controller
                 'complemento' => 'nullable|string|max:255',
                 'cep' => 'nullable|string|max:10',
                 'referencia' => 'nullable|string|max:255',
+                'estou_ciente' => 'nullable|in:true,false',
             ]);
 
             $person = Person::find($personId);
@@ -260,7 +262,7 @@ class PersonController extends Controller
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Erro de validação.',
-                'error' => $e->error()
+                'error' => $e->errors()
             ], 422);
 
         } catch (\Illuminate\Database\QueryException $e) {

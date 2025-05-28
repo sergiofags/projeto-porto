@@ -31,7 +31,8 @@ class Person extends Model
         'numero',
         'complemento',
         'cep',
-        'referencia'
+        'referencia',
+        'estou_ciente',
     ];
 
     public function user()
