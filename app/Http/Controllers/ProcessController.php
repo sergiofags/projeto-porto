@@ -79,6 +79,12 @@ class ProcessController extends Controller
                 'data_inicio' => 'required|date',
                 'data_fim' => 'nullable|date',
             ]);
+            // Verifica se o arquivo foi enviado e salva no storage
+            if ($request->hasFile('edital')) {
+            $file = $request->file('edital');
+            $path = $file->store('editais'); // salva em storage/app/editais
+            $validatedData['edital'] = $path; // salva o caminho no banco
+            }
 
             if (Process::where('numero_processo', $validatedData['numero_processo'])->exists()) {
                 return response()->json([

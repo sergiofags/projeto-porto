@@ -4,6 +4,7 @@ import { SharedData, type BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import TextLink from '@/components/text-link';
 
+
 // import { BreadcrumbAuto } from '@/components/ui/breadcrumb-auto'
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -104,9 +105,11 @@ export default function Inicio({ processos = [] }: Props) {
                             <p className="text-sm text-blue-600 mt-1">
                             Clique no botão para adicionar um processo
                             </p>
+                        <Link href="/cadastra-processo">
                             <Button className="p-4 sm:p-6 bg-blue-600 hover:bg-blue-800 mt-4 text-sm sm:text-base">
                             Adicionar processo <span className="ml-1">＋</span>
                             </Button>
+                        </Link>
                         </div>
                     </div>
 
