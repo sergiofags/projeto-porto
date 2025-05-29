@@ -20,6 +20,7 @@ class Experience extends Model
         'semestre_modulo',
         'data_inicio',
         'data_fim',
+        'emprego_atual',
     ];
 
     public function person()

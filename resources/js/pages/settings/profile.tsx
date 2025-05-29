@@ -328,7 +328,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                 value={pessoaData.estado}
                                 onValueChange={(value) => setPessoaDataField('estado', value)} // Changed to setPessoaDataField
                             >
-                                <SelectTrigger className="w-[180px]">
+                                <SelectTrigger className="w-full">
                                     <SelectValue placeholder="Selecione o estado" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -629,8 +629,6 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
 
                     </form>
                 </div>
-
-                <DeleteUser />
             </SettingsLayout>
         </AppLayout>
     );
