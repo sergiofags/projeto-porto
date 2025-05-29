@@ -631,5 +631,6 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                 </div>
             </SettingsLayout>
         </AppLayout>
+        
     );
 }

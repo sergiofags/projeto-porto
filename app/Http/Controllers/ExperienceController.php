@@ -140,6 +140,7 @@ class ExperienceController extends Controller
                 }
             }
 
+            
             $experience = Experience::create($validatedData);
 
             return response()->json($experience, 201);

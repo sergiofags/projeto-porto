@@ -27,4 +27,5 @@ class Experience extends Model
     {
         return $this->belongsTo(Person::class, 'id_person');
     }
+    
 }

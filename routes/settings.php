@@ -22,4 +22,5 @@ Route::middleware('auth')->group(function () {
     Route::get('settings/experience', function () {
         return Inertia::render('settings/experience');
     })->name('experience');
+    
 });
