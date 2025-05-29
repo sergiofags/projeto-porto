@@ -8,21 +8,32 @@ import { type PropsWithChildren } from 'react';
 
 const sidebarNavItems: NavItem[] = [
     {
-        title: 'Profile',
+        title: 'Perfil',
         href: '/settings/profile',
         icon: null,
     },
     {
-        title: 'Password',
+        title: 'Experiências',
+        href: '/settings/experience',
+        icon: null,
+    },
+    {
+        title: 'Experiências Complementares',
+        href: '/settings/complementary-experience',
+        icon: null,
+    },
+    {
+        title: 'Senha',
         href: '/settings/password',
         icon: null,
     },
     {
-        title: 'Appearance',
+        title: 'Aparencia',
         href: '/settings/appearance',
         icon: null,
     },
 ];
+
 
 export default function SettingsLayout({ children }: PropsWithChildren) {
     // When server-side rendering, we only render the layout on the client...
