@@ -10,61 +10,182 @@ class DocumentController extends Controller
 {
     public function index(Request $request, $personId)
     {
-        $person = Person::findOrFail($personId);
-        $document = $person->document;
-        return response()->json($document);
+        try {
+            $person = Person::find($personId);
+            if (!$person) {
+                return response()->json([
+                    'message' => 'Pessoa não encontrada'
+                ], 404);
+            }
+
+            $document = $person->document;
+            return response()->json($document);
+
+        } catch (\Illuminate\Database\QueryException $e) {
+            return response()->json([
+                'message' => 'Erro ao acessar o banco de dados.',
+                'error' => $e->getMessage()
+            ], 500);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erro interno no servidor.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function show(Request $request, $personId, $documentId)
     {
-        $person = Person::findOrFail($personId);
-        $document = $person->document()->findOrFail($documentId);
-        return response()->json($document);
+        try {
+            $person = Person::find($personId);
+            if (!$person) {
+                return response()->json([
+                    'message' => 'Pessoa não encontrada'
+                ], 404);
+            }
+
+            $document = $person->document()->find($documentId);
+            if (!$document) {
+                return response()->json([
+                    'message' => 'Documento não encontrado'
+                ], 404);
+            }
+
+            return response()->json($document);
+
+        } catch (\Illuminate\Database\QueryException $e) {
+            return response()->json([
+                'message' => 'Erro ao acessar o banco de dados.',
+                'error' => $e->getMessage()
+            ], 500);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erro interno no servidor.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function store(Request $request, $personId)
     {
-        $person = Person::findOrFail($personId);
+        try {
+            $person = Person::find($personId);
+            if (!$person) {
+                return response()->json([
+                    'message' => 'Pessoa não encontrada'
+                ], 404);
+            }
 
-        $validatedData = $request->validate([
-            'tipo_documento' => 'required|in:Contratacao,Candidatura',
-            'documento' => 'nullable|string|max:255',
-            'nome_documento' => 'required|in:AtestadoMatricula,HistoricoEscolar,Curriculo,CoeficienteRendimento,Foto3x4,CedulaIdentidadeOuCNH,CadastroPessoaFisica,CTPS,CarteiraDeReservista,ComprovanteDeResidencia,AntecedentesCriminaisECivel,AntecedentesCriminaisPoliciaFederal,VacinacaFebreAmarela,VacinacaCovid19,GrupoSanguineo,ComprovanteMatricula,AtestadadoFrequencia',    
-        ]);
+            $validatedData = $request->validate([
+                'tipo_documento' => 'required|in:Contratacao,Candidatura',
+                'documento' => 'nullable|string|max:255',
+                'nome_documento' => 'required|in:AtestadoMatricula,HistoricoEscolar,Curriculo,CoeficienteRendimento,Foto3x4,CedulaIdentidadeOuCNH,CadastroPessoaFisica,CTPS,CarteiraDeReservista,ComprovanteDeResidencia,AntecedentesCriminaisECivel,AntecedentesCriminaisPoliciaFederal,VacinacaFebreAmarela,VacinacaCovid19,GrupoSanguineo,ComprovanteMatricula,AtestadadoFrequencia',    
+            ]);
 
-        $validatedData['id_person'] = $person->id;
+            $validatedData['id_person'] = $person->id;
 
-        // Precisa verificar pois não consegui converter o arquivo para path, irei corrigir posteriormente
+            // Precisa verificar pois não consegui converter o arquivo para path, irei corrigir posteriormente
 
-        $document = Document::create($validatedData);
+            $document = Document::create($validatedData);
 
-        return response()->json($document, 201);
+            return response()->json($document, 201);
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Erro de validação.',
+                'error' => $e->error()
+            ], 422);
+
+        } catch (\Illuminate\Database\QueryException $e) {
+            return response()->json([
+                'message' => 'Erro ao acessar o banco de dados.',
+                'error' => $e->getMessage()
+            ], 500);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erro interno no servidor.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function update(Request $request, $personId, $documentId)
     {
-        $person = Person::findOrFail($personId);
-        $document = $person->document()->findOrFail($documentId);
+        try {
+            $person = Person::find($personId);
+            if (!$person) {
+                return response()->json([
+                    'message' => 'Pessoa não encontrada'
+                ], 404);
+            }
 
-        $validatedData = $request->validate([
-            'tipo_documento' => 'required|in:Candidatura,Contratacao',
-            'documento' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'nome_documento' => 'required|in:AtestadoMatricula,HistoricoEscolar,Curriculo,CoeficienteRendimento,Foto3x4,CedulaIdentidadeOuCNH,CadastroPessoaFisica,CTPS,CarteiraDeReservista,ComprovanteDeResidencia,AntecedentesCriminaisECivel,AntecedentesCriminaisPoliciaFederal,VacinacaFebreAmarela,VacinacaCovid19,GrupoSanguineo,ComprovanteMatricula,AtestadadoFrequencia',    
-        ]);
+            $document = $person->document()->find($documentId);
+            if (!$document) {
+                return response()->json([
+                    'message' => 'Documento não encontrado'
+                ], 404);
+            }
 
-        // Precisa verificar pois não consegui converter o arquivo para path, irei corrigir posteriormente
+            $validatedData = $request->validate([
+                'tipo_documento' => 'required|in:Candidatura,Contratacao',
+                'documento' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+                'nome_documento' => 'required|in:AtestadoMatricula,HistoricoEscolar,Curriculo,CoeficienteRendimento,Foto3x4,CedulaIdentidadeOuCNH,CadastroPessoaFisica,CTPS,CarteiraDeReservista,ComprovanteDeResidencia,AntecedentesCriminaisECivel,AntecedentesCriminaisPoliciaFederal,VacinacaFebreAmarela,VacinacaCovid19,GrupoSanguineo,ComprovanteMatricula,AtestadadoFrequencia',    
+            ]);
 
-        $document->update($validatedData);
+            // Precisa verificar pois não consegui converter o arquivo para path, irei corrigir posteriormente
 
-        return response()->json($document, 200);
+            $document->update($validatedData);
+
+            return response()->json($document, 200);
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Erro de validação.',
+                'error' => $e->error()
+            ], 422);
+
+        } catch (\Illuminate\Database\QueryException $e) {
+            return response()->json([
+                'message' => 'Erro ao acessar o banco de dados.',
+                'error' => $e->getMessage()
+            ], 500);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erro interno no servidor.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function allDocumentByType(Request $request, $personId, $typeDocument)
     {
-        $person = Person::findOrFail($personId);
+        try {
+            $person = Person::find($personId);
+            if (!$person) {
+                return response()->json([
+                    'message' => 'Pessoa não encontrada'
+                ], 404);
+            }
 
-        $documents = $person->document()->where('tipo_documento', $typeDocument)->get();
-        return response()->json($documents);
+            $documents = $person->document()->where('tipo_documento', $typeDocument)->get();
+            return response()->json($documents);
+
+        } catch (\Illuminate\Database\QueryException $e) {
+            return response()->json([
+                'message' => 'Erro ao acessar o banco de dados.',
+                'error' => $e->getMessage()
+            ], 500);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erro interno no servidor.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
 }

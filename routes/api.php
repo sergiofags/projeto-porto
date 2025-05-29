@@ -17,49 +17,50 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::get('/process', [ProcessController::class, 'index'])->name('process.index'); //Retorna todos os processos
-Route::post('/process', [ProcessController::class, 'store'])->name('process.store')->middleware('auth:sanctum','admin'); //Cria um novo processo
-Route::put('/process/{processId}', [ProcessController::class, 'update'])->name('process.update')->middleware('auth:sanctum','admin'); //Atualiza um processo
+Route::post('/admin/{adminId}/process', [ProcessController::class, 'store'])->name('process.store'); //Cria um novo processo
+Route::put('/admin/{adminId}/process/{processId}', [ProcessController::class, 'update'])->name('process.update'); //Atualiza um processo
 Route::get('/process/{processId}', [ProcessController::class, 'show'])->name('process.show'); //Retorna um processo específico
 
 Route::get('/process/{processId}/vacancy', [VacancyController::class, 'index'])->name('vacancy.index'); //Retorna todas as vagas de um processo
-Route::post('/process/{processId}/vacancy', [VacancyController::class, 'store'])->name('vacancy.store')->middleware('auth:sanctum','admin'); //Cria uma nova vaga
+Route::post('/admin/{adminId}/process/{processId}/vacancy', [VacancyController::class, 'store'])->name('vacancy.store'); //Cria uma nova vaga
 Route::get('/process/{processId}/vacancy/{vacancyId}', [VacancyController::class, 'show'])->name('vacancy.show'); //Retorna uma vaga específica
-Route::put('/process/{processId}/vacancy/{vacancyId}', [VacancyController::class, 'update'])->name('vacancy.update')->middleware('auth:sanctum','admin');//Atualiza uma vaga
+Route::put('/admin/{adminId}/process/{processId}/vacancy/{vacancyId}', [VacancyController::class, 'update'])->name('vacancy.update');//Atualiza uma vaga
 
-Route::get('/person', [PersonController::class, 'index'])->name('person.index')->middleware('auth:sanctum','admin'); //Retorna todas as pessoas (somente para fins de teste, não será utilizado no projeto final)
-Route::post('/person', [PersonController::class, 'store'])->name('person.store')->middleware('auth:sanctum','candidate'); //Cria uma nova pessoa
-Route::put('/person/{personId}', [PersonController::class, 'update'])->name('person.update')->middleware('auth:sanctum','candidate'); //Atualiza uma pessoa
-Route::get('/person/{personId}', [PersonController::class, 'show'])->name('person.show')->middleware('auth:sanctum','candidate'); //Retorna uma pessoa específica (deverá ser utilizado para mostrar o perfil do candidato)
+Route::get('/person', [PersonController::class, 'index'])->name('person.index'); //Retorna todas as pessoas (somente para fins de teste, não será utilizado no projeto final)
+Route::post('/person', [PersonController::class, 'store'])->name('person.store'); //Cria uma nova pessoa
+Route::put('/person/{personId}', [PersonController::class, 'update'])->name('person.update'); //Atualiza uma pessoa
+Route::get('/person/{personId}', [PersonController::class, 'show'])->name('person.show'); //Retorna uma pessoa específica (deverá ser utilizado para mostrar o perfil do candidato)
 
 Route::get('/person/{personId}/document', [DocumentController::class, 'index'])->name('document.index'); //Retorna todos os documentos de uma pessoa
-Route::post('/person/{personId}/document', [DocumentController::class, 'store'])->name('document.store')->middleware('auth:sanctum','candidate');; //Cria um novo documento
+Route::post('/person/{personId}/document', [DocumentController::class, 'store'])->name('document.store');; //Cria um novo documento
 Route::get('/person/{personId}/document/{documentId}', [DocumentController::class, 'show'])->name('document.show'); //Retorna um documento específico
-Route::put('/person/{personId}/document/{documentId}', [DocumentController::class, 'update'])->name('document.update')->middleware('auth:sanctum','candidate');; //Atualiza um documento
+Route::put('/person/{personId}/document/{documentId}', [DocumentController::class, 'update'])->name('document.update');; //Atualiza um documento
 Route::get('/person/{personId}/document/type/{typeDocument}', [DocumentController::class, 'allDocumentByType'])->name('document.allDocumentByType'); //Retorna todos os documentos pelo tipo de documento (Candidatura ou Contratação)
 
 Route::get('/person/{personId}/experience', [ExperienceController::class, 'index'])->name('experience.index'); //Retorna todas as experiências de uma pessoa
-Route::post('/person/{personId}/experience', [ExperienceController::class, 'store'])->name('experience.store')->middleware('auth:sanctum','candidate'); //Cria uma nova experiência 
+Route::post('/person/{personId}/experience', [ExperienceController::class, 'store'])->name('experience.store'); //Cria uma nova experiência 
 Route::get('/person/{personId}/experience/{experienceId}', [ExperienceController::class, 'show'])->name('experience.show'); //Retorna uma experiência específica
-Route::put('/person/{personId}/experience/{experienceId}', [ExperienceController::class, 'update'])->name('experience.update')->middleware('auth:sanctum','candidate'); //Atualiza uma experiência 
+Route::put('/person/{personId}/experience/{experienceId}', [ExperienceController::class, 'update'])->name('experience.update'); //Atualiza uma experiência 
 Route::get('/person/{personId}/experience/type/{typeExperience}', [ExperienceController::class, 'allExperienceByType'])->name('experience.allExperienceByType'); //Retorna todas as experiências pelo tipo de experiência (Acadêmica ou Profissional)
+Route::delete('/person/{personId}/experience/{experienceId}', [ExperienceController::class, 'delete'])->name('experience.delete'); //Deleta uma experiência específica
 
 Route::get('/person/{personId}/complementaryexperience', [ComplementaryExperienceController::class, 'index'])->name('complementaryexperience.index'); //Retorna todas as experiências complementares de uma pessoa
-Route::post('/person/{personId}/complementaryexperience', [ComplementaryExperienceController::class, 'store'])->name('complementaryexperience.store')->middleware('auth:sanctum','candidate'); //Cria uma nova experiência complementar 
+Route::post('/person/{personId}/complementaryexperience', [ComplementaryExperienceController::class, 'store'])->name('complementaryexperience.store'); //Cria uma nova experiência complementar 
 Route::get('/person/{personId}/complementaryexperience/{complementaryExperienceId}', [ComplementaryExperienceController::class, 'show'])->name('complementaryexperience.show'); //Retorna uma experiência complementar específica
-Route::put('/person/{personId}/complementaryexperience/{complementaryExperienceId}', [ComplementaryExperienceController::class, 'update'])->name('complementaryexperience.update')->middleware('auth:sanctum','candidate'); //Atualiza uma experiência complementar 
+Route::put('/person/{personId}/complementaryexperience/{complementaryExperienceId}', [ComplementaryExperienceController::class, 'update'])->name('complementaryexperience.update'); //Atualiza uma experiência complementar 
 Route::get('/person/{personId}/complementaryexperience/type/{typeComplementaryExperience}', [ComplementaryExperienceController::class, 'allComplementaryExperienceByType'])->name('complementaryexperience.allComplementaryExperienceByType'); //Retorna todas as experiências complementares por tipo (Idioma ou Curso)
 
 Route::get('/person/{personId}/candidacy', [CandidacyController::class, 'allCandidacyByPerson'])->name('candidacy.allCandidacyByPerson'); //Retorna toodas as candidaturas por pessoa
 Route::get('/person/{personId}/candidacy/{candidacyId}', [CandidacyController::class, 'specificCandidacyByPerson'])->name('candidacy.specificCandidacyByPerson'); //Retorna uma candidatura especifica de uma pessoa
-Route::get('/vacancy/{vacancyId}/candidacy', [CandidacyController::class, 'allCandidacyByVacancy'])->name('candidacy.allCandidacyByVacancy')->middleware('auth:sanctum','admin'); //Retorna todas as candidaturas por vaga
-Route::get('/vacancy/{vacancyId}/candidacy/{candidacyId}', [CandidacyController::class, 'specificCandidacyByVacancy'])->name('candidacy.specificCandidacyByVacancy')->middleware('auth:sanctum','admin'); //Retorna uma candidatura especifica de uma vaga
-Route::post('/person/{personId}/vacancy/{vacancyId}/candidacy', [CandidacyController::class, 'store'])->name('candidacy.store')->middleware('auth:sanctum','candidate'); //Cria uma nova candidatura
-Route::put('/person/{personId}/candidacy/{candidacyId}', [CandidacyController::class, 'update'])->name('candidacy.update')->middleware('auth:sanctum','candidate'); //Atualiza uma candidatura
+Route::get('/vacancy/{vacancyId}/candidacy', [CandidacyController::class, 'allCandidacyByVacancy'])->name('candidacy.allCandidacyByVacancy'); //Retorna todas as candidaturas por vaga
+Route::get('/vacancy/{vacancyId}/candidacy/{candidacyId}', [CandidacyController::class, 'specificCandidacyByVacancy'])->name('candidacy.specificCandidacyByVacancy'); //Retorna uma candidatura especifica de uma vaga
+Route::post('/person/{personId}/vacancy/{vacancyId}/candidacy', [CandidacyController::class, 'store'])->name('candidacy.store'); //Cria uma nova candidatura
+Route::put('/person/{personId}/candidacy/{candidacyId}', [CandidacyController::class, 'update'])->name('candidacy.update'); //Atualiza uma candidatura
 
 Route::get('/candidacy/{candidacyId}/interview', [InterviewController::class, 'index'])->name('interview.index'); //Retorna a entrevista relacionada a candidatura
-Route::post('/candidacy/{candidacyId}/interview', [InterviewController::class, 'store'])->name('interview.store'); //Cria uma nova entrevista
-Route::put('/candidacy/{candidacyId}/interview/{interviewId}', [InterviewController::class, 'update'])->name('interview.update'); //Atualiza uma entrevista
+Route::post('/admin/{adminId}/candidacy/{candidacyId}/interview', [InterviewController::class, 'store'])->name('interview.store'); //Cria uma nova entrevista
+Route::put('/admin/{adminId}/candidacy/{candidacyId}/interview/{interviewId}', [InterviewController::class, 'update'])->name('interview.update'); //Atualiza uma entrevista
 
 Route::get('/vacancy/{vacancyId}/classification', [ClassificationController::class, 'index'])->name('classification.index'); //Retorna todas as classificações de uma vaga
-Route::post('/candidacy/{candidacyId}/classification', [ClassificationController::class, 'store'])->name('classification.store')->middleware('auth:sanctum','admin'); //Cria uma nova classificação para uma candidatura
-Route::put('/candidacy/{candidacyId}/classification/{classificationId}', [ClassificationController::class, 'update'])->name('classification.update')->middleware('auth:sanctum','admin'); //Atualiza uma classificação para uma candidatura
+Route::post('/admin/{adminId}/candidacy/{candidacyId}/classification', [ClassificationController::class, 'store'])->name('classification.store'); //Cria uma nova classificação para uma candidatura
+Route::put('/admin/{adminId}/candidacy/{candidacyId}/classification/{classificationId}', [ClassificationController::class, 'update'])->name('classification.update'); //Atualiza uma classificação para uma candidatura

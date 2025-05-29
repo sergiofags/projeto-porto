@@ -26,6 +26,7 @@ class ProcessController extends Controller
                 'message' => 'Erro ao acessar o banco de dados.',
                 'error' => $e->getMessage()
             ], 500);
+
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Erro interno no servidor.',
@@ -38,7 +39,6 @@ class ProcessController extends Controller
     {
         try {
             $process = Process::find($processId);
-
             if (!$process) {
                 return response()->json([
                     'message' => 'Processo não encontrado.'
@@ -47,7 +47,13 @@ class ProcessController extends Controller
 
             return response()->json($process);
 
-        } catch (Exception $e) {
+        } catch (\Illuminate\Database\QueryException $e) {
+            return response()->json([
+                'message' => 'Erro ao acessar o banco de dados.',
+                'error' => $e->getMessage()
+            ], 500);
+
+        } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Erro interno no servidor.',
                 'error' => $e->getMessage()
@@ -55,9 +61,16 @@ class ProcessController extends Controller
         }
     }
 
-    public function store(Request $request)
+    public function store(Request $request, $adminId)
     {
         try {
+            $admin = User::where('id', $adminId)->where('tipo_perfil', 'Admin')->first();
+            if (!$admin) {
+                return response()->json([
+                    'message' => 'Administrador não encontrado ou não possui perfil de Admin.'
+                ], 404);
+            }
+
             $validatedData = $request->validate([
                 'descricao' => 'required|string|max:255',
                 'status' => 'required|in:Pendente,Aberto,Fechado',
@@ -78,6 +91,8 @@ class ProcessController extends Controller
                     'message' => 'A data de início não pode ser maior que a data de fim.',
                 ], 422);
             }
+
+            $validatedData['id_admin'] = $adminId;
 
             $process = Process::create($validatedData);
 
@@ -86,17 +101,40 @@ class ProcessController extends Controller
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Erro de validação.',
-                'errors' => $e->validator->errors(),
+                'error' => $e->error()
             ], 422);
 
-        } catch (Exception $e) {
-            return response()->json(['message' => 'Erro interno do servidor.'], 500);
+        } catch (\Illuminate\Database\QueryException $e) {
+            return response()->json([
+                'message' => 'Erro ao acessar o banco de dados.',
+                'error' => $e->getMessage()
+            ], 500);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erro interno no servidor.',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 
-    public function update(Request $request, $processId)
+    public function update(Request $request, $processId, $adminId)
     {
         try {
+            $admin = User::where('id', $adminId)->where('tipo_perfil', 'Admin')->first();
+            if (!$admin) {
+                return response()->json([
+                    'message' => 'Administrador não encontrado ou não possui perfil de Admin.'
+                ], 404);
+            }
+
+            $process = Process::find($processId);
+            if (!$process) {
+                return response()->json([
+                    'message' => 'Processo não encontrado.'
+                ], 404);
+            }
+
             $validatedData = $request->validate([
                 'descricao' => 'required|string|max:255',
                 'status' => 'required|in:Pendente,Aberto,Fechado',
@@ -106,18 +144,15 @@ class ProcessController extends Controller
                 'data_fim' => 'nullable|date',
             ]);
 
-            $process = Process::find($processId);
-
-            if (!$process) {
-                return response()->json([
-                    'message' => 'Processo não encontrado.'
-                ], 404);
-            }
-
-            if (Process::where('numero_processo', $validatedData['numero_processo'])->exists()) {
-                return response()->json([
-                    'message' => 'O número do processo já existe.',
-                ], 409);
+            if ($process->numero_processo !== $validatedData['numero_processo']) {
+                $numeroProcessoExists = Process::where('numero_processo', $validatedData['numero_processo'])
+                    ->where('id', '!=', $process->id)
+                    ->exists();
+                if ($numeroProcessoExists) {
+                    return response()->json([
+                        'message' => 'O número do processo já está em uso por outro processo.'
+                    ], 422);
+                }
             }
 
             if (isset($validatedData['data_fim']) && $validatedData['data_inicio'] > $validatedData['data_fim']) {
@@ -126,6 +161,8 @@ class ProcessController extends Controller
                 ], 422);
             }
 
+            $validatedData['id_admin'] = $adminId;
+
             $process->update($validatedData);
 
             return response()->json($process);
@@ -133,10 +170,16 @@ class ProcessController extends Controller
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Erro de validação.',
-                'errors' => $e->errors()
+                'error' => $e->error()
             ], 422);
 
-        } catch (Exception $e) {
+        } catch (\Illuminate\Database\QueryException $e) {
+            return response()->json([
+                'message' => 'Erro ao acessar o banco de dados.',
+                'error' => $e->getMessage()
+            ], 500);
+
+        } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Erro interno no servidor.',
                 'error' => $e->getMessage()

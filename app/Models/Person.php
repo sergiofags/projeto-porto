@@ -9,16 +9,23 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Person extends Model
 {
     protected $table = 'person';
+    protected $primaryKey = 'id';
+    public $incrementing = false;
+    protected $keyType = 'int';
 
     protected $fillable = [
+        'id',
         'id_user',
         'foto_perfil',
         'sobre',
         'linkedin',
+        'instagram',
+        'facebook',
         'cpf',
         'data_nascimento',
         'genero',
         'deficiencia',
+        'qual_deficiencia',
         'servico_militar',
         'telefone',
         'rua',
@@ -28,7 +35,8 @@ class Person extends Model
         'numero',
         'complemento',
         'cep',
-        'referencia'
+        'referencia',
+        'estou_ciente',
     ];
 
     public function user()

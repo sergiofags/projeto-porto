@@ -10,6 +10,7 @@ class Interview extends Model
     protected $table = 'interview';
 
     protected $fillable = [
+        'id_admin',
         'id_candidacy',
         'data_hora',
         'status',

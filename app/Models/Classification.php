@@ -10,6 +10,7 @@ class Classification extends Model
     protected $table = 'classification';
 
     protected $fillable = [
+        'id_admin',
         'id_candidacy',
         'id_vacancy',
         'nota_coeficiente_rendimento',

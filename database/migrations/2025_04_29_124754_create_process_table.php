@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('process', function (Blueprint $table) {
             $table->id();
 
-            // $table->foreignId('id_user')->constrained('users'); Id do adm que criou
+            $table->foreignId('id_admin')->constrained('users');
 
             $table->string('descricao');
             $table->enum('status', ['Pendente', 'Aberto', 'Fechado']);

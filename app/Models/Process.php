@@ -10,6 +10,7 @@ class Process extends Model
     protected $table = 'process';
 
     protected $fillable = [
+        'id_admin',
         'descricao',
         'status',
         'data_inicio',
@@ -26,5 +27,10 @@ class Process extends Model
     public function candidacy()
     {
         return $this->hasMany(Candidacy::class, 'id_process');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'id_admin');
     }
 }
