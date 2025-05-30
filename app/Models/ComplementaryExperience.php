@@ -19,6 +19,7 @@ class ComplementaryExperience extends Model
         'data_inicio',
         'data_fim',
         'instituicao',
+        'status'
     ];
 
     public function person()
