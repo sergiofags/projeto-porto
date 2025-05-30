@@ -59,7 +59,7 @@ export default function Experience() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(experiencia),
+                body: JSON.stringify(experienciaFormatada),
             });
         
             const data = await response.json(); // ✅ única leitura
@@ -136,7 +136,7 @@ export default function Experience() {
                     <HeadingSmall title="Experiências" description="Adicione suas experiências profissionais e acadêmicas" />
 
                     <div className="space-y-6">
-                        {experiences.map((experience, index) => (
+                        {experiences.map((experience) => (
                             <>
                                 <div key={experience.id} className="grid gap-2 border p-4 rounded-md">
                                     
