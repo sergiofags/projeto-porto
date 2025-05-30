@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('id_person')->constrained('person');
 
             $table->enum('tipo_experiencia', ['Acadêmica', 'Profissional']);
-            $table->enum('status', ['Trancado', 'Cursando', 'Formado', 'EmpregoAnterior', 'EmpregoAtual']);
+            $table->enum('status', ['Trancado', 'Cursando', 'Formado'])->nullable();
             $table->string('empresa_instituicao')->nullable();
             $table->string('curso_cargo')->nullable();
             $table->string('nivel')->nullable();
