@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('person', function (Blueprint $table) {
-            $table->id();
+            $table->unsignedBigInteger('id')->primary();
             
             $table->foreignId('id_user')->constrained('users');
 
@@ -21,13 +21,13 @@ return new class extends Migration
             $table->string('linkedin')->nullable();
             $table->string('instagram')->nullable();
             $table->string('facebook')->nullable();
-            $table->string('cpf')->unique();
-            $table->date('data_nascimento');
-            $table->enum('genero', ['Masculino', 'Feminino', 'Outro']);
-            $table->boolean('deficiencia')->default(false);
+            $table->string('cpf')->unique()->nullable();
+            $table->date('data_nascimento')->nullable();
+            $table->enum('genero', ['Masculino', 'Feminino', 'Outro'])->nullable();
+            $table->boolean('deficiencia', ['true', 'false'])->nullable();
             $table->string('qual_deficiencia')->nullable();
-            $table->boolean('servico_militar')->default(false);
-            $table->string('telefone');
+            $table->enum('servico_militar', ['true', 'false'])->nullable();
+            $table->string('telefone')->nullable();
             $table->string('rua')->nullable();
             $table->string('bairro')->nullable();
             $table->string('cidade')->nullable();
@@ -36,6 +36,7 @@ return new class extends Migration
             $table->string('complemento')->nullable();
             $table->string('cep')->nullable();
             $table->string('referencia')->nullable();
+            $table->enum('estou_ciente', ['true', 'false'])->nullable();
             $table->timestamps();
         });
     }

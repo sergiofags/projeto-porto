@@ -9,8 +9,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Person extends Model
 {
     protected $table = 'person';
+    protected $primaryKey = 'id';
+    public $incrementing = false;
+    protected $keyType = 'int';
 
     protected $fillable = [
+        'id',
         'id_user',
         'foto_perfil',
         'sobre',
@@ -31,7 +35,8 @@ class Person extends Model
         'numero',
         'complemento',
         'cep',
-        'referencia'
+        'referencia',
+        'estou_ciente',
     ];
 
     public function user()
