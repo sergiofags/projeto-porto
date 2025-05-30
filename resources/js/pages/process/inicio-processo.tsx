@@ -111,7 +111,6 @@ export default function Inicio({ processos = [] }: Props) {
                         <Link href="/cadastra-processo">
                             <Button className="p-4 sm:p-6 bg-[#008DD0] hover:bg-[#0072d0] mt-4 text-sm sm:text-base">
                             Adicionar processo <Plus />
-
                             </Button>
                         </Link>
                         </div>

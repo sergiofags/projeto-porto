@@ -9,11 +9,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('inicio-processo');
 });
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('inicio-processo', function () {
-        return Inertia::render('process/inicio-processo');
-    })->name('inicio-processo');
-});
+Route::get('/cadastra-processo', function () {
+    return Inertia::render('process/cadastra-processo');
+})->middleware(['auth', 'verified']);
+
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('inicio-vaga', function () {

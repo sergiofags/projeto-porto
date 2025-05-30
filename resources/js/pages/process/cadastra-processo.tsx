@@ -112,6 +112,7 @@ export default function CadastraProcesso() {
                                 type="file"
                                 id="edital"
                                 name="edital"
+                                accept="application/pdf" // <-- Aceita apenas arquivos PDF
                                 className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                                 onChange={e => setEdital(e.target.files?.[0] || null)}
                             />
@@ -161,14 +162,14 @@ export default function CadastraProcesso() {
                             </select>
                         </div>
                         <div className="flex flex-row gap-2">
-                            <Button type="submit" className="w-full" disabled={carregando}>
-                                {carregando ? 'Salvando...' : 'Cadastrar Processo'}
-                            </Button>
                             <Link href="/inicio-processo" className="w-full">
                                 <Button type="button" variant="secondary" className="w-full">
                                     Voltar
                                 </Button>
                             </Link>
+                            <Button type="submit" className="w-full" disabled={carregando}>
+                                {carregando ? 'Salvando...' : 'Cadastrar Processo'}
+                            </Button>
                         </div>
                         {mensagem && (
                             <div className={`mt-2 text-center ${mensagem.includes('sucesso') ? 'text-green-600' : 'text-red-600'}`}>
