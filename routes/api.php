@@ -49,6 +49,8 @@ Route::post('/person/{personId}/complementaryexperience', [ComplementaryExperien
 Route::get('/person/{personId}/complementaryexperience/{complementaryExperienceId}', [ComplementaryExperienceController::class, 'show'])->name('complementaryexperience.show'); //Retorna uma experiência complementar específica
 Route::put('/person/{personId}/complementaryexperience/{complementaryExperienceId}', [ComplementaryExperienceController::class, 'update'])->name('complementaryexperience.update'); //Atualiza uma experiência complementar 
 Route::get('/person/{personId}/complementaryexperience/type/{typeComplementaryExperience}', [ComplementaryExperienceController::class, 'allComplementaryExperienceByType'])->name('complementaryexperience.allComplementaryExperienceByType'); //Retorna todas as experiências complementares por tipo (Idioma ou Curso)
+Route::delete('/person/{personId}/complementaryexperience/{complementaryExperienceId}', [ComplementaryExperienceController::class, 'delete'])->name('complementaryexperience.delete'); //Deleta uma experiência específica
+
 
 Route::get('/person/{personId}/candidacy', [CandidacyController::class, 'allCandidacyByPerson'])->name('candidacy.allCandidacyByPerson'); //Retorna toodas as candidaturas por pessoa
 Route::get('/person/{personId}/candidacy/{candidacyId}', [CandidacyController::class, 'specificCandidacyByPerson'])->name('candidacy.specificCandidacyByPerson'); //Retorna uma candidatura especifica de uma pessoa

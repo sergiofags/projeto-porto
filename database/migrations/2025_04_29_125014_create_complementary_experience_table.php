@@ -18,12 +18,13 @@ return new class extends Migration
 
             $table->enum('tipo_experiencia', ['Idioma', 'Curso']);
             $table->string('titulo');
-            $table->string('descricao');
-            $table->enum('nivel_idioma', ['Básico', 'Intermediário', 'Avançado', 'Fluente/Nativo']);
-            $table->string('certificado');
+            $table->string('descricao')->nullable();
+            $table->enum('nivel_idioma', ['Básico', 'Intermediário', 'Avançado', 'Fluente/Nativo'])->nullable();
+            $table->string('certificado')->nullable();
             $table->date('data_inicio');
-            $table->date('data_fim');
+            $table->date('data_fim')->nullable();
             $table->string('instituicao');
+            $table->enum('status', ['Cursando', 'Concluido']);
 
             $table->timestamps();
         });
