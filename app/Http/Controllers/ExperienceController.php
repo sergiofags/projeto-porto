@@ -19,10 +19,16 @@ class ExperienceController extends Controller
             }
 
             $experience = $person->experience->map(function ($exp) {
-                $exp->data_inicio = \DateTime::createFromFormat('Y-m-d', $exp->data_inicio)->format('d/m/Y');
+                $dataInicio = \DateTime::createFromFormat('Y-m-d', $exp->data_inicio);
+                $exp->data_inicio = $dataInicio ? $dataInicio->format('d/m/Y') : $exp->data_inicio;
+            
                 if ($exp->data_fim) {
-                    $exp->data_fim = \DateTime::createFromFormat('Y-m-d', $exp->data_fim)->format('d/m/Y');
+                    $dataFim = \DateTime::createFromFormat('Y-m-d', $exp->data_fim);
+                    $exp->data_fim = $dataFim ? $dataFim->format('d/m/Y') : $exp->data_fim;
+                } else {
+                    $exp->data_fim = null;
                 }
+            
                 return $exp;
             });
 
@@ -58,14 +64,6 @@ class ExperienceController extends Controller
                     'message' => 'Experiência não encontrada.'
                 ], 404);
             }
-
-            $experience = $person->experience->map(function ($exp) {
-                $exp->data_inicio = \DateTime::createFromFormat('Y-m-d', $exp->data_inicio)->format('d/m/Y');
-                if ($exp->data_fim) {
-                    $exp->data_fim = \DateTime::createFromFormat('Y-m-d', $exp->data_fim)->format('d/m/Y');
-                }
-                return $exp;
-            });
 
             return response()->json($experience);
 
@@ -104,7 +102,7 @@ class ExperienceController extends Controller
                 }
             }
 
-            if ($request->has('data_fim')) {
+            if ($request->filled('data_fim')) {
                 $dataFim = \DateTime::createFromFormat('d/m/Y', $request->input('data_fim'));
                 if ($dataFim) {
                     $request->merge(['data_fim' => $dataFim->format('Y-m-d')]);
@@ -113,11 +111,13 @@ class ExperienceController extends Controller
                         'message' => 'Formato de data_fim inválido. Use dd/mm/yyyy.'
                     ], 422);
                 }
+            } else {
+                $request->merge(['data_fim' => null]);
             }
 
             $validatedData = $request->validate([
                 'tipo_experiencia' => 'required|in:Acadêmica,Profissional',
-                'status' => 'required|in:Trancado,Cursando,Formado,EmpregoAnterior,EmpregoAtual',
+                'status' => 'nullable|in:Trancado,Cursando,Formado',
                 'empresa_instituicao' => 'required|string|max:255',
                 'curso_cargo' => 'required|string|max:255',
                 'nivel' => 'nullable|string|max:255',
@@ -182,28 +182,6 @@ class ExperienceController extends Controller
                 ], 404);
             }
 
-            if ($request->has('data_inicio')) {
-                $dataInicio = \DateTime::createFromFormat('d/m/Y', $request->input('data_inicio'));
-                if ($dataInicio) {
-                    $request->merge(['data_inicio' => $dataInicio->format('Y-m-d')]);
-                } else {
-                    return response()->json([
-                        'message' => 'Formato de data_inicio inválido. Use dd/mm/yyyy.'
-                    ], 422);
-                }
-            }
-
-            if ($request->has('data_fim')) {
-                $dataFim = \DateTime::createFromFormat('d/m/Y', $request->input('data_fim'));
-                if ($dataFim) {
-                    $request->merge(['data_fim' => $dataFim->format('Y-m-d')]);
-                } else {
-                    return response()->json([
-                        'message' => 'Formato de data_fim inválido. Use dd/mm/yyyy.'
-                    ], 422);
-                }
-            }
-
             $validatedData = $request->validate([
                 'tipo_experiencia' => 'required|in:Acadêmica,Profissional',
                 'status' => 'required|in:Trancado,Cursando,Formado,EmpregoAnterior,EmpregoAtual',
@@ -216,12 +194,6 @@ class ExperienceController extends Controller
                 'data_fim' => 'nullable|date',
                 'emprego_atual' => 'required|in:Sim,Não',
             ]);
-
-            if (isset($validatedData['data_fim']) && $validatedData['data_inicio'] > $validatedData['data_fim']) {
-                return response()->json([
-                    'message' => 'A data de início não pode ser maior que a data de fim.',
-                ], 422);
-            }
 
             $experience->update($validatedData);
 
