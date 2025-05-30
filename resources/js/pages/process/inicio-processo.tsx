@@ -8,6 +8,8 @@ import TextLink from '@/components/text-link';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 
+import { Plus } from 'lucide-react';
+
 // const breadcrumbs: BreadcrumbItem[] = [
 //     {
 //         title: 'Início',
@@ -68,9 +70,9 @@ export default function Inicio({ processos = [] }: Props) {
                 <nav className="text-sm text-muted-foreground mb-4">
                     <ol className="flex items-center space-x-2">
                         <li>
-                            <Link href="/" className="hover:underline">Início</Link>
+                            <Link href="/inicio-processo" className="hover:underline">Processos</Link>
                         </li>
-                        {segments.map((segment, index) => {
+                        {segments.filter((seg, i) => !(i === 0 && seg === 'inicio-processo')).map((segment, index) => {
                             const href = '/' + segments.slice(0, index + 1).join('/');
                             const isLast = index === segments.length - 1;
                             const label = segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
@@ -97,15 +99,15 @@ export default function Inicio({ processos = [] }: Props) {
                 {processos.length === 0 ? (
                     <div className="text-center flex items-center justify-center h-full px-4">
                         <div className="tracking-wide max-w-md w-full break-words whitespace-normal">
-                            <h2 className="text-xl font-semibold block leading-tight text-black break-words">
+                            <h2 className="text-xl font-semibold block leading-tight break-words">
                             No momento não há processos cadastrados
                             </h2>
-                            <hr className="mt-4 mb-4 w-full bg-blue-600 h-0.5" />
-                            <p className="text-sm text-blue-600 mt-1">
+                            <hr className="mt-4 mb-4 w-full bg-[#008DD0] h-0.5" />
+                            <p className="text-sm text-[#008DD0] mt-1">
                             Clique no botão para adicionar um processo
                             </p>
-                            <Button className="p-4 sm:p-6 bg-blue-600 hover:bg-blue-800 mt-4 text-sm sm:text-base">
-                            Adicionar processo <span className="ml-1">＋</span>
+                            <Button className="p-4 sm:p-6 bg-[#008DD0] hover:bg-[#0072d0] mt-4 text-sm sm:text-base">
+                            Adicionar processo <Plus />
                             </Button>
                         </div>
                     </div>
