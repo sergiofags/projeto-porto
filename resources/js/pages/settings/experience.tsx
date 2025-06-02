@@ -20,7 +20,6 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-
 export default function Experience() {
     const { auth } = usePage<SharedData>().props;
     const personId = auth.user.id;
@@ -29,7 +28,7 @@ export default function Experience() {
         id_person: personId,
         tipo_experiencia: '',
         empresa_instituicao: '',
-        nivel: null, /* <- n sei pra que serve */
+        nivel: '',
         status: '',
         curso_cargo: '',
         atividades: '',
@@ -146,6 +145,7 @@ export default function Experience() {
                                             <p><strong>Tipo:</strong> {experience.tipo_experiencia}</p>
                                             <p><strong>Status:</strong> {experience.status}</p>
                                             <p><strong>Instituição:</strong> {experience.empresa_instituicao}</p>
+                                            <p><strong>Nivel:</strong> {experience.nivel}</p>
                                             <p><strong>Curso:</strong> {experience.curso_cargo}</p>
                                             <p><strong>Atividades:</strong> {experience.atividades}</p>
                                             <p><strong>Semestre/Módulo:</strong> {experience.semestre_modulo}</p>
@@ -239,6 +239,26 @@ export default function Experience() {
                                         onChange={(e) => setExperiencia({ ...experiencia, empresa_instituicao: e.target.value })}
                                         placeholder="Instituição"
                                     />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="nivel">Nivel</Label>
+                                    <Select
+                                        value={experiencia.nivel}
+                                        onValueChange={(value) => setExperiencia({ ...experiencia, nivel: value })}
+                                        required
+                                    >
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Selecione o nivel" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectGroup>
+                                                <SelectLabel>Niveis</SelectLabel>
+                                                <SelectItem value="Graduacao">Graduação</SelectItem>
+                                                <SelectItem value="PosGarduacao">Pós-Graduação</SelectItem>
+                                            </SelectGroup>
+                                        </SelectContent>
+                                    </Select>
                                 </div>
 
                                 <div className="grid gap-2">

@@ -120,7 +120,7 @@ class ExperienceController extends Controller
                 'status' => 'nullable|in:Trancado,Cursando,Formado',
                 'empresa_instituicao' => 'required|string|max:255',
                 'curso_cargo' => 'required|string|max:255',
-                'nivel' => 'nullable|string|max:255',
+                'nivel' => 'nullable|in:Graduacao,PosGraduacao',
                 'atividades' => 'nullable|string|max:1000',
                 'semestre_modulo' => 'nullable|string|max:255',
                 'data_inicio' => 'required|date',

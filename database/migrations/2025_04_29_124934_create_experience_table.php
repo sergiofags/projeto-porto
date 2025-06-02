@@ -20,7 +20,7 @@ return new class extends Migration
             $table->enum('status', ['Trancado', 'Cursando', 'Formado'])->nullable();
             $table->string('empresa_instituicao')->nullable();
             $table->string('curso_cargo')->nullable();
-            $table->string('nivel')->nullable();
+            $table->enum('nivel', ['Graduacao', 'PosGraduacao'])->nullable();
             $table->string('atividades')->nullable();
             $table->string('semestre_modulo')->nullable();
             $table->date('data_inicio')->nullable();
