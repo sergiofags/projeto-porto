@@ -25,7 +25,7 @@ return new class extends Migration
             $table->string('semestre_modulo')->nullable();
             $table->date('data_inicio')->nullable();
             $table->date('data_fim')->nullable();
-            $table->enum('emprego_atual', ['Sim', 'Não'])->default('Não');
+            $table->enum('emprego_atual', ['Sim', 'Não'])->default('Não')->nullable();
 
             $table->timestamps();
         });
