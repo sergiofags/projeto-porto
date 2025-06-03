@@ -14,12 +14,12 @@ class ProcessController extends Controller
     {
         try {
             $process = Process::all();
-            return Inertia::render('process/inicio-processo', [
-                response()->json($process),
-                'user' => [
-                    'name' => Auth::user()->name,
-                ],
-            ]);
+            if (!$process) {
+                return response()->json([
+                    'message' => 'Processo não encontrado.'
+                ], 404);
+            }
+            return response()->json($process);
 
         } catch (\Illuminate\Database\QueryException $e) {
             return response()->json([
