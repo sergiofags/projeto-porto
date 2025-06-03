@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
 import { SharedData, type BreadcrumbItem } from '@/types';
@@ -34,33 +35,37 @@ type Props = {
 export default function Inicio({ processos = [] }: Props) {
     const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
     const segments = pathname.split('/').filter(Boolean);
-
-    const [process, setProcess] = useState([]);
+    
     const {auth}=usePage<SharedData>().props;
     //const [data] = useState({name: auth.user.name});
     const nomeCompleto = auth.user.name;
     const partes = nomeCompleto.trim().split(' ');
     const nome =partes[0];
 
+
+    const [process, setProcess] = useState<Array<{
+        id: string;
+        descricao: string;
+        status: string;
+        numero_processo: string;
+        edital: string;
+        data_inicio: string;
+        data_fim: string;
+    }>>([]);
+
     useEffect(() => {
-        async function getProcess() {
-            const url = "https://localhost:8000/api/process";
+        const fetchProcess = async () => {
             try {
-                const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error(`Response status: ${response.status}`);
-                }
-
-                const json = await response.json();
-                setProcess(json);
-            } catch (e) {
-                console.log('Deu erro', e);
+                const response = await axios.get(`http://localhost:8000/api/process`);
+                setProcess(response.data);
+                console.log(response.data)
+            } catch (error) {
+                console.error('Error fetching process:', error);
             }
-        }
+        };
 
-        getProcess();
+        fetchProcess();
     }, []);
-    
 
     return (
         <AppLayout>
@@ -97,7 +102,7 @@ export default function Inicio({ processos = [] }: Props) {
 
                 <div className="border-sidebar-border/70 dark:border-sidebar-border relative max-h-[100vh] flex-1 overflow-hidden rounded-xl border md:min-h-min flex items-center justify-center ">
 
-                {processos.length === 0 ? (
+                {process.length === 0 ? (
                     <div className="text-center flex items-center justify-center h-full px-4">
                         <div className="tracking-wide max-w-md w-full break-words whitespace-normal">
                             <h2 className="text-xl font-semibold block leading-tight break-words">
@@ -108,24 +113,38 @@ export default function Inicio({ processos = [] }: Props) {
                             Clique no botão para adicionar um processo
                             </p>
 
-                        <Link href="/cadastra-processo">
-                            <Button className="p-4 sm:p-6 bg-[#008DD0] hover:bg-[#0072d0] mt-4 text-sm sm:text-base">
-                            Adicionar processo <Plus />
-                            </Button>
-                        </Link>
+                            {auth.user.tipo_perfil === 'Admin' && (
+                                <Link href="/cadastra-processo">
+                                    <Button className="p-4 sm:p-6 bg-[#008DD0] hover:bg-[#0072d0] mt-4 text-sm sm:text-base">
+                                    Adicionar processo <Plus />
+                                    </Button>
+                                </Link>
+                            )}
                         </div>
                     </div>
 
                 ) : (
-                    <div className="grid gap-4">
-                        {processos.map((processo) => (
-                            <div key={processo.id} className="border rounded p-4">
-                                <h3 className="font-semibold">{process.nome}</h3> {/* substitua por campo correto */}
-                                <p>{process.descricao}</p>
-                                <p>{process.numero_processo}</p>
-                            </div>
-                        ))}
-                    </div>
+                    <>
+                        <div className="grid gap-4">
+                            {process.map((processo) => (
+                                <div key={processo.numero_processo} className="border rounded p-4">
+                                    <h3 className="font-semibold">Descrição: {processo.descricao}</h3> {/* substitua por campo correto */}
+                                    <p>Status: {processo.status}</p>
+                                    <p>Número Processo: {processo.numero_processo}</p>
+                                    <p>Data Inicio: {processo.data_inicio}</p>
+                                    <p>Data Fim: {processo.data_fim}</p>
+                                </div>
+                            ))}
+                            {auth.user.tipo_perfil === 'Admin' && (
+                                <Link href="/cadastra-processo">
+                                    <Button className="p-4 sm:p-6 bg-[#008DD0] hover:bg-[#0072d0] mt-4 text-sm sm:text-base">
+                                    Adicionar processo <Plus />
+                                    </Button>
+                                </Link>
+                            )}
+                        </div>
+                        
+                    </>
                 )}
                 </div>
 
