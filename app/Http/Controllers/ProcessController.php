@@ -75,7 +75,7 @@ class ProcessController extends Controller
                 'descricao' => 'required|string|max:255',
                 'status' => 'required|in:Pendente,Aberto,Fechado',
                 'numero_processo' => 'required|string|max:255',
-                'edital' => 'nullable|file|mimes:pdf|max:204800', // 200MB max
+                'edital' => 'nullable|string|max:255',
                 'data_inicio' => 'required|date',
                 'data_fim' => 'nullable|date',
             ]);
