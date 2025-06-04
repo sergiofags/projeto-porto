@@ -73,12 +73,12 @@ class VacancyController extends Controller
     public function store(Request $request, $processId, $adminId)
     {
         try {
-            // $admin = User::where('id', $adminId)->where('tipo_perfil', 'Admin')->first();
-            // if (!$admin) {
-            //     return response()->json([
-            //         'message' => 'Administrador não encontrado ou não possui perfil de Admin.'
-            //     ], 404);
-            // }
+            $admin = User::where('id', $adminId)->where('tipo_perfil', 'Admin')->first();
+            if (!$admin) {
+                return response()->json([
+                    'message' => 'Administrador não encontrado ou não possui perfil de Admin.'
+                ], 404);
+            }
 
             $process = Process::find($processId);
             if (!$process) {
