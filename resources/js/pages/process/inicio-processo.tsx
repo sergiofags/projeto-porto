@@ -133,6 +133,13 @@ export default function Inicio({ processos = [] }: Props) {
                                     <p>Número Processo: {processo.numero_processo}</p>
                                     <p>Data Inicio: {processo.data_inicio}</p>
                                     <p>Data Fim: {processo.data_fim}</p>
+                                    {auth.user.tipo_perfil === 'Admin' && (
+                                        <Link href={`/processo/cadastrar-vaga?id=${processo.id}`}>
+                                            <Button className="p-4 sm:p-6 bg-[#008DD0] hover:bg-[#0072d0] mt-4 text-sm sm:text-base">
+                                                Cadastrar Vaga <Plus />
+                                            </Button>
+                                        </Link>
+                                    )}
                                 </div>
                             ))}
                             {auth.user.tipo_perfil === 'Admin' && (

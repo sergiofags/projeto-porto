@@ -7,6 +7,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/', function () {
         return Inertia::render('process/inicio-processo');
     })->name('inicio-processo');
+
+    Route::get('/processo/cadastrar-vaga', function () {
+        return Inertia::render('vacancy/cadastrar-vaga');
+    })->middleware(['auth', 'verified']);
 });
 
 Route::get('/cadastra-processo', function () {
