@@ -144,6 +144,8 @@ export default function Register() {
                                 </Button>
                             </div>
 
+                            <hr className="mt-1 mb-1 w-full bg-[#008DD0] h-0.5" />
+
                             <div className="text-center text-sm text-black">
                                 Já possui uma conta?{' '}
                                 <TextLink href={route('login')} tabIndex={6} className="text-[#008DD0] no-underline">
