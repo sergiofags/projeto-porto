@@ -48,7 +48,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
     return (
         <>
             <div className="border-sidebar-border/80 border-b bg-[#008DD0]">
-                <div className="mx-auto flex h-16 items-center px-4 md:max-w-7xl">
+                <div className="mx-auto flex h-16 items-center px-2 md:max-w-7xl">
                     {/* Mobile Menu */}
                     <div className="lg:hidden">
                         <Sheet>
@@ -95,7 +95,10 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
 
 
                     {/* Desktop Navigation */}
-                    <div className="ml-6 hidden h-full items-center space-x-6 lg:flex">
+                        <div className=" hidden h-full items-center space-x-6 lg:flex">
+                            <div className="flex items-center">
+                                <img src="/PORTO_IMBITUBA_Branca.png" alt="Logo" className="w-20 h-auto" />
+                            </div>
                         <NavigationMenu className="flex h-full items-stretch">
                             <NavigationMenuList className="flex h-full items-stretch space-x-2">
                                 {/* {mainNavItems.map((item, index) => (
@@ -122,7 +125,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
 
                     <div className="ml-auto flex items-center space-x-2">
                         <div className="relative flex items-center space-x-1">
-                            <Button variant="ghost" size="icon" className="group h-9 w-9 cursor-pointer">
+                            <Button variant="ghost" size="icon" className="group h-9 w-9 cursor-pointer hover:none"  style={{ pointerEvents: 'none' }} >
                                 <Search className="!size-5 text-white"/>
                             </Button>
                             <div className="hidden lg:flex">

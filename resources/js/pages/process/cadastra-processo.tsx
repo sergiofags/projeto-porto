@@ -3,6 +3,7 @@ import AppLayout from '@/layouts/app-layout';
 import { SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
+import { ChevronDown, ChevronLeft, ChevronRight, Paperclip } from 'lucide-react';
 
 export default function CadastraProcesso() {
     const { auth } = usePage<SharedData>().props;
@@ -14,9 +15,12 @@ export default function CadastraProcesso() {
     const [edital, setEdital] = useState<File | null>(null);
     const [dataInicio, setDataInicio] = useState('');
     const [dataFim, setDataFim] = useState('');
-    const [status, setStatus] = useState('Pendente');
+    const [status, setStatus] = useState('');
     const [mensagem, setMensagem] = useState('');
     const [carregando, setCarregando] = useState(false);
+
+    const [aberto, setAberto] = useState(false);
+
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -68,115 +72,146 @@ export default function CadastraProcesso() {
                         </li>
                         <li>
                             <span className="mx-1">/</span>
-                            <span className="font-medium">Cadastrar Processo</span>
+                            <span className="font-medium">Cadastro do Processo</span>
                         </li>
                     </ol>
-                    <h1 className="text-2xl font-semibold mt-4 text-black">Olá, {auth.user.name.split(' ')[0]}.</h1>
                 </nav>
-                <div className="max-w-xl mx-auto w-full bg-white p-8 shadow rounded">
-                    <h2 className="text-xl font-semibold mb-4">Cadastre o Processo</h2>
-                    <form onSubmit={handleSubmit} encType="multipart/form-data" className="space-y-4">
-                        <div>
-                            <label htmlFor="descricao" className="block text-sm font-medium text-gray-700">
-                                Descrição:
+                <div className="max-w mx-auto w-full bg-white p-10">
+                   <div className="mt-2 mb-1 w-fit">
+                        <h1 className="text-2xl text-black">Cadastro do Processo</h1>
+                        <hr className="mt-1 bg-[#008DD0] h-0.5" />
+                    </div>
+                <form onSubmit={handleSubmit} encType="multipart/form-data" className="grid grid-cols-1 gap-4 md:grid-cols-6">
+                    <div className="md:col-span-4 mt-5">
+                        <label htmlFor="descricao"  className="block mb-2">Descrição</label>
+                        <input
+                            type="text"
+                            id="descricao"
+                            name="descricao"
+                            className="w-full pl-2 pr-2 py-2 border border-[#008DD0] rounded-md focus:outline-none focus:border-[#145F7F] text-black shadow-md"
+                            value={descricao}
+                            onChange={e => setDescricao(e.target.value)}
+                            placeholder="Ex: Edital de Processo Seletivo de Estágio"
+                            required
+                        />
+                    </div>
+                    <div className="md:col-span-2 mt-5">
+                        <label htmlFor="numero_processo" className="block mb-2">Número do Processo</label>
+                        <input
+                            type="text"
+                            id="numero_processo"
+                            name="numero_processo"
+                            className="w-full pl-2 pr-2 py-2 border border-[#008DD0] rounded-md focus:outline-none focus:border-[#145F7F] text-black shadow-md"
+                            value={numeroProcesso}
+                            onChange={e => setNumeroProcesso(e.target.value)}
+                            placeholder="Ex: Nº 001/2025"
+                            required
+                        />
+                    </div>
+                    <div className="md:col-span-2 mt-5">
+                            <label htmlFor="edital" className="block mb-2">
+                                Edital (PDF)
                             </label>
-                            <input
-                                type="text"
-                                id="descricao"
-                                name="descricao"
-                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                                value={descricao}
-                                onChange={e => setDescricao(e.target.value)}
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="numero_processo" className="block text-sm font-medium text-gray-700">
-                                Número do Processo:
-                            </label>
-                            <input
-                                type="text"
-                                id="numero_processo"
-                                name="numero_processo"
-                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                                value={numeroProcesso}
-                                onChange={e => setNumeroProcesso(e.target.value)}
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="edital" className="block text-sm font-medium text-gray-700">
-                                Edital:
-                            </label>
-                            <input
-                                type="file"
-                                id="edital"
-                                name="edital"
-                                accept="application/pdf" // <-- Aceita apenas arquivos PDF
-                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                                onChange={e => setEdital(e.target.files?.[0] || null)}
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="data_inicio" className="block text-sm font-medium text-gray-700">
-                                Data início inscrições:
-                            </label>
-                            <input
-                                type="date"
-                                id="data_inicio"
-                                name="data_inicio"
-                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                                value={dataInicio}
-                                onChange={e => setDataInicio(e.target.value)}
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="data_fim" className="block text-sm font-medium text-gray-700">
-                                Data fim inscrições:
-                            </label>
-                            <input
-                                type="date"
-                                id="data_fim"
-                                name="data_fim"
-                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                                value={dataFim}
-                                onChange={e => setDataFim(e.target.value)}
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="status" className="block text-sm font-medium text-gray-700">
-                                Status:
-                            </label>
-                            <select
-                                id="status"
-                                name="status"
-                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                                value={status}
-                                onChange={e => setStatus(e.target.value)}
-                                required
-                            >
-                                <option value="Pendente">Pendente</option>
-                                <option value="Aberto">Aberto</option>
-                                <option value="Fechado">Fechado</option>
-                            </select>
-                        </div>
-                        <div className="flex flex-row gap-2">
-                            <Link href="/inicio-processo" className="w-full">
-                                <Button type="button" variant="secondary" className="w-full">
-                                    Voltar
-                                </Button>
-                            </Link>
-                            <Button type="submit" className="w-full" disabled={carregando}>
-                                {carregando ? 'Salvando...' : 'Cadastrar Processo'}
-                            </Button>
-                        </div>
-                        {mensagem && (
-                            <div className={`mt-2 text-center ${mensagem.includes('sucesso') ? 'text-green-600' : 'text-red-600'}`}>
-                                {mensagem}
+                            <div className="relative w-full">
+                                <input
+                                    id="edital"
+                                    name="edital"
+                                    type="file"
+                                    accept="application/pdf"
+                                    className={`w-full pr-10 pl-3 py-2 border border-[#008DD0] focus:outline-none focus:border-[#145F7F] rounded-md shadow-md file:hidden ${
+                                        edital ? 'text-black' : 'text-[#9c9c9c]'
+                                    }`}
+                                    onChange={e => setEdital(e.target.files?.[0] || null)}
+                                />
+
+                                <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[#9c9c9c]">
+                                <Paperclip className="w-5 h-5" />
+                                </div>
                             </div>
-                        )}
-                    </form>
+                    </div>
+                    <div className="md:col-span-2 mt-5">
+                        <label htmlFor="data_inicio" className="block mb-2">Data início inscrições</label>
+                       <input
+                            type="date"
+                            id="data_inicio"
+                            name="data_inicio"
+                            className={`w-full pl-2 pr-2 py-2 border border-[#008DD0] rounded-md focus:outline-none focus:border-[#145F7F] shadow-md ${
+                                dataInicio ? 'text-black' : 'text-[#9c9c9c]'
+                            }`}
+                            value={dataInicio}
+                            onChange={e => setDataInicio(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className="md:col-span-2 mt-5">
+                        <label htmlFor="data_fim" className="block mb-2">Data fim inscrições</label>
+                       <input
+                            type="date"
+                            id="data_fim"
+                            name="data_fim"
+                            className={`w-full pl-2 pr-2 py-2 border border-[#008DD0] rounded-md focus:outline-none focus:border-[#145F7F] shadow-md ${
+                                dataFim ? 'text-black' : 'text-[#9c9c9c]'
+                            }`}
+                            value={dataFim}
+                            onChange={e => setDataFim(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className="md:col-span-2 mt-5">
+                        <label htmlFor="status" className="block mb-2">Status</label>
+                        <div className="relative w-full">
+                            <div
+                            className={`w-full cursor-pointer pl-2 pr-10 py-2 border border-[#008DD0] rounded-md shadow-md ${
+                                status === '' ? 'text-[#9c9c9c]' : 'text-black'
+                            }`}
+                            onClick={() => setAberto(!aberto)}
+                            >
+                            {status === '' ? 'Selecione o status' : status}
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#008DD0]">
+                                <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${aberto ? 'rotate-180' : ''}`} />
+                            </div>
+                            </div>
+
+                            {aberto && (
+                            <ul className="absolute z-20 mt-1 w-full bg-white border border-[#008DD0] rounded-md shadow-md text-black overflow-hidden">
+                                {['Pendente', 'Aberto', 'Fechado'].map((option, index, arr) => (
+                                <li
+                                    key={option}
+                                    className={`px-4 py-2 hover:bg-gray-100 cursor-pointer ${
+                                    index === arr.length - 1 ? 'mt-2' : ''
+                                    }`}
+                                    onClick={() => {
+                                    setStatus(option);
+                                    setAberto(false);
+                                    }}
+                                >
+                                    {option}
+                                </li>
+                                ))}
+                            </ul>
+                            )}
+                        </div>
+                    </div>
+                    <div className="md:col-span-6 flex justify-between gap-2 mt-4">
+                        <Link href={route('inicio-processo')} className="w-full md:w-auto">
+                            <Button type="button" variant="secondary" className="flex items-center bg-[#808080] hover:bg-[#404040] gap-2 rounded-md px-4 py-2 text-sm shadow-md transition-colors duration-200 text-white">
+                                <ChevronLeft />
+                                Voltar
+                            </Button>
+                        </Link>
+                        <Button type="submit" className="flex items-center bg-[#008DD0] hover:bg-[#145F7F] gap-2 rounded-md px-4 py-2 text-sm shadow-md transition-colors duration-200 text-white" disabled={carregando}>
+                            {carregando ? 'Salvando...' : 'Concluir'}
+                            <ChevronRight />
+                        </Button>
+                    </div>
+                    {mensagem && (
+                        <div className="md:col-span-6 mt-2 text-center">
+                            <span className={mensagem.includes('sucesso') ? 'text-green-600' : 'text-red-600'}>
+                                {mensagem}
+                            </span>
+                        </div>
+                    )}
+                </form>
                 </div>
             </div>
         </AppLayout>

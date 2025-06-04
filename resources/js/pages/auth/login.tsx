@@ -128,6 +128,8 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                             </Button>
                         </div>
 
+                        <hr className="mt-1 mb-1 w-full bg-[#008DD0] h-0.5" />
+
                         <div className="text-center text-sm">
                             Não possui uma conta?{' '}
                             <TextLink href={route('register')} tabIndex={5} className="text-[#008DD0] no-underline">
