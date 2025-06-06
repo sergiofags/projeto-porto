@@ -19,10 +19,17 @@ Route::get('/cadastra-processo', function () {
 
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('process-inicio-vaga', function () {
+        return Inertia::render('process/inicio-vaga');
+    })->name('inicio-vaga');
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('inicio-vaga', function () {
         return Inertia::render('vacancy/inicio-vaga');
     })->name('inicio-vaga');
 });
+
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
