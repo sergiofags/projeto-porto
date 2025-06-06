@@ -11,12 +11,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/processo/cadastrar-vaga', function () {
         return Inertia::render('vacancy/cadastrar-vaga');
     })->middleware(['auth', 'verified']);
+
+    Route::middleware(['auth', 'verified'])->group(function () {
+        Route::get('/process/edita-processo', function () {
+            return Inertia::render('process/edita-processo');
+        })->name('edita-processo');
+    });
+
 });
 
 Route::get('/cadastra-processo', function () {
     return Inertia::render('process/cadastra-processo');
 })->middleware(['auth', 'verified']);
-
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('process-inicio-vaga', function () {
