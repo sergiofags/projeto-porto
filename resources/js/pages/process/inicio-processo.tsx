@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 
 import { Plus } from 'lucide-react';
 
+
 // const breadcrumbs: BreadcrumbItem[] = [
 //     {
 //         title: 'Início',
@@ -66,6 +67,43 @@ export default function Inicio({ processos = [] }: Props) {
 
         fetchProcess();
     }, []);
+
+    // Função para fechar o processo
+    const fecharProcesso = async (processoId: string) => {
+        try {
+            const adminId = auth.user.id;
+            const formData = new FormData();
+            formData.append('_method', 'PUT');
+            formData.append('status', 'Fechado');
+
+            // Busca os dados atuais do processo para enviar os campos obrigatórios
+            const resGet = await fetch(`/api/process/${processoId}`);
+            const dados = await resGet.json();
+
+            formData.append('descricao', dados.descricao);
+            formData.append('numero_processo', dados.numero_processo);
+            formData.append('data_inicio', dados.data_inicio);
+            formData.append('data_fim', dados.data_fim ?? '');
+            // Não precisa enviar edital novamente
+
+            const res = await fetch(`/api/admin/${adminId}/process/${processoId}`, {
+                method: 'POST',
+                body: formData,
+                credentials: 'include',
+            });
+
+            if (res.ok) {
+                // Atualiza a lista de processos após fechar
+                setProcess(process.map(p =>
+                    p.id === processoId ? { ...p, status: 'Fechado' } : p
+                ));
+            } else {
+                alert('Erro ao fechar processo');
+            }
+        } catch {
+            alert('Erro ao conectar com o servidor');
+        }
+    };
 
     return (
         <AppLayout>
@@ -128,17 +166,45 @@ export default function Inicio({ processos = [] }: Props) {
                         <div className="grid gap-4">
                             {process.map((processo) => (
                                 <div key={processo.numero_processo} className="border rounded p-4">
-                                    <h3 className="font-semibold">Descrição: {processo.descricao}</h3> {/* substitua por campo correto */}
+                                    <h3 className="font-semibold">Descrição: {processo.descricao}</h3>
                                     <p>Status: {processo.status}</p>
                                     <p>Número Processo: {processo.numero_processo}</p>
                                     <p>Data Inicio: {processo.data_inicio}</p>
                                     <p>Data Fim: {processo.data_fim}</p>
                                     {auth.user.tipo_perfil === 'Admin' && (
-                                        <Link href={`/processo/cadastrar-vaga?id=${processo.id}`}>
-                                            <Button className="p-4 sm:p-6 bg-[#008DD0] hover:bg-[#0072d0] mt-4 text-sm sm:text-base">
-                                                Cadastrar Vaga <Plus />
-                                            </Button>
-                                        </Link>
+                                        <div className="flex gap-2 mt-4">
+                                            {/* Só mostra "Cadastrar Vaga" se NÃO estiver fechado */}
+                                            {processo.status !== 'Fechado' && (
+                                                <Link href={`/processo/cadastrar-vaga?id=${processo.id}`}>
+                                                    <Button className="p-4 sm:p-6 bg-[#008DD0] hover:bg-[#0072d0] text-sm sm:text-base">
+                                                        Cadastrar Vaga <Plus />
+                                                    </Button>
+                                                </Link>
+                                            )}
+                                            <a
+                                                href={`/storage/${processo.edital}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                            >
+                                                <Button className="p-4 sm:p-6 bg-blue-500 hover:bg-blue-600 text-sm sm:text-base">
+                                                    Visualizar
+                                                </Button>
+                                            </a>
+                                            <Link href={`/process/edita-processo?id=${processo.id}`}>
+                                                <Button className="p-4 sm:p-6 bg-green-500 hover:bg-green-600 text-sm sm:text-base">
+                                                    Editar
+                                                </Button>
+                                            </Link>
+                                            {/* Só mostra "Fechar" se NÃO estiver fechado */}
+                                            {processo.status !== 'Fechado' && (
+                                                <Button
+                                                    className="p-4 sm:p-6 bg-red-600 hover:bg-red-800 text-white"
+                                                    onClick={() => fecharProcesso(processo.id)}
+                                                >
+                                                    Fechar
+                                                </Button>
+                                            )}
+                                        </div>
                                     )}
                                 </div>
                             ))}
