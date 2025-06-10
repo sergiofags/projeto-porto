@@ -22,6 +22,7 @@ class Vacancy extends Model
         'data_inicio',
         'data_fim',
         'tipo_vaga',
+        'status',
     ];
 
     public function process()

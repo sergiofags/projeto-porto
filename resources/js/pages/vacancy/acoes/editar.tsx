@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -28,12 +29,28 @@ export default function CadastrarVaga() {
     });
 
     useEffect(() => {
-        const queryParams = new URLSearchParams(window.location.search);
-        const processId = queryParams.get('id');
-        if (processId) {
-            setVaga((prevState) => ({ ...prevState, id_process: processId }));
-        }
+        const fetchVacancy = async () => {
+            try {
+                const queryParams = new URLSearchParams(window.location.search);
+                const vacancyId = queryParams.get('id-vaga');
+                const processId = queryParams.get('id-processo');
+
+                console.log(processId)
+                console.log(vacancyId)
+
+                const response = await axios.get(`http://localhost:8000/api/process/${processId}/vacancy/${vacancyId}`);
+                setVaga(response.data);
+                console.log(response.data)
+            } catch (error) {
+                console.error('Error fetching vacancy:', error);
+            }
+        };
+
+        fetchVacancy();
+
     }, []);
+
+    console.log(vaga)
 
     const submitVacancy = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -43,24 +60,32 @@ export default function CadastrarVaga() {
         }
 
         const queryParams = new URLSearchParams(window.location.search);
-        const processId = queryParams.get('id');
+        const processId = queryParams.get('id-processo');
+        const vacancyId = queryParams.get('id-vaga');
         const adminId = auth.user.id;
 
-        console.log(adminId)
+        console.log('processId:', processId);
+        console.log('vacancyId:', vacancyId);
+        console.log('adminId:', adminId);
 
         if (!processId) {
             console.error('Process ID não encontrado.');
             return;
         }
 
+        console.log('Vaga a ser enviada:', vaga);
+
         try {
-            const response: Response = await fetch(`http://localhost:8000/api/admin/${adminId}/process/${processId}/vacancy`, {
-                method: 'POST',
+            const response: Response = await fetch(`http://localhost:8000/api/admin/${adminId}/process/${processId}/vacancy/${vacancyId}`, {
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(vaga),
+                
             });
+
+            console.log(JSON.stringify(vaga))
 
             const data = await response.json();
 
@@ -88,6 +113,8 @@ export default function CadastrarVaga() {
     };
 
     const [vacancyRecentlySuccessful, setVacancyRecentlySuccessful] = useState(false);
+    const queryParams = new URLSearchParams(window.location.search);
+    const processId = queryParams.get('id-processo');
 
     return (
         <AppLayout>
@@ -278,13 +305,13 @@ export default function CadastrarVaga() {
                         />
                     </div>
                     <div className="flex flex-row gap-2">
-                        <Link href="/" className="w-full">
+                        <Link href={`/processo/vagas?id=${processId}`} className="w-full">
                             <Button type="button" variant="secondary">
                                 Voltar
                             </Button>
                         </Link>
                         <Button type="submit">
-                            Cadastrar Vaga
+                            Arualizar Vaga
                         </Button>
                         <Transition
                             show={vacancyRecentlySuccessful}
