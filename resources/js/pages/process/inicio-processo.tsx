@@ -171,52 +171,46 @@ export default function Inicio({ processos = [] }: Props) {
                                     <p>Número Processo: {processo.numero_processo}</p>
                                     <p>Data Inicio: {processo.data_inicio}</p>
                                     <p>Data Fim: {processo.data_fim}</p>
-                                        <div className='space-y-6 space-x-2'>
-                                            {auth.user.tipo_perfil === 'Admin' && (
-                                                <Link href={`/processo/cadastrar-vaga?id=${processo.id}`}>
-                                                    <Button className="p-4 sm:p-6 bg-[#008DD0] hover:bg-[#0072d0] mt-4 text-sm sm:text-base">
-                                    {auth.user.tipo_perfil === 'Admin' && (
-                                        <div className="flex gap-2 mt-4">
-                                            {processo.status !== 'Fechado' && (
-                                                <Link href={`/processo/cadastrar-vaga?id=${processo.id}`}>
-                                                    <Button className="p-4 sm:p-6 bg-[#008DD0] hover:bg-[#0072d0] text-sm sm:text-base">
-                                                        Cadastrar Vaga <Plus />
+                                    <div className="space-y-6 space-x-2">
+                                        {auth.user.tipo_perfil === 'Admin' && (
+                                            <div className="flex gap-2 mt-4">
+                                                {processo.status !== 'Fechado' && (
+                                                    <Link href={`/processo/cadastrar-vaga?id=${processo.id}`}>
+                                                        <Button className="p-4 sm:p-6 bg-[#008DD0] hover:bg-[#0072d0] text-sm sm:text-base">
+                                                            Cadastrar Vaga <Plus />
+                                                        </Button>
+                                                    </Link>
+                                                )}
+                                                <Link href={`/processo/vagas?id=${processo.id}`}>
+                                                    <Button className="p-4 sm:p-6 bg-gray-500 hover:bg-gray-600 mt-4 text-sm sm:text-base">
+                                                        Visualizar Vagas <Eye />
                                                     </Button>
                                                 </Link>
-                                            )}
-                                            <Link href={`/processo/vagas?id=${processo.id}`}>
-                                                <Button className="p-4 sm:p-6 bg-gray-500 hover:bg-gray-600 mt-4 text-sm sm:text-base">
-                                                    Visualizar Vagas <Eye />
-                                                </Button>
-                                            </Link>
-                                        </div>
-                                        
-                                    
-                                            <a
-                                                href={`/storage/${processo.edital}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
+                                            </div>
+                                        )}
+                                        <a
+                                            href={`/storage/${processo.edital}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            <Button className="p-4 sm:p-6 bg-blue-500 hover:bg-blue-600 text-sm sm:text-base">
+                                                Visualizar
+                                            </Button>
+                                        </a>
+                                        <Link href={`/process/edita-processo?id=${processo.id}`}>
+                                            <Button className="p-4 sm:p-6 bg-green-500 hover:bg-green-600 text-sm sm:text-base">
+                                                Editar
+                                            </Button>
+                                        </Link>
+                                        {processo.status !== 'Fechado' && (
+                                            <Button
+                                                className="p-4 sm:p-6 bg-red-600 hover:bg-red-800 text-white"
+                                                onClick={() => fecharProcesso(processo.id)}
                                             >
-                                                <Button className="p-4 sm:p-6 bg-blue-500 hover:bg-blue-600 text-sm sm:text-base">
-                                                    Visualizar
-                                                </Button>
-                                            </a>
-                                            <Link href={`/process/edita-processo?id=${processo.id}`}>
-                                                <Button className="p-4 sm:p-6 bg-green-500 hover:bg-green-600 text-sm sm:text-base">
-                                                    Editar
-                                                </Button>
-                                            </Link>
-                                            {/* Só mostra "Fechar" se NÃO estiver fechado */}
-                                            {processo.status !== 'Fechado' && (
-                                                <Button
-                                                    className="p-4 sm:p-6 bg-red-600 hover:bg-red-800 text-white"
-                                                    onClick={() => fecharProcesso(processo.id)}
-                                                >
-                                                    Fechar
-                                                </Button>
-                                            )}
-                                        </div>
-                                    )}
+                                                Fechar
+                                            </Button>
+                                        )}
+                                    </div>
                                 </div>
                             ))}
                             {auth.user.tipo_perfil === 'Admin' && (
