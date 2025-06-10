@@ -122,6 +122,7 @@ class VacancyController extends Controller
                 'data_inicio' => 'required|date|before_or_equal:data_fim',
                 'data_fim' => 'nullable|date|after_or_equal:data_inicio',
                 'tipo_vaga' => 'required|in:Graduacao,Pos-Graduacao',
+                'status' => 'required|in:Aberto,Fechado',
             ]);
 
             if (isset($validatedData['data_fim']) && $validatedData['data_inicio'] > $validatedData['data_fim']) {
@@ -161,7 +162,7 @@ class VacancyController extends Controller
         }
     }
 
-    public function update(Request $request, $processId, $vacancyId)
+    public function update(Request $request, $adminId, $processId, $vacancyId)
     {
         try {
             $admin = User::where('id', $adminId)->where('tipo_perfil', 'Admin')->first();
@@ -171,14 +172,14 @@ class VacancyController extends Controller
                 ], 404);
             }
 
-            $process = Process::findOrFail($processId);
+            $process = Process::find($processId);
             if (!$process) {
                 return response()->json([
                     'message' => 'Processo não encontrado.'
                 ], 404);
             }
 
-            $vacancy = $process->vacancy()->findOrFail($vacancyId);
+            $vacancy = $process->vacancy()->find($vacancyId);
             if (!$vacancy) {
                 return response()->json([
                     'message' => 'Vaga não encontrada.'
@@ -196,6 +197,7 @@ class VacancyController extends Controller
                 'data_inicio' => 'required|date|before_or_equal:data_fim',
                 'data_fim' => 'nullable|date|after_or_equal:data_inicio',
                 'tipo_vaga' => 'required|in:Graduacao,Pos-Graduacao',
+                'status' => 'required|in:Aberto,Fechado',
             ]);
 
             if (isset($validatedData['data_fim']) && $validatedData['data_inicio'] > $validatedData['data_fim']) {
@@ -226,6 +228,41 @@ class VacancyController extends Controller
                 'message' => 'Erro interno no servidor.',
                 'error' => $e->getMessage()
             ], 500);
+        }
+    }
+
+    public function delete(Request $request, $adminId, $processId, $vacancyId)
+    {
+        try {
+            $admin = User::where('id', $adminId)->where('tipo_perfil', 'Admin')->first();
+            if (!$admin) {
+                return response()->json([
+                    'message' => 'Administrador não encontrado ou não possui perfil de Admin.'
+                ], 404);
+            }
+
+            $process = Process::find($processId);
+            if (!$process) {
+                return response()->json([
+                    'message' => 'Processo não encontrado.'
+                ], 404);
+            }
+
+            $vacancy = $process->vacancy()->find($vacancyId);
+            if (!$vacancy) {
+                return response()->json([
+                    'message' => 'Vaga não encontrada.'
+                ], 404);
+            }
+
+            $vacancy->delete();
+
+            return response()->json([
+                'message' => 'Vaga excluída com sucesso.'
+            ], 204);
+
+        } catch (err){
+            console.log(err);
         }
     }
 }

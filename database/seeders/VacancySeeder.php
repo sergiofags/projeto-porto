@@ -34,6 +34,7 @@ class VacancySeeder extends Seeder
                 'data_inicio' => Carbon::now()->toDateString(),
                 'data_fim' => Carbon::now()->addDays(30)->toDateString(),
                 'tipo_vaga' => 'Graduacao',
+                'status' => 'Aberto',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -50,6 +51,7 @@ class VacancySeeder extends Seeder
                 'data_inicio' => Carbon::now()->addDays(5)->toDateString(),
                 'data_fim' => Carbon::now()->addDays(35)->toDateString(),
                 'tipo_vaga' => 'Pos-Graduacao',
+                'status' => 'Aberto',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]

@@ -10,7 +10,7 @@ import TextLink from '@/components/text-link';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 
-import { Plus } from 'lucide-react';
+import { Eye, Pen, Plus } from 'lucide-react';
 
 // const breadcrumbs: BreadcrumbItem[] = [
 //     {
@@ -133,13 +133,22 @@ export default function Inicio({ processos = [] }: Props) {
                                     <p>Número Processo: {processo.numero_processo}</p>
                                     <p>Data Inicio: {processo.data_inicio}</p>
                                     <p>Data Fim: {processo.data_fim}</p>
-                                    {auth.user.tipo_perfil === 'Admin' && (
-                                        <Link href={`/processo/cadastrar-vaga?id=${processo.id}`}>
-                                            <Button className="p-4 sm:p-6 bg-[#008DD0] hover:bg-[#0072d0] mt-4 text-sm sm:text-base">
-                                                Cadastrar Vaga <Plus />
-                                            </Button>
-                                        </Link>
-                                    )}
+                                        <div className='space-y-6 space-x-2'>
+                                            {auth.user.tipo_perfil === 'Admin' && (
+                                                <Link href={`/processo/cadastrar-vaga?id=${processo.id}`}>
+                                                    <Button className="p-4 sm:p-6 bg-[#008DD0] hover:bg-[#0072d0] mt-4 text-sm sm:text-base">
+                                                        Cadastrar Vaga <Plus />
+                                                    </Button>
+                                                </Link>
+                                            )}
+                                            <Link href={`/processo/vagas?id=${processo.id}`}>
+                                                <Button className="p-4 sm:p-6 bg-gray-500 hover:bg-gray-600 mt-4 text-sm sm:text-base">
+                                                    Visualizar Vagas <Eye />
+                                                </Button>
+                                            </Link>
+                                        </div>
+                                        
+                                    
                                 </div>
                             ))}
                             {auth.user.tipo_perfil === 'Admin' && (

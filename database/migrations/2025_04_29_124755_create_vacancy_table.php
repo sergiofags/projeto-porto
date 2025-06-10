@@ -27,6 +27,7 @@ return new class extends Migration
             $table->date('data_inicio');
             $table->date('data_fim');
             $table->enum('tipo_vaga', ['Graduacao', 'Pos-Graduacao']);
+            $table->enum('status', ['Aberto', 'Fechado']);
             $table->timestamps();
         });
     }

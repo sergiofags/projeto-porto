@@ -11,6 +11,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/processo/cadastrar-vaga', function () {
         return Inertia::render('vacancy/cadastrar-vaga');
     })->middleware(['auth', 'verified']);
+
+    Route::get('/processo/vagas', function () {
+        return Inertia::render('vacancy/visualizar-vagas');
+    })->middleware(['auth', 'verified']);
+
+    Route::get('/processo/vagas/editar', function () {
+        return Inertia::render('vacancy/acoes/editar');
+    })->middleware(['auth', 'verified']);
+
+    Route::get('/processo/vagas/detalhes', function () {
+        return Inertia::render('vacancy/acoes/detalhes-da-vaga');
+    })->middleware(['auth', 'verified']);
 });
 
 Route::get('/cadastra-processo', function () {
