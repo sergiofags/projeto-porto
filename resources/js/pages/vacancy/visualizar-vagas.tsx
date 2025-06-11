@@ -1,23 +1,17 @@
 import axios from 'axios';
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link, usePage } from '@inertiajs/react';
-import {
-    Table,
-    TableBody,
-    TableCaption,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-  } from "@/components/ui/table"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from '@/components/ui/button';
-import { Eye, Pen, Trash2 } from 'lucide-react';
+import { Eye, Pen, Trash2, Undo2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { SharedData } from '@/types';
 
-
 export default function CadastrarVaga() {
     const { auth } = usePage<SharedData>().props;
+    const queryParams = new URLSearchParams(window.location.search);
+    const processId = queryParams.get('id');
+    const adminId = auth.user.id;
 
     const [vagas, setVagas] = useState<Array<{
         id_process: string;
@@ -38,53 +32,41 @@ export default function CadastrarVaga() {
     useEffect(() => {
         const fetchVacancy = async () => {
             try {
-                const queryParams = new URLSearchParams(window.location.search);
-                const processId = queryParams.get('id');
-
-                console.log(processId)
-
                 const response = await axios.get(`http://localhost:8000/api/process/${processId}/vacancy`);
                 setVagas(response.data);
-                console.log(response.data)
             } catch (error) {
-                console.error('Error fetching vacancy:', error);
+                alert(error)
+                return;
             }
         };
 
         fetchVacancy();
     }, []);
 
-    console.log(vagas)
-
-    // Route::delete('/admin/{adminId}/process/{processId}/vacancy/{vacancyId}/delete', [VacancyController::class, 'delete'])->name('vacancy.delete');//Deleta uma vaga
-
     async function handleDelete(vagaId: string) {
-        const queryParams = new URLSearchParams(window.location.search);
-        const processId = queryParams.get('id');
-        const adminId = auth.user.id;
-
         if (!processId || !vagaId) {
-            console.error('Invalid processId or vagaId');
+            alert("Id do processo ou vaga inválido")
             return;
         }
 
         try {
-            const response = await fetch(`http://localhost:8000/api/admin/${adminId}/process/${processId}/vacancy/${vagaId}/delete`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-            console.log('Delete successful:', response);
+            if (!confirm("Você tem certeza que deseja deletar essa vaga?")) {
+                return;
+            }
+            await axios.delete(`http://localhost:8000/api/admin/${adminId}/process/${processId}/vacancy/${vagaId}/delete`);
+            alert("Vaga deletada com sucesso!")
             window.location.reload();
+
         } catch (error) {
-            console.error('Error deleting vacancy:', error);
+            alert("Erro ao deletar vaga")
+            return;
         }
     }
 
     return (
         <AppLayout>
             <Head title="Visualizar Vaga" />
+            <Link href={`/`}><Button><Undo2 /> Voltar</Button></Link>
             <h1 className='text-3xl'>Vagas Abertas</h1>
             <div className='container mt-5'>
                 <Table>
