@@ -34,6 +34,15 @@ export default function CadastrarVaga() {
             try {
                 const response = await axios.get(`http://localhost:8000/api/process/${processId}/vacancy`);
                 setVagas(response.data);
+
+                setVagas(
+                    response.data.map((vaga: any) => ({
+                        ...vaga,
+                        data_inicio: vaga.data_inicio ? vaga.data_inicio.split("-").reverse().join("/") : null,
+                        data_fim: vaga.data_fim ? vaga.data_fim.split("-").reverse().join("/") : null
+                    }))
+                );
+                
             } catch (error) {
                 alert(error)
                 return;
@@ -50,7 +59,8 @@ export default function CadastrarVaga() {
         }
 
         try {
-            if (!confirm("Você tem certeza que deseja deletar essa vaga?")) {
+            const vaga = vagas.find(v => v.id === vagaId);
+            if (!vaga || !confirm(`Você tem certeza que deseja deletar a vaga "${vaga.titulo}"?`)) {
                 return;
             }
             await axios.delete(`http://localhost:8000/api/admin/${adminId}/process/${processId}/vacancy/${vagaId}/delete`);
@@ -58,7 +68,7 @@ export default function CadastrarVaga() {
             window.location.reload();
 
         } catch (error) {
-            alert("Erro ao deletar vaga")
+            alert(error)
             return;
         }
     }

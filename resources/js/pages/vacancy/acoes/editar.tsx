@@ -6,22 +6,25 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import { SharedData } from '@/types';
-import { Transition } from '@headlessui/react';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 
 export default function CadastrarVaga() {
     const { auth } = usePage<SharedData>().props;
+    const queryParams = new URLSearchParams(window.location.search);
+    const vacancyId = queryParams.get('id-vaga');
+    const processId = queryParams.get('id-processo');
+    const adminId = auth.user.id;
 
     const [vaga, setVaga] = useState({
         id_process: '',
         titulo: '',
         responsabilidades: '',
-        carga_horaria: '',
-        remuneracao: '',
+        carga_horaria: null,
+        remuneracao: null,
         requisitos: '',
         beneficios: '',
-        quantidade: '',
+        quantidade: null,
         tipo_vaga: '',
         status: '',
         data_inicio: '',
@@ -31,26 +34,24 @@ export default function CadastrarVaga() {
     useEffect(() => {
         const fetchVacancy = async () => {
             try {
-                const queryParams = new URLSearchParams(window.location.search);
-                const vacancyId = queryParams.get('id-vaga');
-                const processId = queryParams.get('id-processo');
-
-                console.log(processId)
-                console.log(vacancyId)
-
                 const response = await axios.get(`http://localhost:8000/api/process/${processId}/vacancy/${vacancyId}`);
                 setVaga(response.data);
-                console.log(response.data)
+
+                setVaga({
+                    ...response.data,
+                    data_inicio: response.data.data_inicio.split("-").reverse().join("/"),
+                    data_fim: response.data.data_fim ? response.data.data_fim.split("-").reverse().join("/") : null
+                })
+
             } catch (error) {
-                console.error('Error fetching vacancy:', error);
+                alert(error)
+                return;
             }
         };
 
         fetchVacancy();
 
     }, []);
-
-    console.log(vaga)
 
     const submitVacancy = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -59,66 +60,38 @@ export default function CadastrarVaga() {
             setVaga({ ...vaga, data_fim: null });
         }
 
-        const queryParams = new URLSearchParams(window.location.search);
-        const processId = queryParams.get('id-processo');
-        const vacancyId = queryParams.get('id-vaga');
-        const adminId = auth.user.id;
-
-        console.log('processId:', processId);
-        console.log('vacancyId:', vacancyId);
-        console.log('adminId:', adminId);
-
         if (!processId) {
-            console.error('Process ID não encontrado.');
+            alert('Id do processo não encontrado.');
             return;
         }
 
-        console.log('Vaga a ser enviada:', vaga);
-
         try {
-            const response: Response = await fetch(`http://localhost:8000/api/admin/${adminId}/process/${processId}/vacancy/${vacancyId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(vaga),
-                
-            });
+            const formattedVaga = {
+                ...vaga,
+                data_inicio: vaga.data_inicio.split("/").reverse().join("-"),
+                data_fim: vaga.data_fim ? vaga.data_fim.split("/").reverse().join("-") : null
+            };
 
-            console.log(JSON.stringify(vaga))
+            const response = await axios.put(`http://localhost:8000/api/admin/${adminId}/process/${processId}/vacancy/${vacancyId}`, formattedVaga);
+            const data = await response.data;
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                console.error('Erro da API:', data);
-                throw new Error(data.message || 'Erro desconhecido');
+            if (data.error) {
+                alert(data.error);
+                return;
             }
 
-            console.log('Resposta da API:', data);
-
-            setVacancyRecentlySuccessful(true);
-            setTimeout(() => {
-                setVacancyRecentlySuccessful(false);
-                setVaga((prev) => ({ ...prev, ...data }));
-            }, 3000);
+            alert('Vaga atualizada com sucesso!');
+            window.location.href = `/processo/vagas?id=${processId}`;
 
         } catch (error) {
-            console.error('Erro ao cadastrar vaga:', error);
-            if (error instanceof Error) {
-                alert(error.message);
-            } else {
-                alert('Erro desconhecido');
-            }
+            alert(error)
+            return;
         }
     };
 
-    const [vacancyRecentlySuccessful, setVacancyRecentlySuccessful] = useState(false);
-    const queryParams = new URLSearchParams(window.location.search);
-    const processId = queryParams.get('id-processo');
-
     return (
         <AppLayout>
-            <Head title="Cadastrar Vaga" />
+            <Head title="Editar Vaga" />
 
             <div className="flex h-full max-h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 <nav className="text-sm text-muted-foreground mb-4">
@@ -178,36 +151,6 @@ export default function CadastrarVaga() {
                         />
                     </div>
                     <div>
-                        <Label htmlFor="carga_horaria" className="block text-sm font-medium text-gray-700">
-                            Carga Horária:
-                        </Label>
-                        <Input
-                            type="text"
-                            id="carga_horaria"
-                            name="carga_horaria"
-                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                            required
-                            placeholder="Carga Horária"
-                            value={vaga.carga_horaria}
-                            onChange={(e) => setVaga({ ...vaga, carga_horaria: e.target.value })}
-                        />
-                    </div>
-                    <div>
-                        <Label htmlFor="remuneracao" className="block text-sm font-medium text-gray-700">
-                            Remuneração:
-                        </Label>
-                        <Input
-                            type="text"
-                            id="remuneracao"
-                            name="remuneracao"
-                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                            required
-                            placeholder="Remuneração"
-                            value={vaga.remuneracao}
-                            onChange={(e) => setVaga({ ...vaga, remuneracao: e.target.value })}
-                        />
-                    </div>
-                    <div>
                         <Label htmlFor="beneficios" className="block text-sm font-medium text-gray-700">
                             Beneficios:
                         </Label>
@@ -220,21 +163,6 @@ export default function CadastrarVaga() {
                             placeholder="Beneficios"
                             value={vaga.beneficios}
                             onChange={(e) => setVaga({ ...vaga, beneficios: e.target.value })}
-                        />
-                    </div>
-                    <div>
-                        <Label htmlFor="quantidade" className="block text-sm font-medium text-gray-700">
-                            Quantidade:
-                        </Label>
-                        <Input
-                            type="text"
-                            id="quantidade"
-                            name="quantidade"
-                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                            required
-                            placeholder="Quantidade"
-                            value={vaga.quantidade}
-                            onChange={(e) => setVaga({ ...vaga, quantidade: e.target.value })}
                         />
                     </div>
                     <div className="grid gap-2">
@@ -313,15 +241,6 @@ export default function CadastrarVaga() {
                         <Button type="submit">
                             Arualizar Vaga
                         </Button>
-                        <Transition
-                            show={vacancyRecentlySuccessful}
-                            enter="transition ease-in-out"
-                            enterFrom="opacity-0"
-                            leave="transition ease-in-out"
-                            leaveTo="opacity-0"
-                        >
-                            <p className="text-sm text-neutral-600">Saved</p>
-                        </Transition>
                     </div>
                 </form>
             </div>
