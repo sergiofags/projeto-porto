@@ -86,39 +86,15 @@ class VacancyController extends Controller
                     'message' => 'Processo não encontrado.'
                 ], 404);
             }
-
-            if ($request->has('data_inicio')) {
-                $dataInicio = \DateTime::createFromFormat('d/m/Y', $request->input('data_inicio'));
-                if ($dataInicio) {
-                    $request->merge(['data_inicio' => $dataInicio->format('Y-m-d')]);
-                } else {
-                    return response()->json([
-                        'message' => 'Formato de data_inicio inválido. Use dd/mm/yyyy.'
-                    ], 422);
-                }
-            }
-
-            if ($request->filled('data_fim')) {
-                $dataFim = \DateTime::createFromFormat('d/m/Y', $request->input('data_fim'));
-                if ($dataFim) {
-                    $request->merge(['data_fim' => $dataFim->format('Y-m-d')]);
-                } else {
-                    return response()->json([
-                        'message' => 'Formato de data_fim inválido. Use dd/mm/yyyy.'
-                    ], 422);
-                }
-            } else {
-                $request->merge(['data_fim' => null]);
-            }
             
             $validatedData = $request->validate([
                 'titulo' => 'required|string|max:255',
                 'responsabilidades' => 'nullable|string',
                 'requisitos' => 'nullable|string',
-                'carga_horaria' => 'required|string|max:255',
-                'remuneracao' => 'required|numeric|min:0',
+                'carga_horaria' => 'nullable|string|max:255',
+                'remuneracao' => 'nullable|numeric|min:0',
                 'beneficios' => 'nullable|string',
-                'quantidade' => 'required|integer|min:1',
+                'quantidade' => 'nullable|integer|min:1',
                 'data_inicio' => 'required|date|before_or_equal:data_fim',
                 'data_fim' => 'nullable|date|after_or_equal:data_inicio',
                 'tipo_vaga' => 'required|in:Graduacao,Pos-Graduacao',
@@ -190,10 +166,10 @@ class VacancyController extends Controller
                 'titulo' => 'required|string|max:255',
                 'responsabilidades' => 'nullable|string',
                 'requisitos' => 'nullable|string',
-                'carga_horaria' => 'required|string|max:255',
-                'remuneracao' => 'required|numeric|min:0',
+                'carga_horaria' => 'nullable|string|max:255',
+                'remuneracao' => 'nullable|numeric|min:0',
                 'beneficios' => 'nullable|string',
-                'quantidade' => 'required|integer|min:1',
+                'quantidade' => 'nullable|integer|min:1',
                 'data_inicio' => 'required|date|before_or_equal:data_fim',
                 'data_fim' => 'nullable|date|after_or_equal:data_inicio',
                 'tipo_vaga' => 'required|in:Graduacao,Pos-Graduacao',
