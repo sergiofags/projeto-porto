@@ -8,6 +8,8 @@ import TextLink from '@/components/text-link';
 
 // import { BreadcrumbAuto } from '@/components/ui/breadcrumb-auto'
 import { useEffect, useState } from 'react';
+import { router } from '@inertiajs/react';
+
 import { Button } from '@/components/ui/button';
 
 import { Plus } from 'lucide-react';
@@ -68,6 +70,11 @@ export default function Inicio({ processos = [] }: Props) {
         fetchProcess();
     }, []);
 
+    // Estado para modal de confirmação
+    const [modalFechar, setModalFechar] = useState<{ aberto: boolean; processoId: string | null }>({ aberto: false, processoId: null });
+    // Estado para modal de sucesso
+    const [modalSucesso, setModalSucesso] = useState(false);
+
     // Função para fechar o processo
     const fecharProcesso = async (processoId: string) => {
         try {
@@ -76,7 +83,6 @@ export default function Inicio({ processos = [] }: Props) {
             formData.append('_method', 'PUT');
             formData.append('status', 'Fechado');
 
-            // Busca os dados atuais do processo para enviar os campos obrigatórios
             const resGet = await fetch(`/api/process/${processoId}`);
             const dados = await resGet.json();
 
@@ -84,7 +90,6 @@ export default function Inicio({ processos = [] }: Props) {
             formData.append('numero_processo', dados.numero_processo);
             formData.append('data_inicio', dados.data_inicio);
             formData.append('data_fim', dados.data_fim ?? '');
-            // Não precisa enviar edital novamente
 
             const res = await fetch(`/api/admin/${adminId}/process/${processoId}`, {
                 method: 'POST',
@@ -93,10 +98,10 @@ export default function Inicio({ processos = [] }: Props) {
             });
 
             if (res.ok) {
-                // Atualiza a lista de processos após fechar
                 setProcess(process.map(p =>
                     p.id === processoId ? { ...p, status: 'Fechado' } : p
                 ));
+                setModalSucesso(true); // Abre o modal de sucesso
             } else {
                 alert('Erro ao fechar processo');
             }
@@ -199,7 +204,7 @@ export default function Inicio({ processos = [] }: Props) {
                                             {processo.status !== 'Fechado' && (
                                                 <Button
                                                     className="p-4 sm:p-6 bg-red-600 hover:bg-red-800 text-white"
-                                                    onClick={() => fecharProcesso(processo.id)}
+                                                    onClick={() => setModalFechar({ aberto: true, processoId: processo.id })}
                                                 >
                                                     Fechar
                                                 </Button>
@@ -220,7 +225,48 @@ export default function Inicio({ processos = [] }: Props) {
                     </>
                 )}
                 </div>
+                {/* Modal de confirmação */}
+                {modalFechar.aberto && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                        <div className="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full flex flex-col items-center">
+                            <h2 className="text-xl font-semibold mb-4 text-red-600">Você tem certeza que deseja fechar este processo?</h2>
+                            <div className="flex gap-4 mt-2">
+                                <button
+                                    className="px-6 py-2 bg-[#008DD0] hover:bg-[#0072d0] text-white rounded shadow"
+                                    onClick={async () => {
+                                        if (modalFechar.processoId) {
+                                            await fecharProcesso(modalFechar.processoId);
+                                        }
+                                        setModalFechar({ aberto: false, processoId: null });
+                                    }}
+                                >
+                                    Confirmar
+                                </button>
+                                <button
+                                    className="px-6 py-2 bg-gray-400 hover:bg-gray-600 text-white rounded shadow"
+                                    onClick={() => setModalFechar({ aberto: false, processoId: null })}
+                                >
+                                    Cancelar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
+                {/* Modal de sucesso */}
+                {modalSucesso && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                        <div className="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full flex flex-col items-center">
+                            <h2 className="text-xl font-semibold mb-4 text-green-600">Processo encerrado com sucesso!</h2>
+                            <button
+                                className="px-6 py-2 bg-[#008DD0] hover:bg-[#0072d0] text-white rounded shadow mt-2"
+                                onClick={() => router.visit(route('inicio-processo'))}
+                            >
+                                Concluir
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </AppLayout>
     );
