@@ -81,9 +81,9 @@ class ProcessController extends Controller
             ]);
             // Verifica se o arquivo foi enviado e salva no storage
             if ($request->hasFile('edital')) {
-            $file = $request->file('edital');
-            $path = $file->store('editais'); // salva em storage/app/editais
-            $validatedData['edital'] = $path; // salva o caminho no banco
+                $file = $request->file('edital');
+                $path = $file->store('editais', 'public'); // Salva em storage/app/public/editais
+                $validatedData['edital'] = $path; // Salva o caminho correto no banco
             }
 
             if (Process::where('numero_processo', $validatedData['numero_processo'])->exists()) {
@@ -124,7 +124,7 @@ class ProcessController extends Controller
         }
     }
 
-    public function update(Request $request, $processId, $adminId)
+    public function update(Request $request, $adminId, $processId)
     {
         try {
             $admin = User::where('id', $adminId)->where('tipo_perfil', 'Admin')->first();
@@ -145,10 +145,17 @@ class ProcessController extends Controller
                 'descricao' => 'required|string|max:255',
                 'status' => 'required|in:Pendente,Aberto,Fechado',
                 'numero_processo' => 'required|string|max:255',
-                'edital' => 'nullable|string|max:255',
+                'edital' => 'nullable|file|mimes:pdf|max:204800', // 200MB max
                 'data_inicio' => 'required|date',
                 'data_fim' => 'nullable|date',
             ]);
+
+            // Verifica se o arquivo foi enviado e salva no storage
+            if ($request->hasFile('edital')) {
+                $file = $request->file('edital');
+                $path = $file->store('editais', 'public'); // Salva em storage/app/public/editais
+                $validatedData['edital'] = $path; // Salva o caminho correto no banco
+            }
 
             if ($process->numero_processo !== $validatedData['numero_processo']) {
                 $numeroProcessoExists = Process::where('numero_processo', $validatedData['numero_processo'])

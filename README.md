@@ -3,6 +3,7 @@ composer install<br>
 npm install<br>
 php artisan key:generate<br>
 php artisan migrate <br>
+php artisan storage:link<br>
 npm run build<br>
 php artisan serve<br>
 

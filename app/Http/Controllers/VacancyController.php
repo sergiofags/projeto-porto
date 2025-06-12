@@ -86,42 +86,19 @@ class VacancyController extends Controller
                     'message' => 'Processo não encontrado.'
                 ], 404);
             }
-
-            if ($request->has('data_inicio')) {
-                $dataInicio = \DateTime::createFromFormat('d/m/Y', $request->input('data_inicio'));
-                if ($dataInicio) {
-                    $request->merge(['data_inicio' => $dataInicio->format('Y-m-d')]);
-                } else {
-                    return response()->json([
-                        'message' => 'Formato de data_inicio inválido. Use dd/mm/yyyy.'
-                    ], 422);
-                }
-            }
-
-            if ($request->filled('data_fim')) {
-                $dataFim = \DateTime::createFromFormat('d/m/Y', $request->input('data_fim'));
-                if ($dataFim) {
-                    $request->merge(['data_fim' => $dataFim->format('Y-m-d')]);
-                } else {
-                    return response()->json([
-                        'message' => 'Formato de data_fim inválido. Use dd/mm/yyyy.'
-                    ], 422);
-                }
-            } else {
-                $request->merge(['data_fim' => null]);
-            }
             
             $validatedData = $request->validate([
                 'titulo' => 'required|string|max:255',
                 'responsabilidades' => 'nullable|string',
                 'requisitos' => 'nullable|string',
-                'carga_horaria' => 'required|string|max:255',
-                'remuneracao' => 'required|numeric|min:0',
+                'carga_horaria' => 'nullable|string|max:255',
+                'remuneracao' => 'nullable|numeric|min:0',
                 'beneficios' => 'nullable|string',
-                'quantidade' => 'required|integer|min:1',
+                'quantidade' => 'nullable|integer|min:1',
                 'data_inicio' => 'required|date|before_or_equal:data_fim',
                 'data_fim' => 'nullable|date|after_or_equal:data_inicio',
                 'tipo_vaga' => 'required|in:Graduacao,Pos-Graduacao',
+                'status' => 'required|in:Aberto,Fechado',
             ]);
 
             if (isset($validatedData['data_fim']) && $validatedData['data_inicio'] > $validatedData['data_fim']) {
@@ -161,7 +138,7 @@ class VacancyController extends Controller
         }
     }
 
-    public function update(Request $request, $processId, $vacancyId)
+    public function update(Request $request, $adminId, $processId, $vacancyId)
     {
         try {
             $admin = User::where('id', $adminId)->where('tipo_perfil', 'Admin')->first();
@@ -171,14 +148,14 @@ class VacancyController extends Controller
                 ], 404);
             }
 
-            $process = Process::findOrFail($processId);
+            $process = Process::find($processId);
             if (!$process) {
                 return response()->json([
                     'message' => 'Processo não encontrado.'
                 ], 404);
             }
 
-            $vacancy = $process->vacancy()->findOrFail($vacancyId);
+            $vacancy = $process->vacancy()->find($vacancyId);
             if (!$vacancy) {
                 return response()->json([
                     'message' => 'Vaga não encontrada.'
@@ -189,13 +166,14 @@ class VacancyController extends Controller
                 'titulo' => 'required|string|max:255',
                 'responsabilidades' => 'nullable|string',
                 'requisitos' => 'nullable|string',
-                'carga_horaria' => 'required|string|max:255',
-                'remuneracao' => 'required|numeric|min:0',
+                'carga_horaria' => 'nullable|string|max:255',
+                'remuneracao' => 'nullable|numeric|min:0',
                 'beneficios' => 'nullable|string',
-                'quantidade' => 'required|integer|min:1',
+                'quantidade' => 'nullable|integer|min:1',
                 'data_inicio' => 'required|date|before_or_equal:data_fim',
                 'data_fim' => 'nullable|date|after_or_equal:data_inicio',
                 'tipo_vaga' => 'required|in:Graduacao,Pos-Graduacao',
+                'status' => 'required|in:Aberto,Fechado',
             ]);
 
             if (isset($validatedData['data_fim']) && $validatedData['data_inicio'] > $validatedData['data_fim']) {
@@ -226,6 +204,41 @@ class VacancyController extends Controller
                 'message' => 'Erro interno no servidor.',
                 'error' => $e->getMessage()
             ], 500);
+        }
+    }
+
+    public function delete(Request $request, $adminId, $processId, $vacancyId)
+    {
+        try {
+            $admin = User::where('id', $adminId)->where('tipo_perfil', 'Admin')->first();
+            if (!$admin) {
+                return response()->json([
+                    'message' => 'Administrador não encontrado ou não possui perfil de Admin.'
+                ], 404);
+            }
+
+            $process = Process::find($processId);
+            if (!$process) {
+                return response()->json([
+                    'message' => 'Processo não encontrado.'
+                ], 404);
+            }
+
+            $vacancy = $process->vacancy()->find($vacancyId);
+            if (!$vacancy) {
+                return response()->json([
+                    'message' => 'Vaga não encontrada.'
+                ], 404);
+            }
+
+            $vacancy->delete();
+
+            return response()->json([
+                'message' => 'Vaga excluída com sucesso.'
+            ], 204);
+
+        } catch (err){
+            console.log(err);
         }
     }
 }
