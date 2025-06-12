@@ -6,6 +6,7 @@ php artisan migrate <br>
 npm run build<br>
 php artisan serve<br>
 
+
 ## Inserir dados de teste no banco de dados:
 php artisan db:seed --class=UserSeeder<br>
 php artisan db:seed --class=PersonSeeder<br>

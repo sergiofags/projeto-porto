@@ -1,10 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Http\Middleware\AdminMiddleware;
+use Http\Middleware\CandidateMiddleware;
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/', function () {
+    Route::get('/processos', function () {
         return Inertia::render('process/inicio-processo');
     })->name('inicio-processo');
 
@@ -18,11 +21,9 @@ Route::get('/cadastra-processo', function () {
 })->middleware(['auth', 'verified']);
 
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('process-inicio-vaga', function () {
-        return Inertia::render('process/inicio-vaga');
-    })->name('inicio-vaga');
-});
+Route::get('/process/inicio-vaga', function () {
+    return Inertia::render('process/inicio-vaga');
+})->name('inicio-vaga');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('inicio-vaga', function () {
@@ -30,6 +31,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('inicio-vaga');
 });
 
+Route::get('/', function () {
+    if (!Auth::check()) {
+        return Inertia::render('landing-page');
+    }
+
+    $user = Auth::user();
+
+    if ($user && $user->tipo_perfil === 'Candidato') {
+        return Inertia::render('landing-page');
+    }
+
+    // Se está logado e NÃO é candidato, redireciona para outra página
+    return redirect()->route('inicio-processo');
+})->name('landing-page');
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
