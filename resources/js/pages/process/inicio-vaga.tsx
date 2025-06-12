@@ -20,7 +20,7 @@ export default function Inicio({ }: InicioProps) {
   const segments = pathname.split('/').filter(Boolean);
 
   const { auth } = usePage<SharedData>().props;
-  const nomeCompleto = auth.user.name;
+  const nomeCompleto = auth?.user?.name || '';
   const partes = nomeCompleto.trim().split(' ');
   const [modalAberto, setModalAberto] = useState(false);
   const [produtoSelecionado, setProdutoSelecionado] = useState<ProdutoCatalogo | null>(null);
