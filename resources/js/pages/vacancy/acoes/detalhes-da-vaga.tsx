@@ -9,6 +9,10 @@ import { ChevronLeft } from 'lucide-react';
 export default function DetalhesVaga() {
 
     const { auth } = usePage<SharedData>().props;
+    const queryParams = new URLSearchParams(window.location.search);
+    const processId = queryParams.get('id-processo');
+    const vacancyId = queryParams.get('id-vaga');
+    const adminId = auth.user.id;
     
         const [vaga, setVaga] = useState<Array<{
             id_process: string;
@@ -29,28 +33,48 @@ export default function DetalhesVaga() {
         useEffect(() => {
             const fetchVacancy = async () => {
                 try {
-                    const queryParams = new URLSearchParams(window.location.search);
-                    const processId = queryParams.get('id-processo');
-                    const vacancyId = queryParams.get('id-vaga');
-    
-                    console.log(processId)
-    
                     const response = await axios.get(`http://localhost:8000/api/process/${processId}/vacancy/${vacancyId}`);
+
+                    if (!response.data) {
+                        return;
+                    }
 
                     setVaga(Array.isArray(response.data) ? response.data : [response.data]);
 
-                    console.log(response.data)
+                    setVaga([{
+                        ...response.data,
+                        data_inicio: response.data.data_inicio.split("-").reverse().join("/"),
+                        data_fim: response.data.data_fim ? response.data.data_fim.split("-").reverse().join("/") : null
+                    }])
 
                 } catch (error) {
-                    console.error('Error fetching vacancy:', error);
+                    alert(error)
+                    return;
                 }
             };
     
             fetchVacancy();
         }, []);
 
-    const queryParams = new URLSearchParams(window.location.search);
-    const processId = queryParams.get('id-processo');
+        async function handleDelete(vagaId: string) {
+            if (!processId || !vagaId) {
+                alert("Id do processo ou vaga inválido")
+                return;
+            }
+    
+            try {
+                const selectedVaga = vaga.find((v: { id: string; titulo: string }) => v.id === vagaId);
+                if (!selectedVaga || !confirm(`Você tem certeza que deseja deletar a vaga "${selectedVaga.titulo}"?`)) {
+                    return;
+                }
+                await axios.delete(`http://localhost:8000/api/admin/${adminId}/process/${processId}/vacancy/${vagaId}/delete`);
+                alert("Vaga deletada com sucesso!")
+                window.location.href = `/processo/vagas?id=${processId}`;
+    
+            } catch (error) {
+                return error;
+            }
+        }
 
     return (
         <AppLayout>
@@ -75,12 +99,12 @@ export default function DetalhesVaga() {
                                     </Link>
                                 </Button>
                                 <Button type="button" className="flex-1 p-4 sm:p-6 bg-green-500 hover:bg-green-600 mt-4 text-sm ">
-                                    <Link href={``} className="w-full">
+                                    <Link href={`/processo/vagas/editar?id-processo=${item.id_process}&id-vaga=${item.id}`} className="w-full">
                                     Editar
                                     </Link>
                                 </Button>
                                 <Button type="button" className="flex-1 p-4 sm:p-6  bg-red-600 hover:bg-red-800 mt-4 text-sm ">
-                                    <Link href={``} className="w-full">
+                                    <Link href="#" onClick={() => handleDelete(item.id)} className="w-full">
                                     Fechar
                                     </Link>
                                 </Button>
