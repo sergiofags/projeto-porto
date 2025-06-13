@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { BookText, List, Undo2, UserRoundSearch } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-export default function CadastrarVaga() {
+export default function VerCandidatos() {
     const queryParams = new URLSearchParams(window.location.search);
     const vancancyId = queryParams.get('id-vaga');
     const processId = queryParams.get('id-processo');
@@ -88,7 +88,7 @@ export default function CadastrarVaga() {
                                     <Link href={``}>
                                         <Button className='bg-blue-600 hover:bg-blue-700 cursor-pointer'><UserRoundSearch /> Entrevista</Button>
                                     </Link>
-                                    <Link href={``}>
+                                    <Link href={`/processo/vagas/ver-candidatos/candidato?id-processo=${processId}&id-vaga=${vancancyId}&id-candidato=${pessoa.id_person}`}>
                                         <Button className='bg-yellow-600 hover:bg-yellow-700 cursor-pointer'><BookText /> Candidatura</Button>
                                     </Link>
                                 </TableCell>

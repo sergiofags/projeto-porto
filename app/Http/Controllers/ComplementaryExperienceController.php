@@ -17,20 +17,13 @@ class ComplementaryExperienceController extends Controller
                     'message' => 'Pessoa não encontrada.'
                 ], 404);
             }
-
-            $complementaryExperience = $person->complementaryExperience->map(function ($exp) {
-                $dataInicio = \DateTime::createFromFormat('Y-m-d', $exp->data_inicio);
-                $exp->data_inicio = $dataInicio ? $dataInicio->format('d/m/Y') : $exp->data_inicio;
             
-                if ($exp->data_fim) {
-                    $dataFim = \DateTime::createFromFormat('Y-m-d', $exp->data_fim);
-                    $exp->data_fim = $dataFim ? $dataFim->format('d/m/Y') : $exp->data_fim;
-                } else {
-                    $exp->data_fim = null;
-                }
-            
-                return $exp;
-            });
+            $complementaryExperience = $person->complementaryExperience;
+            if (!$complementaryExperience) {
+                return response()->json([
+                    'message' => 'Experiência complementar não encontrada.'
+                ], 404);
+            }
 
             return response()->json($complementaryExperience);
 
