@@ -88,7 +88,7 @@ export default function VerCandidatos() {
                                     <Link href={``}>
                                         <Button className='bg-blue-600 hover:bg-blue-700 cursor-pointer'><UserRoundSearch /> Entrevista</Button>
                                     </Link>
-                                    <Link href={``}>
+                                    <Link href={`/processo/vagas/ver-candidatos/candidato?id-processo=${processId}&id-vaga=${vancancyId}&id-candidato=${pessoa.id_person}`}>
                                         <Button className='bg-yellow-600 hover:bg-yellow-700 cursor-pointer'><BookText /> Candidatura</Button>
                                     </Link>
                                 </TableCell>

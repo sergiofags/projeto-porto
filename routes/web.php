@@ -30,6 +30,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/processo/vagas/ver-candidatos', function () {
         return Inertia::render('candidacy/ver-candidatos');
     })->middleware(['auth', 'verified']);
+    
+    Route::get('/processo/vagas/ver-candidatos/candidato', function () {
+        return Inertia::render('candidacy/candidato');
+    })->middleware(['auth', 'verified']);
 
 
 
