@@ -26,6 +26,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/processo/vagas/detalhes', function () {
         return Inertia::render('vacancy/acoes/detalhes-da-vaga');
     })->middleware(['auth', 'verified']);
+
+    Route::get('/processo/vagas/ver-candidatos', function () {
+        return Inertia::render('candidacy/ver-candidatos');
+    })->middleware(['auth', 'verified']);
+
+
+
     Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/process/edita-processo', function () {
             return Inertia::render('process/edita-processo');
