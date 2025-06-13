@@ -210,28 +210,8 @@ export default function Inicio({ processos = [] }: Props) {
                                         {processo.status !== 'Fechado' && (
                                             <Button
                                                 className="p-4 sm:p-6 bg-red-600 hover:bg-red-800 text-white"
-                                                onClick={() => fecharProcesso(processo.id)}
+                                                onClick={() => setModalFechar({ aberto: true, processoId: processo.id })}
                                             >
-                                                <Button className="p-4 sm:p-6 bg-blue-500 hover:bg-blue-600 text-sm sm:text-base">
-                                                    Visualizar
-                                                </Button>
-                                            </a>
-                                            <Link href={`/process/edita-processo?id=${processo.id}`}>
-                                                <Button className="p-4 sm:p-6 bg-green-500 hover:bg-green-600 text-sm sm:text-base">
-                                                    Editar
-                                                </Button>
-                                            </Link>
-                                            {/* Só mostra "Fechar" se NÃO estiver fechado */}
-                                            {processo.status !== 'Fechado' && (
-                                                <Button
-                                                    className="p-4 sm:p-6 bg-red-600 hover:bg-red-800 text-white"
-                                                    onClick={() => setModalFechar({ aberto: true, processoId: processo.id })}
-                                                >
-                                                    Fechar
-                                                </Button>
-                                            )}
-                                        </div>
-                                    )}
                                                 Fechar
                                             </Button>
                                         )}
