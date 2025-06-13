@@ -89,7 +89,7 @@ export default function DetalhesVaga() {
 
                             <div className="flex flex-col sm:flex-row gap-2 mt-6 mb-6">
                                 <Button type="button" className="flex-1 p-4 sm:p-6 bg-[#008DD0] hover:bg-[#0072d0] mt-4 text-sm">
-                                    <Link href={``} className="w-full">
+                                    <Link href={`/processo/vagas/ver-candidatos?id-processo=${item.id_process}&id-vaga=${item.id}`} className="w-full">
                                     Ver candidatos
                                     </Link>
                                 </Button>
