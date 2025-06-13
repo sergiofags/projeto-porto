@@ -18,6 +18,7 @@ Route::get('/user', function (Request $request) {
 
 Route::get('/process', [ProcessController::class, 'index'])->name('process.index'); //Retorna todos os processos
 Route::post('/admin/{adminId}/process', [ProcessController::class, 'store'])->name('process.store'); //Cria um novo processo
+
 Route::put('/admin/{adminId}/process/{processId}', [ProcessController::class, 'update'])->name('process.update'); //Atualiza um processo
 Route::get('/process/{processId}', [ProcessController::class, 'show'])->name('process.show'); //Retorna um processo específico
 

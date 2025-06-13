@@ -1,7 +1,7 @@
 import { useState } from 'react';
+import { Link, usePage, router } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { SharedData } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, ChevronLeft, ChevronRight, Paperclip } from 'lucide-react';
 
@@ -18,9 +18,8 @@ export default function CadastraProcesso() {
     const [status, setStatus] = useState('');
     const [mensagem, setMensagem] = useState('');
     const [carregando, setCarregando] = useState(false);
-
     const [aberto, setAberto] = useState(false);
-
+    const [modalAberto, setModalAberto] = useState(false); // Estado para controlar a exibição do modal
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -50,6 +49,7 @@ export default function CadastraProcesso() {
                 setDataInicio('');
                 setDataFim('');
                 setStatus('Pendente');
+                setModalAberto(true); // Abre o modal
             } else {
                 const err = await res.json();
                 setMensagem(err.message || 'Erro ao cadastrar processo');
@@ -63,7 +63,6 @@ export default function CadastraProcesso() {
 
     return (
         <AppLayout>
-            <Head title="Cadastrar Processo" />
             <div className="flex h-full max-h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 <nav className="text-sm text-muted-foreground mb-4">
                     <ol className="flex items-center space-x-2">
@@ -212,6 +211,20 @@ export default function CadastraProcesso() {
                         </div>
                     )}
                 </form>
+                {/* Modal de sucesso */}
+                {modalAberto && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                        <div className="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full flex flex-col items-center">
+                            <h2 className="text-xl font-semibold mb-4 text-green-600">Processo cadastrado com sucesso!</h2>
+                            <button
+                                className="mt-2 px-6 py-2 bg-[#008DD0] hover:bg-[#0072d0] text-white rounded shadow"
+                                onClick={() => router.visit(route('inicio-processo'))}
+                            >
+                                Voltar para Processos
+                            </button>
+                        </div>
+                    </div>
+                )}
                 </div>
             </div>
         </AppLayout>
