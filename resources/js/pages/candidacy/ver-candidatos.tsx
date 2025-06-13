@@ -60,7 +60,7 @@ export default function VerCandidatos() {
 
     return (
         <AppLayout>
-            <Head title="Visualizar Vaga" />
+            <Head title="Ver candidatos" />
             <Link href={`/processo/vagas/detalhes?id-processo=${processId}&id-vaga=${vancancyId}`}><Button><Undo2 /> Voltar</Button></Link>
             <h1 className='text-3xl'>Vagas Abertas</h1>
             <div className='container mt-5'>
