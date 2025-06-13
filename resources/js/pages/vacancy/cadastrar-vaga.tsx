@@ -163,7 +163,7 @@ export default function CadastrarVaga() {
                                 <SelectGroup>
                                     <SelectLabel>Niveis</SelectLabel>
                                     <SelectItem value="Graduacao">Graduação</SelectItem>
-                                    <SelectItem value="Pos-Garduacao">Pós-Graduação</SelectItem>
+                                    <SelectItem value="Pos-Graduacao">Pós-Graduação</SelectItem>
                                 </SelectGroup>
                             </SelectContent>
                         </Select>
