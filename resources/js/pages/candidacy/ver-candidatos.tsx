@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { BookText, List, Undo2, UserRoundSearch } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-export default function CadastrarVaga() {
+export default function VerCandidatos() {
     const queryParams = new URLSearchParams(window.location.search);
     const vancancyId = queryParams.get('id-vaga');
     const processId = queryParams.get('id-processo');
