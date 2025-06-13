@@ -20,13 +20,14 @@ return new class extends Migration
             $table->string('titulo');
             $table->text('responsabilidades')->nullable();
             $table->text('requisitos')->nullable();
-            $table->string('carga_horaria');
-            $table->float('remuneracao');
+            $table->string('carga_horaria')->nullable();
+            $table->float('remuneracao')->nullable();
             $table->string('beneficios')->nullable();
-            $table->integer('quantidade');
+            $table->integer('quantidade')->nullable();
             $table->date('data_inicio');
             $table->date('data_fim');
             $table->enum('tipo_vaga', ['Graduacao', 'Pos-Graduacao']);
+            $table->enum('status', ['Aberto', 'Fechado']);
             $table->timestamps();
         });
     }

@@ -6,14 +6,14 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import { SharedData } from '@/types';
-import { Transition } from '@headlessui/react';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 
 export default function CadastrarVaga() {
     const { auth } = usePage<SharedData>().props;
     const queryParams = new URLSearchParams(window.location.search);
-    const processId = queryParams.get('id');
+    const vacancyId = queryParams.get('id-vaga');
+    const processId = queryParams.get('id-processo');
     const adminId = auth.user.id;
 
     const [vaga, setVaga] = useState({
@@ -32,9 +32,25 @@ export default function CadastrarVaga() {
     });
 
     useEffect(() => {
-        if (processId) {
-            setVaga((prevState) => ({ ...prevState, id_process: processId }));
-        }
+        const fetchVacancy = async () => {
+            try {
+                const response = await axios.get(`http://localhost:8000/api/process/${processId}/vacancy/${vacancyId}`);
+                setVaga(response.data);
+
+                setVaga({
+                    ...response.data,
+                    data_inicio: response.data.data_inicio.split("-").reverse().join("/"),
+                    data_fim: response.data.data_fim ? response.data.data_fim.split("-").reverse().join("/") : null
+                })
+
+            } catch (error) {
+                alert(error)
+                return;
+            }
+        };
+
+        fetchVacancy();
+
     }, []);
 
     const submitVacancy = async (e: React.FormEvent) => {
@@ -45,7 +61,7 @@ export default function CadastrarVaga() {
         }
 
         if (!processId) {
-            console.error('Process ID não encontrado.');
+            alert('Id do processo não encontrado.');
             return;
         }
 
@@ -56,7 +72,7 @@ export default function CadastrarVaga() {
                 data_fim: vaga.data_fim ? vaga.data_fim.split("/").reverse().join("-") : null
             };
 
-            const response = await axios.post(`http://localhost:8000/api/admin/${adminId}/process/${processId}/vacancy`, formattedVaga);
+            const response = await axios.put(`http://localhost:8000/api/admin/${adminId}/process/${processId}/vacancy/${vacancyId}`, formattedVaga);
             const data = await response.data;
 
             if (data.error) {
@@ -64,7 +80,7 @@ export default function CadastrarVaga() {
                 return;
             }
 
-            alert('Vaga cadastrada com sucesso!');
+            alert('Vaga atualizada com sucesso!');
             window.location.href = `/processo/vagas?id=${processId}`;
 
         } catch (error) {
@@ -75,7 +91,7 @@ export default function CadastrarVaga() {
 
     return (
         <AppLayout>
-            <Head title="Cadastrar Vaga" />
+            <Head title="Editar Vaga" />
 
             <div className="flex h-full max-h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 <nav className="text-sm text-muted-foreground mb-4">
@@ -217,13 +233,13 @@ export default function CadastrarVaga() {
                         />
                     </div>
                     <div className="flex flex-row gap-2">
-                        <Link href="/" className="w-full">
+                        <Link href={`/processo/vagas?id=${processId}`} className="w-full">
                             <Button type="button" variant="secondary">
                                 Voltar
                             </Button>
                         </Link>
                         <Button type="submit">
-                            Cadastrar Vaga
+                            Arualizar Vaga
                         </Button>
                     </div>
                 </form>
