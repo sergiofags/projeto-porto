@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import AppLayout from '@/layouts/app-layout';
 import { SharedData } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, usePage, router } from '@inertiajs/react'; // adicione 'router' aqui
 import { Button } from '@/components/ui/button';
 import { ChevronDown, ChevronLeft, ChevronRight, Paperclip } from 'lucide-react';
 
@@ -27,6 +27,7 @@ export default function EditaProcesso() {
     const [mensagem, setMensagem] = useState('');
     const [carregando, setCarregando] = useState(false);
     const [aberto, setAberto] = useState(false);
+    const [modalSucesso, setModalSucesso] = useState(false); // Estado para controlar a exibição do modal
 
     // Carrega dados do processo ao abrir a página
     useEffect(() => {
@@ -74,6 +75,7 @@ export default function EditaProcesso() {
 
             if (res.ok) {
                 setMensagem('Processo atualizado com sucesso!');
+                setModalSucesso(true); // abre o modal de sucesso
             } else {
                 const err = await res.json();
                 setMensagem((err.message || 'Erro ao atualizar processo'));
@@ -234,6 +236,20 @@ export default function EditaProcesso() {
                         </div>
                     )}
                 </form>
+                {/* Modal de sucesso */}
+                {modalSucesso && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                        <div className="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full flex flex-col items-center">
+                            <h2 className="text-xl font-semibold mb-4 text-green-600">Processo alterado com sucesso!</h2>
+                            <button
+                                className="px-6 py-2 bg-[#008DD0] hover:bg-[#0072d0] text-white rounded shadow mt-2"
+                                onClick={() => router.visit(route('inicio-processo'))}
+                            >
+                                Voltar para Processos
+                            </button>
+                        </div>
+                    </div>
+                )}
                 </div>
             </div>
         </AppLayout>

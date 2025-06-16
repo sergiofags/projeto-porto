@@ -95,9 +95,7 @@ class PersonController extends Controller
                 'instagram' => optional($person)->instagram,
                 'facebook' => optional($person)->facebook,
                 'cpf' => optional($person)->cpf,
-                'data_nascimento' => optional($person)->data_nascimento 
-                    ? \Carbon\Carbon::parse($person->data_nascimento)->format('d/m/Y') 
-                    : null,
+                'data_nascimento' => optional($person)->data_nascimento,
                 'genero' => optional($person)->genero,
                 'deficiencia' => optional($person)->deficiencia,
                 'qual_deficiencia' => optional($person)->qual_deficiencia,

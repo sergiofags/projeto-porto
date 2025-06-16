@@ -33,6 +33,12 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+         $user = Auth::user();
+
+        if ($user && $user->tipo_perfil === 'Candidato') {
+            return redirect()->route('landing-page');
+        }
+
         return redirect()->intended(route('inicio-processo', absolute: false));
     }
 
