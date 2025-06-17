@@ -1,0 +1,10 @@
+{
+  "name": "Laravel Dev",
+  "image": "mcr.microsoft.com/devcontainers/php:8.4",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "18"
+    }
+  },
+  "postCreateCommand": "composer install && npm install"
+}
