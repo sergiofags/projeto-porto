@@ -10,6 +10,7 @@ import { Pencil, Trash, TableOfContents, FileDown} from 'lucide-react';
 // import { BreadcrumbAuto } from '@/components/ui/breadcrumb-auto'
 import { useEffect, useState } from 'react';
 import { router } from '@inertiajs/react';
+
 import { Button } from '@/components/ui/button';
 
 import { Plus } from 'lucide-react';
@@ -23,6 +24,13 @@ import {
     TableHeader,
     TableRow,
   } from "@/components/ui/table"
+
+
+import { Button } from '@/components/ui/button';
+
+import { Eye, Pen, Plus } from 'lucide-react';
+
+
 
 // const breadcrumbs: BreadcrumbItem[] = [
 //     {
@@ -88,6 +96,11 @@ export default function Inicio({ processos = [] }: Props) {
     // Estado para modal de sucesso
     const [modalSucesso, setModalSucesso] = useState(false);
 
+    // Estado para modal de confirmação
+    const [modalFechar, setModalFechar] = useState<{ aberto: boolean; processoId: string | null }>({ aberto: false, processoId: null });
+    // Estado para modal de sucesso
+    const [modalSucesso, setModalSucesso] = useState(false);
+
     // Função para fechar o processo
     const fecharProcesso = async (processoId: string) => {
         try {
@@ -96,7 +109,6 @@ export default function Inicio({ processos = [] }: Props) {
             formData.append('_method', 'PUT');
             formData.append('status', 'Fechado');
 
-            // Busca os dados atuais do processo para enviar os campos obrigatórios
             const resGet = await fetch(`/api/process/${processoId}`);
             const dados = await resGet.json();
 
@@ -104,7 +116,6 @@ export default function Inicio({ processos = [] }: Props) {
             formData.append('numero_processo', dados.numero_processo);
             formData.append('data_inicio', dados.data_inicio);
             formData.append('data_fim', dados.data_fim ?? '');
-            // Não precisa enviar edital novamente
 
             const res = await fetch(`/api/admin/${adminId}/process/${processoId}`, {
                 method: 'POST',
@@ -113,7 +124,6 @@ export default function Inicio({ processos = [] }: Props) {
             });
 
             if (res.ok) {
-                // Atualiza a lista de processos após fechar
                 setProcess(process.map(p =>
                     p.id === processoId ? { ...p, status: 'Fechado' } : p
                 ));
@@ -248,6 +258,7 @@ export default function Inicio({ processos = [] }: Props) {
                         </Table>
                     </div>
 
+
                     {/* Botão Adicionar Processo */}
                     {auth.user.tipo_perfil === 'Admin' && (
                         <div className="flex justify-center mt-6 mb-4">
@@ -256,6 +267,71 @@ export default function Inicio({ processos = [] }: Props) {
                                     Adicionar processo <Plus className="ml-2" />
                                 </Button>
                             </Link>
+
+                ) : (
+                    <>
+                        <div className="grid gap-4">
+                            {process.map((processo) => (
+                                <div key={processo.numero_processo} className="border rounded p-4">
+                                    <h3 className="font-semibold">Descrição: {processo.descricao}</h3>
+                                    <p>Status: {processo.status}</p>
+                                    <p>Número Processo: {processo.numero_processo}</p>
+                                    <p>Data Inicio: {processo.data_inicio}</p>
+                                    <p>Data Fim: {processo.data_fim}</p>
+                                    <div className="space-y-6 space-x-2">
+                                        {auth.user.tipo_perfil === 'Admin' && (
+                                            <div className="flex gap-2 mt-4">
+                                                {processo.status !== 'Fechado' && (
+                                                    <Link href={`/processo/cadastrar-vaga?id=${processo.id}`}>
+                                                        <Button className="p-4 sm:p-6 bg-[#008DD0] hover:bg-[#0072d0] text-sm sm:text-base">
+                                                            Cadastrar Vaga <Plus />
+                                                        </Button>
+                                                    </Link>
+                                                )}
+                                                <Link href={`/processo/vagas?id=${processo.id}`}>
+                                                    <Button className="p-4 sm:p-6 bg-gray-500 hover:bg-gray-600 mt-4 text-sm sm:text-base">
+                                                        Visualizar Vagas <Eye />
+                                                    </Button>
+                                                </Link>
+                                            </div>
+                                        )}
+                                        <a
+                                            href={`/storage/${processo.edital}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            <Button className="p-4 sm:p-6 bg-blue-500 hover:bg-blue-600 text-sm sm:text-base">
+                                                Visualizar
+                                            </Button>
+                                        </a>
+                                        {auth.user.tipo_perfil === 'Admin' && (
+                                            <>
+                                                <Link href={`/process/edita-processo?id=${processo.id}`}>
+                                                    <Button className="p-4 sm:p-6 bg-green-500 hover:bg-green-600 text-sm sm:text-base">
+                                                        Editar
+                                                    </Button>
+                                                </Link>
+                                                {processo.status !== 'Fechado' && (
+                                                    <Button
+                                                        className="p-4 sm:p-6 bg-red-600 hover:bg-red-800 text-white"
+                                                        onClick={() => setModalFechar({ aberto: true, processoId: processo.id })}
+                                                    >
+                                                        Fechar
+                                                    </Button>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                            {auth.user.tipo_perfil === 'Admin' && (
+                                <Link href="/cadastra-processo">
+                                    <Button className="p-4 sm:p-6 bg-[#008DD0] hover:bg-[#0072d0] mt-4 text-sm sm:text-base">
+                                    Adicionar processo <Plus />
+                                    </Button>
+                                </Link>
+                            )}
+
                         </div>
                     )}
                 </>
@@ -287,6 +363,7 @@ export default function Inicio({ processos = [] }: Props) {
                         </button>
                     </div>
                 </div>
+
             </div>
         )}
 
@@ -302,6 +379,50 @@ export default function Inicio({ processos = [] }: Props) {
                         Concluir
                     </button>
                 </div>
+
+                {/* Modal de confirmação */}
+                {modalFechar.aberto && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                        <div className="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full flex flex-col items-center">
+                            <h2 className="text-xl font-semibold mb-4 text-red-600">Você tem certeza que deseja fechar este processo?</h2>
+                            <div className="flex gap-4 mt-2">
+                                <button
+                                    className="px-6 py-2 bg-[#008DD0] hover:bg-[#0072d0] text-white rounded shadow"
+                                    onClick={async () => {
+                                        if (modalFechar.processoId) {
+                                            await fecharProcesso(modalFechar.processoId);
+                                        }
+                                        setModalFechar({ aberto: false, processoId: null });
+                                    }}
+                                >
+                                    Confirmar
+                                </button>
+                                <button
+                                    className="px-6 py-2 bg-gray-400 hover:bg-gray-600 text-white rounded shadow"
+                                    onClick={() => setModalFechar({ aberto: false, processoId: null })}
+                                >
+                                    Cancelar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Modal de sucesso */}
+                {modalSucesso && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                        <div className="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full flex flex-col items-center">
+                            <h2 className="text-xl font-semibold mb-4 text-green-600">Processo encerrado com sucesso!</h2>
+                            <button
+                                className="px-6 py-2 bg-[#008DD0] hover:bg-[#0072d0] text-white rounded shadow mt-2"
+                                onClick={() => router.visit(route('inicio-processo'))}
+                            >
+                                Concluir
+                            </button>
+                        </div>
+                    </div>
+                )}
+
             </div>
         )}
     </AppLayout>
