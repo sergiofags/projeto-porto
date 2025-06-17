@@ -45,6 +45,9 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
     const page = usePage<SharedData>();
     const { auth } = page.props;
     const getInitials = useInitials();
+    const perfil = auth?.user?.tipo_perfil;
+    const logoHref = perfil === 'Admin' ? '/processos' : '/';
+
     return (
         <>
             <div className="border-sidebar-border/80 border-b bg-[#008DD0]">
@@ -97,7 +100,9 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                     {/* Desktop Navigation */}
                         <div className=" hidden h-full items-center space-x-6 lg:flex">
                             <div className="flex items-center">
-                                <img src="/PORTO_IMBITUBA_Branca.png" alt="Logo" className="w-20 h-auto" />
+                                <Link href={logoHref}>
+                                    <img src="/PORTO_IMBITUBA_Branca.png" alt="Logo" className="w-20 h-auto" />
+                                </Link>
                             </div>
                         <NavigationMenu className="flex h-full items-stretch">
                             <NavigationMenuList className="flex h-full items-stretch space-x-2">

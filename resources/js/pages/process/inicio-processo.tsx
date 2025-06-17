@@ -202,18 +202,22 @@ export default function Inicio({ processos = [] }: Props) {
                                                 Visualizar
                                             </Button>
                                         </a>
-                                        <Link href={`/process/edita-processo?id=${processo.id}`}>
-                                            <Button className="p-4 sm:p-6 bg-green-500 hover:bg-green-600 text-sm sm:text-base">
-                                                Editar
-                                            </Button>
-                                        </Link>
-                                        {processo.status !== 'Fechado' && (
-                                            <Button
-                                                className="p-4 sm:p-6 bg-red-600 hover:bg-red-800 text-white"
-                                                onClick={() => setModalFechar({ aberto: true, processoId: processo.id })}
-                                            >
-                                                Fechar
-                                            </Button>
+                                        {auth.user.tipo_perfil === 'Admin' && (
+                                            <>
+                                                <Link href={`/process/edita-processo?id=${processo.id}`}>
+                                                    <Button className="p-4 sm:p-6 bg-green-500 hover:bg-green-600 text-sm sm:text-base">
+                                                        Editar
+                                                    </Button>
+                                                </Link>
+                                                {processo.status !== 'Fechado' && (
+                                                    <Button
+                                                        className="p-4 sm:p-6 bg-red-600 hover:bg-red-800 text-white"
+                                                        onClick={() => setModalFechar({ aberto: true, processoId: processo.id })}
+                                                    >
+                                                        Fechar
+                                                    </Button>
+                                                )}
+                                            </>
                                         )}
                                     </div>
                                 </div>
