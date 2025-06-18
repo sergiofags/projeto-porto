@@ -46,6 +46,46 @@ class ClassificationController extends Controller
         }
     }
 
+    public function showByCandidacy($vacancyId, $candidacyId)
+    {
+        try {
+            $vacancy = Vacancy::find($vacancyId);
+            if (!$vacancy) {
+                return response()->json([
+                    'message' => 'Vaga não encontrada.'
+                ], 404);
+            }
+
+            $candidacy = Candidacy::find($candidacyId);
+            if (!$candidacy) {
+                return response()->json([
+                    'message' => 'Candidatura não encontrada.'
+                ], 404);
+            }
+
+            $classification = $vacancy->classification->where('id_candidacy', $candidacyId)->first();
+            if (!$classification) {
+                return response()->json([
+                    'message' => 'Classificação não encontrada para a candidatura especificada.'
+                ], 404);
+            }
+
+            return response()->json($classification);
+
+        } catch (\Illuminate\Database\QueryException $e) {
+            return response()->json([
+                'message' => 'Erro ao acessar o banco de dados.',
+                'error' => $e->getMessage()
+            ], 500);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erro interno no servidor.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function store(Request $request, $candidacyId, $adminId)
     {
         try {
@@ -64,10 +104,10 @@ class ClassificationController extends Controller
             }
 
             $validatedData = $request->validate([
-                'nota_coeficiente_rendimento' => 'nullable|numeric|min:0|max:10',
-                'nota_entrevista' => 'nullable|numeric|min:0|max:10',
+                'nota_coeficiente_rendimento' => 'nullable|string|min:0|max:10',
+                'nota_entrevista' => 'nullable|string|min:0|max:10',
                 'situacao' => 'nullable|in:Habilitado,Inabilitado,Desclassificado',
-                'motivo_situacao' => 'nullable|in:Esperar RH',
+                'motivo_situacao' => 'nullable|string|max:255',
             ]);
 
             $validatedData['id_candidacy'] = $candidacy->id;
@@ -121,7 +161,7 @@ class ClassificationController extends Controller
         }
     }
 
-    public function update(Request $request, $candidacyId, $classificationId)
+    public function updateNote(Request $request, $candidacyId, $classificationId, $adminId)
     {
         try {
             $admin = User::where('id', $adminId)->where('tipo_perfil', 'Admin')->first();
@@ -146,9 +186,9 @@ class ClassificationController extends Controller
             }
 
             $validatedData = $request->validate([
-                'nota_coeficiente_rendimento' => 'nullable|numeric|min:0|max:10',
-                'nota_entrevista' => 'nullable|numeric|min:0|max:10',
-                'situacao' => 'nullable|in:Habilitado,Inabilitado, Desclassificado',
+                'nota_coeficiente_rendimento' => 'nullable|string|min:0|max:10',
+                'nota_entrevista' => 'nullable|string|min:0|max:10',
+                'situacao' => 'nullable|in:Habilitado,Inabilitado,Desclassificado',
                 'motivo_situacao' => 'nullable|string|max:255',
             ]);
 

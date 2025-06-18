@@ -24,6 +24,7 @@ export default function VerCandidatos() {
         name: string;
         email: string;
         telefone: string;
+        id_candidacy: string;
     }>>([]);
 
     useEffect(() => {
@@ -33,10 +34,12 @@ export default function VerCandidatos() {
 
                 setCandidatura(responseCandidacy.data);
 
+                console.log(responseCandidacy.data);
+
                 const personsData = await Promise.all(
                     responseCandidacy.data.map(async (candidatura: any) => {
                         const responsePerson = await axios.get(`http://localhost:8000/api/person/${candidatura.id_person}`);
-                        return { ...responsePerson.data, id_person: candidatura.id_person };
+                        return { ...responsePerson.data, id_person: candidatura.id_person, id_candidacy: candidatura.id };
                     })
                 );
 
@@ -50,7 +53,7 @@ export default function VerCandidatos() {
                 );
                 
             } catch (error) {
-                alert(error)
+                console.log(error)
                 return;
             }
         };
@@ -82,7 +85,7 @@ export default function VerCandidatos() {
                                 <TableCell>{pessoa.telefone}</TableCell>
                                 <TableCell>{candidatura.find(c => c.id_person === pessoa.id_person)?.data_candidatura}</TableCell>
                                 <TableCell className="text-right space-x-2">
-                                    <Link href={``}>
+                                    <Link href={`/processo/vagas/ver-candidatos/candidato/notas?id-processo=${processId}&id-vaga=${vancancyId}&id-candidato=${pessoa.id_person}&id-candidatura=${pessoa.id_candidacy}`}>
                                         <Button className='bg-cyan-600 hover:bg-cyan-700 cursor-pointer'><List /> Notas</Button>
                                     </Link>
                                     <Link href={``}>
