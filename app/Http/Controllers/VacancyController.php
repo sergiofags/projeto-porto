@@ -70,7 +70,7 @@ class VacancyController extends Controller
         }
     }
 
-    public function store(Request $request, $processId, $adminId)
+    public function store(Request $request, $adminId, $processId)
     {
         try {
             $admin = User::where('id', $adminId)->where('tipo_perfil', 'Admin')->first();

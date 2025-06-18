@@ -18,11 +18,11 @@ return new class extends Migration
             $table->foreignId('id_vacancy')->constrained('vacancy');
             $table->foreignId('id_admin')->constrained('users');
             
-            $table->float('nota_coeficiente_rendimento')->nullable();
-            $table->float('nota_entrevista')->nullable();
-            $table->float('nota_historico')->nullable();
+            $table->string('nota_coeficiente_rendimento')->nullable();
+            $table->string('nota_entrevista')->nullable();
+            $table->string('nota_historico')->nullable();
             $table->enum('situacao', ['Habilitado', 'Inabilitado', 'Desclassificado']);
-            $table->enum('motivo_situacao', ['Esperar RH']);
+            $table->string('motivo_situacao')->nullable();
 
             $table->timestamps();
         });
