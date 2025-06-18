@@ -17,3 +17,4 @@ php artisan db:seed --class=CandidacySeeder<br>
 php artisan db:seed --class=DocumentSeeder<br>
 php artisan db:seed --class=ExperienceSeeder<br>
 php artisan db:seed --class=ComplementaryExperienceSeeder<br>
+php artisan db:seed --class=ClassificationSeeder<br>
