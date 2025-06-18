@@ -4,6 +4,10 @@ npm install<br>
 php artisan key:generate<br>
 php artisan migrate <br>
 php artisan storage:link<br>
+
+## Rodar antes do npm run build para instalar o scroll-area:
+npm install @radix-ui/react-scroll-area<br>
+
 npm run build<br>
 php artisan serve<br>
 
