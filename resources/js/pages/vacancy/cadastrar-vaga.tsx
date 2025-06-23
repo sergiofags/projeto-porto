@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import { SharedData } from '@/types';
-import { Transition } from '@headlessui/react';
+// import { Transition } from '@headlessui/react';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 
@@ -217,7 +217,7 @@ export default function CadastrarVaga() {
                         />
                     </div>
                     <div className="flex flex-row gap-2">
-                        <Link href="/" className="w-full">
+                        <Link href={`/processo/vagas?id=${processId}`} className="w-full">
                             <Button type="button" variant="secondary">
                                 Voltar
                             </Button>
