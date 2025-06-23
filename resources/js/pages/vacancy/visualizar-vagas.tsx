@@ -4,7 +4,6 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import {
     Table,
     TableBody,
-    TableCaption,
     TableCell,
     TableHead,
     TableHeader,
@@ -110,11 +109,7 @@ export default function CadastrarVaga() {
     return (
         <AppLayout>
             <Head title="Visualizar Vaga" />
-            <div className="tracking-wide max-w-md w-full break-words">
-                <h1 className="text-3xl  mt-10 pl-4 pr-4">Adicione vagas ao processo</h1>
-                <hr className="mb-4 ml-4 mr-4 bg-[#008DD0] h-0.5" />
-            </div>
-            
+
             {processo && (
                 <div className="pl-4 pr-4 mt-4">
                     <h2 className="text-2xl font-semibold text-[#008DD0]">
@@ -123,48 +118,84 @@ export default function CadastrarVaga() {
                 </div>
             )}
 
+            {vagas.length === 0 ? (
+                <div className="flex h-full max-h-full flex-1 flex-col gap-4 rounded-xl p-4">
+                    <div className="border-sidebar-border/70 dark:border-sidebar-border relative max-h-[100vh] flex-1 overflow-hidden rounded-xl border md:min-h-min flex items-center justify-center ">
+                        <div className="text-center flex items-center justify-center h-full px-4">
+                            <div className="tracking-wide max-w-md w-full break-words whitespace-normal">
+                                <h2 className="text-xl font-semibold block leading-tight break-words">
+                                No momento não há vagas cadastradas
+                                </h2>
+                                <hr className="mt-4 mb-4 w-full bg-[#008DD0] h-0.5" />
+                                <p className="text-sm text-[#008DD0] mt-1">
+                                Clique no botão para adicionar uma vaga
+                                </p>
 
-            <div className="flex items-end justify-end w-full">
-                <div className="ml-0">
-                    <Link href={`/processo/cadastrar-vaga?id=${processId}`} className="w-fit">
-                    <Button className="flex items-center gap-2 rounded-md p-4 mr-4 sm:p-6 bg-[#008DD0] hover:bg-[#0072d0] text-sm sm:text-base">
-                        Adicionar Vaga <Plus />
-                    </Button>
-                    </Link>
+                                {auth.user.tipo_perfil === 'Admin' && (
+                                    <Link href={`/processo/cadastrar-vaga?id=${processId}`}>
+                                        <Button className="p-4 sm:p-6 bg-[#008DD0] hover:bg-[#0072d0] mt-4 text-sm sm:text-base">
+                                        Adicionar vaga <Plus />
+                                        </Button>
+                                    </Link>
+                                )}
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <div className='container mt-5 pl-2 pr-2'>
-                <Table>
-                    <ScrollArea className="h-[400px] w-full rounded-md border border-[#008DD0] p-4">
-                        <TableHeader>
-                            <TableRow>
-                            <TableHead className="sticky top-0 bg-white w-[500px] font-semibold">Vaga</TableHead>
-                            <TableHead className="sticky top-0 bg-white font-semibold">Data Inicio</TableHead>
-                            <TableHead className="sticky top-0 bg-white font-semibold">Data Fim</TableHead>
-                            <TableHead className="sticky top-0 bg-white text-center align-middle font-semibold">Opções</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {vagas
-                                .filter((vaga) => vaga.status === 'Aberto')
-                                .map((vaga) => (
-                                    <TableRow key={vaga.id}>
-                                        <TableCell className="">{vaga.titulo}</TableCell>
-                                        <TableCell>{vaga.data_inicio}</TableCell>
-                                        <TableCell>{vaga.data_fim}</TableCell>
-                                        <TableCell className="text-center space-x-2 align-middle">
-                                            <Link href={`/processo/vagas/editar?id-processo=${vaga.id_process}&id-vaga=${vaga.id}`}><Button className='bg-green-600 hover:bg-green-700'><Pen /> Editar</Button></Link>
-                                            <Button onClick={() => handleDelete(vaga.id)} className='bg-red-600 hover:bg-red-700'><Trash2 /> Excluir</Button>
-                                            <Link href={`/processo/vagas/detalhes?id-processo=${vaga.id_process}&id-vaga=${vaga.id}`}><Button><Eye /> Visualizar</Button></Link>
-                                        </TableCell>
+            ) : (
+                <>
+                    <div className="tracking-wide max-w-md w-full break-words">
+                        <h1 className="text-3xl  mt-10 pl-4 pr-4">Adicione vagas ao processo</h1>
+                        <hr className="mb-4 ml-4 mr-4 bg-[#008DD0] h-0.5" />
+                    </div>
+        
+
+                    <div className="flex items-end justify-end w-full">
+                        <div className="ml-0">
+                            <Link href={`/processo/cadastrar-vaga?id=${processId}`} className="w-fit">
+                            <Button className="flex items-center gap-2 rounded-md p-4 mr-4 sm:p-6 bg-[#008DD0] hover:bg-[#0072d0] text-sm sm:text-base">
+                                Adicionar Vaga <Plus />
+                            </Button>
+                            </Link>
+                        </div>
+                    </div>
+
+                    <div className='container mt-5 pl-2 pr-2'>
+                        <Table>
+                            <ScrollArea className="h-[400px] w-full rounded-md border border-[#008DD0] p-4">
+                                <TableHeader>
+                                    <TableRow>
+                                    <TableHead className="sticky top-0 bg-white w-[500px] font-semibold">Vaga</TableHead>
+                                    <TableHead className="sticky top-0 bg-white font-semibold">Data Inicio</TableHead>
+                                    <TableHead className="sticky top-0 bg-white font-semibold">Data Fim</TableHead>
+                                    <TableHead className="sticky top-0 bg-white text-center align-middle font-semibold">Opções</TableHead>
                                     </TableRow>
-                                ))}
-                        </TableBody>
-                    </ScrollArea>
-                </Table>
-            </div>
+                                </TableHeader>
+                                <TableBody>
+                                    {vagas
+                                        .filter((vaga) => vaga.status === 'Aberto')
+                                        .map((vaga) => (
+                                            <TableRow key={vaga.id}>
+                                                <TableCell className="">{vaga.titulo}</TableCell>
+                                                <TableCell>{vaga.data_inicio}</TableCell>
+                                                <TableCell>{vaga.data_fim}</TableCell>
+                                                <TableCell className="text-center space-x-2 align-middle">
+                                                    <Link href={`/processo/vagas/editar?id-processo=${vaga.id_process}&id-vaga=${vaga.id}`}><Button className='bg-green-600 hover:bg-green-700'><Pen /> Editar</Button></Link>
+                                                    <Button onClick={() => handleDelete(vaga.id)} className='bg-red-600 hover:bg-red-700'><Trash2 /> Excluir</Button>
+                                                    <Link href={`/processo/vagas/detalhes?id-processo=${vaga.id_process}&id-vaga=${vaga.id}`}><Button><Eye /> Visualizar</Button></Link>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                </TableBody>
+                            </ScrollArea>
+                        </Table>
+                    </div>
 
+                    
+                </>
+
+            )}
             <div className="mt-6 mb-6 pl-2">
                 <Link className="w-fit flex" href="/">
                     <Button
@@ -173,7 +204,6 @@ export default function CadastrarVaga() {
                     </Button>
                 </Link>
             </div>
-
         </AppLayout> 
     );
 }

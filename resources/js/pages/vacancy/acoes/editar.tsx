@@ -239,7 +239,7 @@ export default function CadastrarVaga() {
                             </Button>
                         </Link>
                         <Button type="submit">
-                            Arualizar Vaga
+                            Atualizar Vaga
                         </Button>
                     </div>
                 </form>
