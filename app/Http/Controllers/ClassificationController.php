@@ -7,8 +7,6 @@ use Illuminate\Http\Request;
 use App\Models\Candidacy;
 use App\Models\Classification;
 use App\Models\Vacancy;
-use App\Models\Process;
-Use App\Models\User;
 use Dotenv\Exception\ValidationException;
 
 class ClassificationController extends Controller
@@ -149,7 +147,7 @@ class ClassificationController extends Controller
         }
     }
 
-    public function updateNote(Request $request, $candidacyId, $classificationId, $adminId)
+    public function update(Request $request, $candidacyId, $classificationId, $adminId)
     {
         try {
             $candidacy = Candidacy::find($candidacyId);
