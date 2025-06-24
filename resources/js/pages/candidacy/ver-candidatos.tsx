@@ -88,8 +88,12 @@ export default function VerCandidatos() {
                                     <Link href={`/processo/vagas/ver-candidatos/candidato/notas?id-processo=${processId}&id-vaga=${vancancyId}&id-candidato=${pessoa.id_person}&id-candidatura=${pessoa.id_candidacy}`}>
                                         <Button className='bg-cyan-600 hover:bg-cyan-700 cursor-pointer'><List /> Notas</Button>
                                     </Link>
-                                    <Link href={``}>
-                                        <Button className='bg-blue-600 hover:bg-blue-700 cursor-pointer'><UserRoundSearch /> Entrevista</Button>
+                                    <Link
+                                      href={`/entrevista-candidato?nome=${encodeURIComponent(pessoa.name)}&email=${encodeURIComponent(pessoa.email)}&telefone=${encodeURIComponent(pessoa.telefone)}&id-candidatura=${pessoa.id_candidacy}`}
+                                    >
+                                      <Button className='bg-blue-600 hover:bg-blue-700 cursor-pointer'>
+                                        <UserRoundSearch /> Entrevista
+                                      </Button>
                                     </Link>
                                     <Link href={`/processo/vagas/ver-candidatos/candidato?id-processo=${processId}&id-vaga=${vancancyId}&id-candidato=${pessoa.id_person}`}>
                                         <Button className='bg-yellow-600 hover:bg-yellow-700 cursor-pointer'><BookText /> Candidatura</Button>

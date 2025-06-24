@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link } from '@inertiajs/react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
@@ -8,6 +9,42 @@ const LandingPage: React.FC = () => {
 
     const [abertoEditais, setAbertoEditais] = useState(true);
     const [abertoEncerrados, setAbertoEncerrados] = useState(false);
+
+    const [processo, setProcesso] = useState<Array<{
+        id: number;
+        id_admin: number;
+        descricao: string;
+        status: 'Pendente' | 'Aberto' | 'Fechado';
+        numero_processo: string;
+        edital: string | null;
+        data_inicio: string;
+        data_fim: string | null;
+    }>>([]);
+
+    useEffect(() => {
+        const fetchProcess = async () => {
+            try {
+                const response = await axios.get(`http://localhost:8000/api/process`);
+                setProcesso(response.data);
+
+                console.log(response.data);
+
+                setProcesso(
+                    response.data.map((processo: any) => ({
+                        ...processo,
+                        data_inicio: processo.data_inicio ? processo.data_inicio.split("-").reverse().join("/") : null,
+                        data_fim: processo.data_fim ? processo.data_fim.split("-").reverse().join("/") : null
+                    }))
+                );
+                
+            } catch (error) {
+                alert(error)
+                return;
+            }
+        }
+        fetchProcess();
+    });
+        
 
     return (
         <>
@@ -48,13 +85,11 @@ const LandingPage: React.FC = () => {
                                     São oferecidas oportunidades de estágio de ensino superior nas diversas áreas que formam a administração portuária (Comunicação, Compras, Engenharia, Financeiro, Jurídico, Licitações, Meio Ambiente, Operações Logísticas, Recursos Humanos e Segurança do Trabalho). A seleção para cadastro reserva de estágio é realizada via Edital. Confira abaixo os processos seletivos abertos:
                                 </p>
                             </div>
-
                             {/* Accordion - Editais em aberto */}
                             <div className="border border-blue-300 rounded-xl p-4">
                                 <div
                                     className="flex justify-between items-center cursor-pointer"
-                                    onClick={() => setAbertoEditais(!abertoEditais)}
-                                >
+                                    onClick={() => setAbertoEditais(!abertoEditais)}>
                                     <h2 className="text-lg font-medium">Editais em aberto</h2>
                                     {abertoEditais ? <ChevronUp /> : <ChevronDown />}
                                 </div>
@@ -62,27 +97,34 @@ const LandingPage: React.FC = () => {
                                 {abertoEditais && (
                                     <div className="mt-4 space-y-6 transition-all duration-300">
                                         <div>
-                                            <h3 className="text-md font-semibold">Edital de processo seletivo de estágio Nº 001/2025</h3>
-                                            <ul className="list-disc list-inside text-blue-600">
-                                                <li><a href="#">Edital PSE 001.2025</a></li>
+                                            {/* <h3 className="text-md font-semibold">
+                                                {processo.length > 0 ? processo[0].numero_processo : ''}
+                                            </h3> */}
+                                            <ul className="space-y-4">
+                                                {processo.map((processo) => (
+                                                    <>
+                                                        <div key={processo.numero_processo}>
+                                                            <div className="space-y-6 space-x-2">
+                                                                <ul>   
+                                                                    <h3 className="font-semibold">{processo.descricao} - {processo.numero_processo}</h3>
+                                                                    <li className="list-disc list-inside text-blue-600 underline">
+                                                                        <a
+                                                                        href={`/storage/${processo.edital}`}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer">
+                                                                            {/* <Button className="p-4 sm:p-6 bg-blue-500 hover:bg-blue-600 text-sm sm:text-base"> */}
+                                                                                {processo.edital ? 'Edital' : 'Edital'}
+                                                                        </a>
+                                                                    </li>
+                                                                    <button className="mt-2 px-4 py-1 text-white bg-blue-500 rounded-full hover:bg-blue-600">
+                                                                        <Link href={`/process/inicio-vaga?id=${processo.id}`}>Visualizar</Link>
+                                                                    </button>
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                    </>
+                                                ))}
                                             </ul>
-                                            <button className="mt-2 px-4 py-1 text-white bg-blue-500 rounded-full hover:bg-blue-600">
-                                                <Link href="/process/inicio-vaga">Visualizar</Link>
-                                            </button>
-                                        </div>
-
-                                        <div>
-                                            <h3 className="text-md font-semibold">Edital de processo seletivo de estágio Nº 002/2024</h3>
-                                            <ul className="list-disc list-inside text-blue-600">
-                                                <li><a href="#">EDITAL PSE 002/2024</a></li>
-                                                <li><a href="#">Aditivo I ao Edital PSE 002.2024</a></li>
-                                                <li><a href="#">Habilitados</a></li>
-                                                <li><a href="#">Inabilitados</a></li>
-                                                <li><a href="#">Resultado final PSE 002.2024</a></li>
-                                            </ul>
-                                            <button className="mt-2 px-4 py-1 text-white bg-blue-500 rounded-full hover:bg-blue-600">
-                                                <Link href="/process/inicio-vaga">Visualizar</Link>
-                                            </button>
                                         </div>
                                     </div>
                                 )}
@@ -100,8 +142,34 @@ const LandingPage: React.FC = () => {
                                 </div>
 
                                 {abertoEncerrados && (
-                                    <div className="mt-4 text-gray-600">
-                                        <p>Nenhum edital encerrado no momento.</p>
+                                    <div className="mt-4 space-y-6 transition-all duration-300">
+                                        {processo.filter(p => p.status === 'Fechado').length === 0 ? (
+                                            <div className="text-gray-600">
+                                                <p>Nenhum edital encerrado no momento.</p>
+                                            </div>
+                                        ) : (
+                                            processo
+                                                .filter(p => p.status === 'Fechado')
+                                                .map((processo) => (
+                                                    <div key={processo.id} className="mb-4">
+                                                        <h3 className="font-semibold">{processo.descricao} - {processo.numero_processo}</h3>
+                                                        <ul className="list-disc list-inside text-blue-600 underline">
+                                                            <li>
+                                                                <a
+                                                                    href={`/storage/${processo.edital}`}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                >
+                                                                    {processo.edital ? 'Edital' : 'Edital'}
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                        <button className="mt-2 px-4 py-1 text-white bg-blue-500 rounded-full hover:bg-blue-600">
+                                                            <Link href={`/process/inicio-vaga?id=${processo.id}`}>Visualizar</Link>
+                                                        </button>
+                                                    </div>
+                                                ))
+                                        )}
                                     </div>
                                 )}
                             </div>

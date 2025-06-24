@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import AppLayout from '@/layouts/app-layout';
 import { SharedData, type BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion'; 
+import axios from 'axios';
 
 interface ProdutoCatalogo {
   id: number;
@@ -25,26 +26,63 @@ export default function Inicio({ }: InicioProps) {
   const [modalAberto, setModalAberto] = useState(false);
   const [produtoSelecionado, setProdutoSelecionado] = useState<ProdutoCatalogo | null>(null);
 
-  const produtos: ProdutoCatalogo[] = [
-    {
-      id: 1,
-      nome: 'Vaga T.I',
-      curso: 'SCPAR',
-      imagem: '/vaga-ti.png',
-    },
-    {
-      id: 2,
-      nome: 'Vaga Comunicação',
-      curso: 'SCPAR',
-      imagem: '/vaga-ti.png',
-    },
-    {
-      id: 3,
-      nome: 'Vaga Operações',
-      curso: 'SCPAR',
-      imagem: '/vaga-ti.png',
-    }
-  ];
+const [vaga, setVaga] = useState<Array<{
+    edital: any;
+    id: number;
+    id_process: number;
+    id_admin: number;
+    titulo: string;
+    responsabilidades?: string | null;
+    requisitos?: string | null;
+    carga_horaria?: string | null;
+    remuneracao?: number | null;
+    beneficios?: string | null;
+    quantidade?: number | null;
+    data_inicio: string;
+    data_fim: string;
+    tipo_vaga: 'Graduacao' | 'Pos-Graduacao';
+    status: 'Aberto' | 'Fechado';
+    created_at: string;
+    updated_at: string;
+  }>>([]);
+
+  const [editalProcesso, setEditalProcesso] = useState<string | null>(null);
+
+  useEffect(() => {
+        const fetchProcess = async () => {
+            try {
+              const response = await axios.get(`http://localhost:8000/api/process/${processId}/vacancy`);
+              setVaga(response.data);
+              const processResponse = await axios.get(`http://localhost:8000/api/process/${processId}`);
+              setEditalProcesso(processResponse.data.edital);
+            } catch (error) {
+                alert(error)
+                return;
+            }
+        }
+        fetchProcess();
+    });
+
+  // const produtos: ProdutoCatalogo[] = [
+  //   {
+  //     id: 1,
+  //     nome: 'Vaga T.I',
+  //     curso: 'SCPAR',
+  //     imagem: '/vaga-ti.png',
+  //   },
+  //   {
+  //     id: 2,
+  //     nome: 'Vaga Comunicação',
+  //     curso: 'SCPAR',
+  //     imagem: '/vaga-ti.png',
+  //   },
+  //   {
+  //     id: 3,
+  //     nome: 'Vaga Operações',
+  //     curso: 'SCPAR',
+  //     imagem: '/vaga-ti.png',
+  //   }
+  // ];
 
   return (
     <>
@@ -84,21 +122,27 @@ export default function Inicio({ }: InicioProps) {
                 <h2 className="text-md">Cursos de Tecnólogo, Graduação e Pós-graduação Disponíveis para Estágio</h2>
               </div>
 
-              {produtos.map((item) => (
+              {vaga.map((item) => (
                 <div
                   key={item.id}
                   id={`card-produto-${item.id}`}
                   className={`group border-solid w-48 flex flex-col p-4 justify-between items-center shadow-xl shadow-slate-400 rounded-lg hover:scale-105 transition-transform`}>
                   <img
-                    src={item.imagem}
-                    alt={item.nome}
+                    src={'/vaga-ti.png'}
+                    alt={item.titulo}
                     className="my-3 rounded-lg w-24 h-12 object-contain"
                   />
-                  <p className="text-sm font-semibold">{item.nome}</p>
-                  <p className="text-sm text-slate-400">{item.curso}</p>
+                  <p className="text-sm font-semibold">{item.titulo}</p>
+                  <p className="text-sm text-slate-400">{item.tipo_vaga}</p>
                   <button
                     onClick={() => {
-                      setProdutoSelecionado(item);
+                      setProdutoSelecionado({
+                        id: item.id,
+                        nome: item.titulo,
+                        curso: item.tipo_vaga,
+                        imagem: '/vaga-ti.png',
+                        // Add other fields as needed for modal
+                      } as ProdutoCatalogo);
                       setModalAberto(true);
                     }}
                     className="mt-4 px-4 py-2 bg-[#207FCD] text-white rounded-full shadow hover:bg-[#1a6fb3] transition-colors">Saiba mais
@@ -117,65 +161,84 @@ export default function Inicio({ }: InicioProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setModalAberto(false)}>
-            <motion.div
-              className="bg-white w-full max-w-2xl rounded-xl shadow-lg p-6 relative"
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-              onClick={(e) => e.stopPropagation()}>
-              <button
-                onClick={() => setModalAberto(false)}
-                className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl">
-                &times;
-              </button>
-              <h2 className="text-xl font-semibold mb-2">
-                Programa de estágio e aprendizagem em {produtoSelecionado.nome}
-              </h2>
-              <p className="text-sm text-gray-500 mb-4">
-                Publicado em 21 de março de 2025<br />
-                Inscrições abertas até 21 de abril de 2025
-              </p>
+              <motion.div
+          className="bg-white w-full max-w-2xl rounded-xl shadow-lg p-6 relative"
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.9, opacity: 0 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+          onClick={(e) => e.stopPropagation()}>
+          <button
+            onClick={() => setModalAberto(false)}
+            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl">
+            &times;
+          </button>
+          {/* Exemplo de uso dos dados do banco de dados */}
+            <h2 className="text-xl font-semibold mb-2">
+            Programa de estágio e aprendizagem em {produtoSelecionado.nome}
+            </h2>
+            <p className="text-sm text-gray-500 mb-4">
+            Publicado em {vaga.find(v => v.id === produtoSelecionado.id)?.created_at
+              ? new Date(vaga.find(v => v.id === produtoSelecionado.id)!.created_at).toLocaleDateString()
+              : '--'}
+            <br />
+            Inscrições abertas até {vaga.find(v => v.id === produtoSelecionado.id)?.data_fim
+              ? new Date(vaga.find(v => v.id === produtoSelecionado.id)!.data_fim).toLocaleDateString()
+              : '--'}
+            </p>
 
-              <h3 className="font-semibold mb-1">Atividades</h3>
-              <ul className="list-disc list-inside text-sm mb-4">
-                <li>Suporte técnico de TI</li>
-                <li>Atendimento telefônico</li>
-                <li>Monitoramento de chamados</li>
-                <li>Suporte técnico TI/Informatica</li>
-                <li>Garantir a resolução eficiente de problemas</li>
-                <li>Monitorar e garantir a baixa de chamados</li>
-              </ul>
+            <h3 className="font-semibold mb-1">Atividades</h3>
+            <ul className="list-disc list-inside text-sm mb-4">
+            {vaga.find(v => v.id === produtoSelecionado.id)?.responsabilidades
+              ? vaga.find(v => v.id === produtoSelecionado.id)!.responsabilidades!.split('\n').map((atv, idx) => (
+                <li key={idx}>{atv}</li>
+              ))
+              : <li>Não informado</li>}
+            </ul>
 
-              <h3 className="font-semibold mb-1">Requisitos e qualificações</h3>
-              <ul className="list-disc list-inside text-sm mb-4">
-                <li>Cursando ensino superior</li>
-                <li>Cursos relacionados com TI</li>
-                <li>Conhecimentos técnicos em TI</li>
-              </ul>
+            <h3 className="font-semibold mb-1">Requisitos e qualificações</h3>
+            <ul className="list-disc list-inside text-sm mb-4">
+            {vaga.find(v => v.id === produtoSelecionado.id)?.requisitos
+              ? vaga.find(v => v.id === produtoSelecionado.id)!.requisitos!.split('\n').map((req, idx) => (
+                <li key={idx}>{req}</li>
+              ))
+              : <li>Não informado</li>}
+            </ul>
 
-              <h3 className="font-semibold mb-1">Valor da bolsa e carga horária</h3>
-              <ul className="list-disc list-inside text-sm mb-4">
-                <li>Bolsa: 20h semanais R$986,65 (graduação)</li>
-                <li>Bolsa: 30h semanais R$1.479,94 (graduação)</li>
-                <li>Bolsa: 20h semanais R$1.153,75 (pós)</li>
-                <li>Bolsa: 30h semanais R$1.780,63 (pós)</li>
-              </ul>
+            <h3 className="font-semibold mb-1">Valor da bolsa e carga horária</h3>
+            <ul className="list-disc list-inside text-sm mb-4">
+            {(vaga.find(v => v.id === produtoSelecionado.id)?.remuneracao || vaga.find(v => v.id === produtoSelecionado.id)?.carga_horaria)
+              ? [
+                vaga.find(v => v.id === produtoSelecionado.id)?.remuneracao
+                ? `Bolsa: R$ ${vaga.find(v => v.id === produtoSelecionado.id)!.remuneracao!.toFixed(2)}`
+                : null,
+                vaga.find(v => v.id === produtoSelecionado.id)?.carga_horaria
+                ? `Carga horária: ${vaga.find(v => v.id === produtoSelecionado.id)!.carga_horaria}`
+                : null
+              ].filter(Boolean).map((bolsa, idx) => <li key={idx}>{bolsa}</li>)
+              : <li>Não informado</li>}
+            </ul>
 
-              <h3 className="font-semibold mb-1">Benefícios</h3>
-              <p className="text-sm mb-4">Auxílio transporte R$10,78</p>
+            <h3 className="font-semibold mb-1">Benefícios</h3>
+            <p className="text-sm mb-4">
+            {vaga.find(v => v.id === produtoSelecionado.id)?.beneficios || 'Não informado'}
+            </p>
 
-              <div className="text-sm text-blue-600 underline mb-4">
-                <a href="/EDITAL_PSE_001.2025.pdf" target="_blank" rel="noopener noreferrer">EDITAL PSE 001.2025.pdf</a>
-              </div>
+            {editalProcesso && (
+            <div className="text-sm text-blue-600 underline mb-4">
+              <a href={editalProcesso} target="_blank" rel="noopener noreferrer">
+              EDITAL
+              </a>
+            </div>
+            )}
 
-              <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                Candidatar-se
-              </button>
+          <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            Candidatar-se
+          </button>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>
     </AppLayout>
   </>
 );}
