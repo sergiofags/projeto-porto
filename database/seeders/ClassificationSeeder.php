@@ -8,23 +8,28 @@ use Illuminate\Support\Facades\DB;
 
 class ClassificationSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        DB::table('classification')->insert([
-            [
-                'id_candidacy' => 1,
-                'id_vacancy' => 1,
-                'id_admin' => 1,
-                'nota_coeficiente_rendimento' => 0,
-                'nota_entrevista' => 0,
+        $candidacies = DB::table('candidacy')->get();
+        $admin = DB::table('users')->where('tipo_perfil', 'Admin')->first();
+
+        if ($candidacies->isEmpty() || !$admin) {
+            $this->command->error('É necessário ter candidaturas e pelo menos um administrador.');
+            return;
+        }
+
+        foreach ($candidacies as $candidacy) {
+            DB::table('classification')->insert([
+                'id_candidacy' => $candidacy->id,
+                'id_vacancy' => $candidacy->id_vacancy,
+                'id_admin' => $admin->id,
+                'nota_coeficiente_rendimento' => rand(60, 100) / 10, // Ex: 6.0 a 10.0
+                'nota_entrevista' => rand(60, 100) / 10,
                 'situacao' => 'Habilitado',
                 'motivo_situacao' => '',
                 'created_at' => now(),
                 'updated_at' => now(),
-            ],
-        ]);
+            ]);
+        }
     }
 }
