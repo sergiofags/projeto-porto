@@ -39,6 +39,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('candidacy/notas/ver-notas');
     })->middleware(['auth', 'verified']);
 
+    Route::get('/processo/vagas/classificacao', function () {
+        return Inertia::render('candidacy/classificacao');
+    })->middleware(['auth', 'verified']);
+
 
 
     Route::middleware(['auth', 'verified'])->group(function () {
