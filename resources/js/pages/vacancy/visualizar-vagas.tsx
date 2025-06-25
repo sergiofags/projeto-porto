@@ -115,24 +115,19 @@ export default function CadastrarVaga() {
                 <hr className="mb-4 ml-4 mr-4 bg-[#008DD0] h-0.5" />
             </div>
             
-            {processo && (
-                <div className="pl-4 pr-4 mt-4">
-                    <h2 className="text-2xl font-semibold text-[#008DD0]">
-                        {processo.descricao} - {processo.numero_processo}
+           {processo && (
+                <div className="flex items-center justify-between pl-4 pr-4 mt-4">
+                    <h2 className="text-2xl font-semibold">
+                        Processo {processo.numero_processo}
                     </h2>
+                    <Link href={`/processo/cadastrar-vaga?id=${processId}`} className="w-fit">
+                        <Button className="flex items-center gap-2 rounded-md p-4 sm:p-6 bg-[#008DD0] hover:bg-[#0072d0] text-sm sm:text-base">
+                            Adicionar Vaga <Plus />
+                        </Button>
+                    </Link>
                 </div>
             )}
 
-
-            <div className="flex items-end justify-end w-full">
-                <div className="ml-0">
-                    <Link href={`/processo/cadastrar-vaga?id=${processId}`} className="w-fit">
-                    <Button className="flex items-center gap-2 rounded-md p-4 mr-4 sm:p-6 bg-[#008DD0] hover:bg-[#0072d0] text-sm sm:text-base">
-                        Adicionar Vaga <Plus />
-                    </Button>
-                    </Link>
-                </div>
-            </div>
 
             <div className='container mt-5 pl-2 pr-2'>
                 <Table>
