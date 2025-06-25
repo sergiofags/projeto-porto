@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Person;
 use App\Models\Experience;
+use Dotenv\Exception\ValidationException;
 
 class ExperienceController extends Controller
 {
@@ -117,7 +118,7 @@ class ExperienceController extends Controller
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Erro de validação.',
-                'error' => $e->error()
+                'error' => $e->getMessage()
             ], 422);
 
         } catch (\Illuminate\Database\QueryException $e) {
@@ -171,7 +172,7 @@ class ExperienceController extends Controller
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Erro de validação.',
-                'error' => $e->error()
+                'error' => $e->getMessage()
             ], 422);
 
         } catch (\Illuminate\Database\QueryException $e) {
@@ -208,34 +209,6 @@ class ExperienceController extends Controller
             $experience->delete();
 
             return response()->json($experience, 200);
-
-        } catch (\Illuminate\Database\QueryException $e) {
-            return response()->json([
-                'message' => 'Erro ao acessar o banco de dados.',
-                'error' => $e->getMessage()
-            ], 500);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Erro interno no servidor.',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-    
-
-    public function allExperienceByType(Request $request, $personId, $typeExperience)
-    {
-        try {
-            $person = Person::find($personId);
-            if (!$person) {
-                return response()->json([
-                    'message' => 'Pessoa não encontrada.'
-                ], 404);
-            }
-
-            $experiences = $person->experience()->where('tipo_experiencia', $typeExperience)->get();
-            return response()->json($experiences);
 
         } catch (\Illuminate\Database\QueryException $e) {
             return response()->json([

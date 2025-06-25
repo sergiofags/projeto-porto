@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Person;
 use App\Models\Document;
+use Dotenv\Exception\ValidationException;
 
 class DocumentController extends Controller
 {
@@ -95,7 +96,7 @@ class DocumentController extends Controller
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Erro de validação.',
-                'error' => $e->error()
+                'error' => $e->getMessage()
             ], 422);
 
         } catch (\Illuminate\Database\QueryException $e) {
@@ -144,7 +145,7 @@ class DocumentController extends Controller
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Erro de validação.',
-                'error' => $e->error()
+                'error' => $e->getMessage()
             ], 422);
 
         } catch (\Illuminate\Database\QueryException $e) {
@@ -160,32 +161,4 @@ class DocumentController extends Controller
             ], 500);
         }
     }
-
-    public function allDocumentByType(Request $request, $personId, $typeDocument)
-    {
-        try {
-            $person = Person::find($personId);
-            if (!$person) {
-                return response()->json([
-                    'message' => 'Pessoa não encontrada'
-                ], 404);
-            }
-
-            $documents = $person->document()->where('tipo_documento', $typeDocument)->get();
-            return response()->json($documents);
-
-        } catch (\Illuminate\Database\QueryException $e) {
-            return response()->json([
-                'message' => 'Erro ao acessar o banco de dados.',
-                'error' => $e->getMessage()
-            ], 500);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Erro interno no servidor.',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-
 }

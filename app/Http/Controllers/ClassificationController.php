@@ -7,8 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Candidacy;
 use App\Models\Classification;
 use App\Models\Vacancy;
-use App\Models\Process;
-Use App\Models\User;
+use Dotenv\Exception\ValidationException;
 
 class ClassificationController extends Controller
 {
@@ -23,12 +22,6 @@ class ClassificationController extends Controller
             }
 
             $classification = $vacancy->classification;
-
-            foreach ($classification as $item) {
-                $item->nota_final = $item->nota_entrevista + $item->nota_historico;
-            }
-
-            $classification = $classification->sortByDesc('nota_final')->values();
 
             return response()->json($classification);
 
@@ -89,13 +82,6 @@ class ClassificationController extends Controller
     public function store(Request $request, $candidacyId, $adminId)
     {
         try {
-            $admin = User::where('id', $adminId)->where('tipo_perfil', 'Admin')->first();
-            if (!$admin) {
-                return response()->json([
-                    'message' => 'Administrador não encontrado ou não possui perfil de Admin.'
-                ], 404);
-            }
-
             $candidacy = Candidacy::find($candidacyId);
             if (!$candidacy) {
                 return response()->json([
@@ -144,7 +130,7 @@ class ClassificationController extends Controller
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Erro de validação.',
-                'error' => $e->error()
+                'error' => $e->getMessage()
             ], 422);
 
         } catch (\Illuminate\Database\QueryException $e) {
@@ -161,16 +147,9 @@ class ClassificationController extends Controller
         }
     }
 
-    public function updateNote(Request $request, $candidacyId, $classificationId, $adminId)
+    public function update(Request $request, $candidacyId, $classificationId, $adminId)
     {
         try {
-            $admin = User::where('id', $adminId)->where('tipo_perfil', 'Admin')->first();
-            if (!$admin) {
-                return response()->json([
-                    'message' => 'Administrador não encontrado ou não possui perfil de Admin.'
-                ], 404);
-            }
-
             $candidacy = Candidacy::find($candidacyId);
             if (!$candidacy) {
                 return response()->json([
@@ -220,7 +199,7 @@ class ClassificationController extends Controller
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Erro de validação.',
-                'error' => $e->error()
+                'error' => $e->getMessage()
             ], 422);
 
         } catch (\Illuminate\Database\QueryException $e) {

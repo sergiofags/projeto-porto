@@ -217,7 +217,7 @@ export default function CadastrarVaga() {
                         />
                     </div>
                     <div className="flex flex-row gap-2">
-                        <Link href="/" className="w-full">
+                        <Link href={`/processo/vagas?id=${processId}`} className="w-full">
                             <Button type="button" variant="secondary">
                                 Voltar
                             </Button>

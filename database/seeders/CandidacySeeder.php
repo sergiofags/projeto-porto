@@ -11,17 +11,17 @@ class CandidacySeeder extends Seeder
 {
     public function run(): void
     {
-        $person = DB::table('person')->where('id_user', 2)->first();
+        $persons = DB::table('person')->get();
         $vacancy = DB::table('vacancy')->first();
         $process = DB::table('process')->first();
 
-        if (!$person || !$vacancy || !$process) {
-            $this->command->error('É necessário ter pelo menos um registro em person, vacancy e process.');
+        if (!$vacancy || !$process) {
+            $this->command->error('É necessário ter pelo menos um registro em vacancy e process.');
             return;
         }
 
-        DB::table('candidacy')->insert([
-            [
+        foreach ($persons as $person) {
+            DB::table('candidacy')->insert([
                 'id_person' => $person->id,
                 'id_vacancy' => $vacancy->id,
                 'id_process' => $process->id,
@@ -29,7 +29,7 @@ class CandidacySeeder extends Seeder
                 'data_candidatura' => Carbon::now()->toDateString(),
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]
-        ]);
+            ]);
+        }
     }
 }

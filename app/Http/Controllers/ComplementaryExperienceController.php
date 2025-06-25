@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Person;
 use App\Models\ComplementaryExperience;
+use Dotenv\Exception\ValidationException;
 
 class ComplementaryExperienceController extends Controller
 {
@@ -139,7 +140,7 @@ class ComplementaryExperienceController extends Controller
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Erro de validação.',
-                'error' => $e->error()
+                'error' => $e->getMessage()
             ], 422);
 
         } catch (\Illuminate\Database\QueryException $e) {
@@ -191,7 +192,7 @@ class ComplementaryExperienceController extends Controller
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Erro de validação.',
-                'error' => $e->error()
+                'error' => $e->getMessage()
             ], 422);
 
         } catch (\Illuminate\Database\QueryException $e) {
@@ -228,33 +229,6 @@ class ComplementaryExperienceController extends Controller
             $complementaryExperience->delete();
 
             return response()->json($complementaryExperience, 200);
-
-        } catch (\Illuminate\Database\QueryException $e) {
-            return response()->json([
-                'message' => 'Erro ao acessar o banco de dados.',
-                'error' => $e->getMessage()
-            ], 500);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Erro interno no servidor.',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-
-    public function allComplementaryExperienceByType(Request $request, $personId, $typeComplementaryExperience)
-    {
-        try {
-            $person = Person::find($personId);
-            if (!$person) {
-                return response()->json([
-                    'message' => 'Pessoa não encontrada.'
-                ], 404);
-            }
-
-            $complementaryExperiences = $person->complementaryExperience()->where('tipo_experiencia', $typeComplementaryExperience)->get();
-            return response()->json($complementaryExperiences);
 
         } catch (\Illuminate\Database\QueryException $e) {
             return response()->json([
