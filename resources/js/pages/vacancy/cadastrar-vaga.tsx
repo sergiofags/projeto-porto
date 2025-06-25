@@ -6,7 +6,6 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import { SharedData } from '@/types';
-// import { Transition } from '@headlessui/react';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 
@@ -58,6 +57,7 @@ export default function CadastrarVaga() {
 
             const response = await axios.post(`http://localhost:8000/api/admin/${adminId}/process/${processId}/vacancy`, formattedVaga);
             const data = await response.data;
+            console.log(data);
 
             if (data.error) {
                 alert(data.error);

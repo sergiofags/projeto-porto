@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Candidacy;
 use App\Models\Interview;
 use App\Models\User;
+use Illuminate\Validation\ValidationException;
 
 class InterviewController extends Controller
 {
@@ -70,7 +71,7 @@ class InterviewController extends Controller
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Erro de validação.',
-                'error' => $e->error()
+                'error' => $e->errors()
             ], 422);
 
         } catch (\Illuminate\Database\QueryException $e) {
@@ -126,7 +127,7 @@ class InterviewController extends Controller
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Erro de validação.',
-                'error' => $e->error()
+                'error' => $e->errors()
             ], 422);
 
         } catch (\Illuminate\Database\QueryException $e) {

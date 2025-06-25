@@ -4,6 +4,7 @@ import AppLayout from '@/layouts/app-layout';
 import { SharedData } from '@/types';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, ChevronLeft, ChevronRight, Paperclip } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 
 export default function CadastraProcesso() {
     const { auth } = usePage<SharedData>().props;
@@ -54,7 +55,7 @@ export default function CadastraProcesso() {
                 const err = await res.json();
                 setMensagem(err.message || 'Erro ao cadastrar processo');
             }
-        } catch (error) {
+        } catch {
             setMensagem('Erro ao conectar com o servidor');
         } finally {
             setCarregando(false);
@@ -212,19 +213,46 @@ export default function CadastraProcesso() {
                     )}
                 </form>
                 {/* Modal de sucesso */}
-                {modalAberto && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-                        <div className="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full flex flex-col items-center">
-                            <h2 className="text-xl font-semibold mb-4 text-green-600">Processo cadastrado com sucesso!</h2>
-                            <button
-                                className="mt-2 px-6 py-2 bg-[#008DD0] hover:bg-[#0072d0] text-white rounded shadow"
-                                onClick={() => router.visit(route('inicio-processo'))}
-                            >
-                                Voltar para Processos
-                            </button>
+                    {/* {modalAberto && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                            <div className="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full flex flex-col items-center">
+                                <h2 className="text-xl font-semibold mb-4 text-green-600">Processo cadastrado com sucesso!</h2>
+                                <button
+                                    className="mt-2 px-6 py-2 bg-[#008DD0] hover:bg-[#0072d0] text-white rounded shadow"
+                                    onClick={() => router.visit(route('inicio-processo'))}
+                                >
+                                    Voltar para Processos
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )} */}
+
+                    {/* Modal de sucesso com fundo blur */}
+                        <AnimatePresence>
+                            {modalAberto && (
+                                <motion.div
+                                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    onClick={() => setModalAberto(false)}
+                                >
+                                    <motion.div
+                                        className="bg-white w-full max-w-sm rounded-xl shadow-lg p-8 relative flex flex-col items-center"
+                                        initial={{ scale: 0.9, opacity: 0 }}
+                                        animate={{ scale: 1, opacity: 1 }}
+                                        exit={{ scale: 0.9, opacity: 0 }}
+                                        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                                        onClick={e => e.stopPropagation()}>
+                                        <h2 className="text-xl font-semibold mb-4 text-green-600">Processo cadastrado com sucesso!</h2>
+                                        <button
+                                            className="mt-2 px-6 py-2 bg-[#008DD0] hover:bg-[#0072d0] text-white rounded shadow"
+                                            onClick={() => router.visit(route('inicio-processo'))}>Voltar para Processos
+                                        </button>
+                                    </motion.div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                 </div>
             </div>
         </AppLayout>

@@ -43,8 +43,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('candidacy/classificacao');
     })->middleware(['auth', 'verified']);
 
-
-
     Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/process/edita-processo', function () {
             return Inertia::render('process/edita-processo');
@@ -66,6 +64,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('inicio-vaga');
 });
 
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('entrevista-candidato', function () {
+        return Inertia::render('interview/entrevista-candidato');
+    })->name('entrevista-candidato');
+
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('adicionar-entrevista', function () {
+        return Inertia::render('interview/adicionar-entrevista');
+    })->name('adicionar-entrevista');
+    });
+
+});
 Route::get('/', function () {
     if (!Auth::check()) {
         return Inertia::render('landing-page');

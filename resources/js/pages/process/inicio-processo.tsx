@@ -23,6 +23,7 @@ import {
     TableRow,
   } from "@/components/ui/table"
 import { SharedData } from '@/types';
+import { AnimatePresence, motion } from 'framer-motion';
 
 // const breadcrumbs: BreadcrumbItem[] = [
 //     {
@@ -133,9 +134,9 @@ export default function Inicio({ processos = [] }: Props) {
         <div className="flex h-full max-h-full flex-1 flex-col gap-4 rounded-xl p-4">
             <nav className="text-sm text-muted-foreground mb-4 items-center">
                 <ol className="flex items-center space-x-2">
-                    <li>
+                    {/*<li>
                         <Link href="/inicio-processo" className="hover:underline">Processos</Link>
-                    </li>
+                    </li>*/}
                     {segments.filter((seg, i) => !(i === 0 && seg === 'inicio-processo')).map((segment, index) => {
                         const href = '/' + segments.slice(0, index + 1).join('/');
                         const label = segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
@@ -262,47 +263,74 @@ export default function Inicio({ processos = [] }: Props) {
             )}
         </div>
 
-        {/* Modal Fechar Processo */}
-        {modalFechar.aberto && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-                <div className="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full flex flex-col items-center">
-                    <h2 className="text-xl font-semibold mb-4 text-red-600">Você tem certeza que deseja fechar este processo?</h2>
-                    <div className="flex gap-4 mt-2">
-                        <button
-                            className="px-6 py-2 bg-[#008DD0] hover:bg-[#0072d0] text-white rounded shadow"
-                            onClick={async () => {
-                                if (modalFechar.processoId) {
-                                    await fecharProcesso(modalFechar.processoId);
-                                }
-                                setModalFechar({ aberto: false, processoId: null });
-                            }}
+<AnimatePresence>
+                    {modalFechar.aberto && (
+                        <motion.div
+                            className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setModalSucesso(false)}
                         >
-                            Confirmar
-                        </button>
-                        <button
-                            className="px-6 py-2 bg-gray-400 hover:bg-gray-600 text-white rounded shadow"
-                            onClick={() => setModalFechar({ aberto: false, processoId: null })}
-                        >
-                            Cancelar
-                        </button>
-                    </div>
-                </div>
-            </div>
-        )}
+                            <motion.div
+                                className="bg-white w-full max-w-sm rounded-xl shadow-lg p-8 relative flex items-center"
+                                initial={{ scale: 0.9, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 0.9, opacity: 0 }}
+                                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                                onClick={e => e.stopPropagation()}>
+                                    <div>
+                                        <h2 className="text-xl font-semibold mb-4 text-red-600">Você tem certeza que deseja fechar este processo?</h2>
+                                        <div className="flex gap-4 mt-2">
+                                            <button
+                                                className="mt-2 px-6 py-2 bg-[#008DD0] hover:bg-[#0072d0] text-white rounded shadow"
+                                                onClick={async () => {
+                                                    if (modalFechar.processoId) {
+                                                        await fecharProcesso(modalFechar.processoId);
+                                                    }
+                                                    setModalFechar({ aberto: false, processoId: null });
+                                                }}
+                                            >
+                                                Confirmar
+                                            </button>
+                                            <button
+                                                className="mt-2 px-6 py-2 bg-gray-400 hover:bg-gray-600 text-white rounded shadow"
+                                                onClick={() => setModalFechar({ aberto: false, processoId: null })}
+                                            >
+                                                Cancelar
+                                            </button>
+                                        </div>
+                                    </div>
+                            </motion.div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
         {/* Modal de sucesso */}
-        {modalSucesso && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-                <div className="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full flex flex-col items-center">
-                    <h2 className="text-xl font-semibold mb-4 text-green-600">Processo encerrado com sucesso!</h2>
-                    <button
-                        className="px-6 py-2 bg-[#008DD0] hover:bg-[#0072d0] text-white rounded shadow mt-2"
-                        onClick={() => router.visit(route('inicio-processo'))}
-                    >
-                        Concluir
-                    </button>
-                </div>
-            </div>
-        )}
+        <AnimatePresence>
+                    {modalSucesso && (
+                        <motion.div
+                            className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setModalSucesso(false)}
+                        >
+                            <motion.div
+                                className="bg-white w-full max-w-sm rounded-xl shadow-lg p-8 relative flex flex-col items-center"
+                                initial={{ scale: 0.9, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 0.9, opacity: 0 }}
+                                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                                onClick={e => e.stopPropagation()}>
+                                <h2 className="text-xl font-semibold mb-4 text-green-600">Processo encerrado com sucesso!</h2>
+                                <button
+                                    className="mt-2 px-6 py-2 bg-[#008DD0] hover:bg-[#0072d0] text-white rounded shadow"
+                                    onClick={() => router.visit(route('inicio-processo'))}>Concluir
+                                </button>
+                            </motion.div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
     </AppLayout>
 )};
