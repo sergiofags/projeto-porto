@@ -23,6 +23,7 @@ class PersonSeeder extends Seeder
                 'linkedin' => "https://linkedin.com/in/candidato{$user->id}",
                 'instagram' => "https://instagram.com/candidato{$user->id}",
                 'facebook' => "https://facebook.com/candidato{$user->id}",
+                'twitter' => "https://x.com/candidato{$user->id}",
                 'cpf' => sprintf('%03d.%03d.%03d-00', $user->id, $user->id, $user->id),
                 'data_nascimento' => '1998-01-01',
                 'genero' => 'Masculino',

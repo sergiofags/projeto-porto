@@ -4,7 +4,6 @@ import { Transition } from '@headlessui/react';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { FormEventHandler, useState } from 'react';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import DeleteUser from '@/components/delete-user';
 import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -51,6 +50,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
         linkedin: '',
         instagram: '',
         facebook: '',
+        twitter: '',
         sobre: '',
         servico_militar: '',
         deficiencia: '',
@@ -245,7 +245,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                         <HeadingSmall title="Formulário Pessoa" />
 
                         <div className="grid gap-2">
-                            <Label htmlFor="cpf">Cpf *</Label>
+                            <Label htmlFor="cpf">CPF *</Label>
 
                             <Input
                                 id="cpf"
@@ -260,7 +260,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                 }}
                                 required
                                 autoComplete="cpf"
-                                placeholder="Cpf"
+                                placeholder="CPF"
                             />
 
                         </div>
@@ -572,7 +572,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="linkedin">Linkedin</Label>
+                            <Label htmlFor="linkedin">LinkedIn</Label>
 
                             <Input
                                 id="linkedin"
@@ -580,7 +580,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                 value={pessoaData.linkedin}
                                 onChange={(e) => setPessoaDataField('linkedin', e.target.value)} // Changed to setPessoaDataField
                                 autoComplete="linkedin"
-                                placeholder="Linkedin"
+                                placeholder="LinkedIn"
                             />
 
                         </div>
@@ -609,6 +609,20 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                 onChange={(e) => setPessoaDataField('facebook', e.target.value)} // Changed to setPessoaDataField
                                 autoComplete="facebook"
                                 placeholder="Facebook"
+                            />
+
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="twitter">X</Label>
+
+                            <Input
+                                id="twitter"
+                                className="mt-1 block w-full"
+                                value={pessoaData.twitter}
+                                onChange={(e) => setPessoaDataField('twitter', e.target.value)} // Changed to setPessoaDataField
+                                autoComplete="twitter"
+                                placeholder="X"
                             />
 
                         </div>

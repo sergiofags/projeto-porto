@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('linkedin')->nullable();
             $table->string('instagram')->nullable();
             $table->string('facebook')->nullable();
+            $table->string('twitter')->nullable();
             $table->string('cpf')->unique()->nullable();
             $table->date('data_nascimento')->nullable();
             $table->enum('genero', ['Masculino', 'Feminino', 'Outro'])->nullable();
