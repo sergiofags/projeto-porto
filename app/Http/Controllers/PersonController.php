@@ -35,6 +35,7 @@ class PersonController extends Controller
                     'linkedin' => optional($person)->linkedin,
                     'instagram' => optional($person)->instagram,
                     'facebook' => optional($person)->facebook,
+                    'twitter' => optional($person)->twitter,
                     'cpf' => optional($person)->cpf,
                     'data_nascimento' => optional($person)->data_nascimento 
                     ? \Carbon\Carbon::parse($person->data_nascimento)->format('d/m/Y') 
@@ -94,6 +95,7 @@ class PersonController extends Controller
                 'linkedin' => optional($person)->linkedin,
                 'instagram' => optional($person)->instagram,
                 'facebook' => optional($person)->facebook,
+                'twitter' => optional($person)->twitter,
                 'cpf' => optional($person)->cpf,
                 'data_nascimento' => optional($person)->data_nascimento,
                 'genero' => optional($person)->genero,
@@ -148,6 +150,7 @@ class PersonController extends Controller
                 'linkedin' => 'nullable|string|max:255',
                 'instagram' => 'nullable|string|max:255',
                 'facebook' => 'nullable|string|max:255',
+                'twitter' => 'nullable|string|max:255',
                 'cpf' => 'required|string|max:14|unique:person,cpf',
                 'data_nascimento' => 'nullable|date',
                 'genero' => 'required|in:Masculino,Feminino,Outro',
@@ -218,6 +221,7 @@ class PersonController extends Controller
                 'linkedin' => 'nullable|string|max:255',
                 'instagram' => 'nullable|string|max:255',
                 'facebook' => 'nullable|string|max:255',
+                'twitter' => 'nullable|string|max:255',
                 'cpf' => 'nullable|string|max:14',
                 'data_nascimento' => 'nullable|date',
                 'genero' => 'nullable|in:Masculino,Feminino,Outro',

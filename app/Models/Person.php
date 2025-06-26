@@ -21,6 +21,7 @@ class Person extends Model
         'linkedin',
         'instagram',
         'facebook',
+        'twitter',
         'cpf',
         'data_nascimento',
         'genero',
