@@ -155,7 +155,7 @@ export default function CadastrarVaga() {
                     </div>
                     <div className='container mt-5 pl-2 pr-2'>
                         <Table>
-                            <ScrollArea className="h-[400px] w-full rounded-md border border-[#008DD0] p-4">
+                            <ScrollArea className="max-h-[400px] w-full rounded-md border border-[#008DD0] p-4 overflow-auto">
                                 <TableHeader>
                                     <TableRow>
                                     <TableHead className="sticky top-0 bg-white w-[500px] font-semibold">Vaga</TableHead>
