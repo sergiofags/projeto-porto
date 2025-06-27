@@ -245,7 +245,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                         <HeadingSmall title="Formulário Pessoa" />
 
                         <div className="grid gap-2">
-                            <Label htmlFor="cpf">Cpf *</Label>
+                            <Label htmlFor="cpf">CPF *</Label>
 
                             <Input
                                 id="cpf"
@@ -260,7 +260,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                 }}
                                 required
                                 autoComplete="cpf"
-                                placeholder="Cpf"
+                                placeholder="CPF"
                             />
 
                         </div>

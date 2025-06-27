@@ -1,9 +1,10 @@
 import AppLayout from '@/layouts/app-layout';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, usePage, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, Pencil, Trash, ChevronLeft } from 'lucide-react';
 import { SharedData } from '@/types';
 import { useEffect, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 
 export default function EntrevistaCandidato() {
     const { auth } = usePage<SharedData>().props;
@@ -13,9 +14,16 @@ export default function EntrevistaCandidato() {
     const email = queryParams.get('email') || '';
     const telefone = queryParams.get('telefone') || '';
     const candidacyId = queryParams.get('id-candidatura') || '';
+    const processId = queryParams.get('id-processo') || '';
+    const vacancyId = queryParams.get('id-vaga') || '';
+    console.log('processId', processId, 'vacancyId', vacancyId);
 
     const [entrevista, setEntrevista] = useState<any>(null);
     const [carregando, setCarregando] = useState(true);
+
+    // Estado para modal de confirmação e sucesso
+    const [modalCancelar, setModalCancelar] = useState(false);
+    const [modalSucesso, setModalSucesso] = useState(false);
 
     useEffect(() => {
         if (!candidacyId) return;
@@ -28,10 +36,63 @@ export default function EntrevistaCandidato() {
             .catch(() => setCarregando(false));
     }, [candidacyId]);
 
+    // Funções para editar/cancelar
+    const handleEditar = () => {
+        router.visit(
+            `/editar-entrevista?` +
+            `id-entrevista=${entrevista.id}` +
+            `&id-candidatura=${candidacyId}` +
+            `&nome=${encodeURIComponent(nome)}` +
+            `&email=${encodeURIComponent(email)}` +
+            `&telefone=${encodeURIComponent(telefone)}` +
+            `&id-processo=${processId}` +
+            `&id-vaga=${vacancyId}`
+        );
+    };
+    
+    // Função para cancelar a entrevista
+    const cancelarEntrevista = async () => {
+        try {
+            const adminId = auth.user.id;
+            const formData = new FormData();
+            formData.append('_method', 'PUT');
+            formData.append('data_hora', entrevista.data_hora);
+            formData.append('status', 'Cancelada');
+            formData.append('localizacao', entrevista.localizacao);
+
+            const res = await fetch(`/api/admin/${adminId}/candidacy/${candidacyId}/interview/${entrevista.id}`, {
+                method: 'POST',
+                body: formData,
+                credentials: 'include',
+            });
+
+            if (res.ok) {
+                setModalSucesso(true);
+                setEntrevista({ ...entrevista, status: 'Cancelada' });
+            } else {
+                alert('Erro ao cancelar entrevista');
+            }
+        } catch {
+            alert('Erro ao conectar com o servidor');
+        }
+    };
+
     return (
         <AppLayout>
             <Head title="Entrevista Candidato" />
             <div className="flex h-full max-h-full flex-1 flex-col gap-4 rounded-xl p-4">
+                {/* Botão Voltar para ver-candidatos */}
+                <div className="mb-4">
+                    <Link
+                        href={`/processo/vagas/ver-candidatos?id-processo=${processId}&id-vaga=${vacancyId}`}
+                        className="w-full md:w-auto"
+                    >
+                        <Button type="button" variant="secondary" className="flex items-center bg-[#808080] hover:bg-[#404040] gap-2 rounded-md px-4 py-2 text-sm shadow-md transition-colors duration-200 text-white">
+                            <ChevronLeft />
+                            Voltar
+                        </Button>
+                    </Link>
+                </div>
                 <nav className="text-sm text-muted-foreground mb-4 items-center">
                     <ol className="flex items-center space-x-2">
                         <li>
@@ -43,7 +104,6 @@ export default function EntrevistaCandidato() {
                         </li>
                     </ol>
                 </nav>
-
                 <div className="relative border-sidebar-border/70 dark:border-sidebar-border max-h-[100vh] flex-1 overflow-hidden rounded-xl border md:min-h-min flex items-center justify-center">
                     {/* Dados do candidato no canto superior esquerdo */}
                     <div className="absolute top-4 left-8 text-left">
@@ -55,16 +115,41 @@ export default function EntrevistaCandidato() {
                         <div className="tracking-wide max-w-md w-full break-words whitespace-normal">
                             {/* Mensagem acima da linha azul */}
                             {!carregando && !(entrevista && entrevista.id) && (
-                                <h2 className="text-2xl text-black">
-                                    O candidato <b>{nome}</b> não possui entrevista cadastrada.
-                                </h2>
+                                <>
+                                    <h2 className="text-2xl text-black">
+                                        O candidato <b>{nome}</b> não possui entrevista cadastrada.
+                                    </h2>
+                                    <hr className="mb-4 w-full bg-[#008DD0] h-0.5" />
+                                </>
                             )}
-                            <hr className="mb-4 w-full bg-[#008DD0] h-0.5" />
                             {carregando ? (
                                 <p>Carregando...</p>
                             ) : entrevista && entrevista.id ? (
                                 <form className="grid grid-cols-1 gap-4 md:grid-cols-6">
-                                    <div className="md:col-span-2 mt-5">
+                                    {/* Botões Editar/Cancelar */}
+                                    <div className="md:col-span-6 flex justify-end gap-2 mb-2">
+                                        <button
+                                            type="button"
+                                            className="flex items-center bg-[#20CD4E] hover:bg-green-600 gap-2 rounded-md px-4 py-2 text-sm shadow-md text-white"
+                                            onClick={handleEditar}
+                                        >
+                                            <Pencil /> Editar
+                                        </button>
+                                        {entrevista.status === 'Agendada' && (
+                                            <button
+                                                type="button"
+                                                className="flex items-center bg-red-600 hover:bg-red-700 gap-2 rounded-md px-4 py-2 text-sm shadow-md text-white"
+                                                onClick={() => setModalCancelar(true)}
+                                            >
+                                                <Trash /> Cancelar
+                                            </button>
+                                        )}
+                                    </div>
+                                    {/* Título "Entrevista" */}
+                                    <div className="md:col-span-6 mb-2">
+                                        <h2 className="text-xl font-bold text-black text-left">Entrevista</h2>
+                                    </div>
+                                    <div className="md:col-span-2 mt-2">
                                         <label className="block mb-2">Data</label>
                                         <input
                                             type="date"
@@ -73,7 +158,7 @@ export default function EntrevistaCandidato() {
                                             disabled
                                         />
                                     </div>
-                                    <div className="md:col-span-2 mt-5">
+                                    <div className="md:col-span-2 mt-2">
                                         <label className="block mb-2">Horário</label>
                                         <input
                                             type="time"
@@ -82,7 +167,7 @@ export default function EntrevistaCandidato() {
                                             disabled
                                         />
                                     </div>
-                                    <div className="md:col-span-2 mt-5">
+                                    <div className="md:col-span-2 mt-2">
                                         <label className="block mb-2">Local</label>
                                         <input
                                             type="text"
@@ -91,7 +176,7 @@ export default function EntrevistaCandidato() {
                                             disabled
                                         />
                                     </div>
-                                    {/* <div className="md:col-span-6 mt-5">
+                                    <div className="md:col-span-2 mt-2">
                                         <label className="block mb-2">Status</label>
                                         <input
                                             type="text"
@@ -99,7 +184,7 @@ export default function EntrevistaCandidato() {
                                             value={entrevista.status || ''}
                                             disabled
                                         />
-                                    </div> */}
+                                    </div>
                                 </form>
                             ) : (
                                 <div>
@@ -107,7 +192,9 @@ export default function EntrevistaCandidato() {
                                         Clique no botão <b>Adicionar Entrevista</b> para adicionar uma entrevista.
                                     </p>
                                     {auth.user.tipo_perfil === 'Admin' && (
-                                        <Link href={`/adicionar-entrevista?id-candidatura=${candidacyId}&nome=${encodeURIComponent(nome)}&email=${encodeURIComponent(email)}&telefone=${encodeURIComponent(telefone)}`}>
+                                        <Link
+                                            href={`/adicionar-entrevista?id-candidatura=${candidacyId}&nome=${encodeURIComponent(nome)}&email=${encodeURIComponent(email)}&telefone=${encodeURIComponent(telefone)}&id-processo=${processId}&id-vaga=${vacancyId}`}
+                                        >
                                             <Button className="p-4 sm:p-6 bg-[#008DD0] hover:bg-[#0072d0] mt-4 text-base sm:text-lg">
                                                 Adicionar entrevista <Plus />
                                             </Button>
@@ -119,6 +206,76 @@ export default function EntrevistaCandidato() {
                     </div>
                 </div>
             </div>
+
+            {/* Modal de confirmação de cancelamento */}
+            <AnimatePresence>
+                {modalCancelar && (
+                    <motion.div
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setModalCancelar(false)}
+                    >
+                        <motion.div
+                            className="bg-white w-full max-w-sm rounded-xl shadow-lg p-8 relative flex items-center"
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                            onClick={e => e.stopPropagation()}>
+                            <div>
+                                <h2 className="text-xl font-semibold mb-4 text-red-600">Você tem certeza que deseja cancelar esta entrevista?</h2>
+                                <div className="flex gap-4 mt-2">
+                                    <button
+                                        className="mt-2 px-6 py-2 bg-[#008DD0] hover:bg-[#0072d0] text-white rounded shadow"
+                                        onClick={async () => {
+                                            await cancelarEntrevista();
+                                            setModalCancelar(false);
+                                        }}
+                                    >
+                                        Confirmar
+                                    </button>
+                                    <button
+                                        className="mt-2 px-6 py-2 bg-gray-400 hover:bg-gray-600 text-white rounded shadow"
+                                        onClick={() => setModalCancelar(false)}
+                                    >
+                                        Cancelar
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Modal de sucesso */}
+            <AnimatePresence>
+                {modalSucesso && (
+                    <motion.div
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setModalSucesso(false)}
+                    >
+                        <motion.div
+                            className="bg-white w-full max-w-sm rounded-xl shadow-lg p-8 relative flex flex-col items-center"
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                            onClick={e => e.stopPropagation()}>
+                            <h2 className="text-xl font-semibold mb-4 text-green-600">Entrevista cancelada com sucesso!</h2>
+                            <button
+                                className="mt-2 px-6 py-2 bg-[#008DD0] hover:bg-[#0072d0] text-white rounded shadow"
+                                onClick={() => window.location.reload()}
+                            >Concluir
+                            </button>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </AppLayout>
     );
 }

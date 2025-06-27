@@ -47,6 +47,8 @@ const [vaga, setVaga] = useState<Array<{
   }>>([]);
 
   const [editalProcesso, setEditalProcesso] = useState<string | null>(null);
+  const queryParams = new URLSearchParams(window.location.search);
+  const processId = queryParams.get('id');
 
   useEffect(() => {
         const fetchProcess = async () => {

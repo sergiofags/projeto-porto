@@ -69,13 +69,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('interview/entrevista-candidato');
     })->name('entrevista-candidato');
 
-
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('adicionar-entrevista', function () {
-        return Inertia::render('interview/adicionar-entrevista');
-    })->name('adicionar-entrevista');
+    Route::middleware(['auth', 'verified'])->group(function () {
+        Route::get('adicionar-entrevista', function () {
+            return Inertia::render('interview/adicionar-entrevista');
+        })->name('adicionar-entrevista');
     });
 
+    Route::middleware(['auth', 'verified'])->group(function () {
+        Route::get('editar-entrevista', function () {
+            return Inertia::render('interview/editar-entrevista');
+        })->name('editar-entrevista');
+    });
 });
 Route::get('/', function () {
     if (!Auth::check()) {
