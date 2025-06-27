@@ -37,7 +37,7 @@ export default function VerCandidatos() {
                 console.log(responseCandidacy.data);
 
                 const personsData = await Promise.all(
-                    responseCandidacy.data.map(async (candidatura: any) => {
+                    responseCandidacy.data.map(async (candidatura: { id_person: string; id: string }) => {
                         const responsePerson = await axios.get(`http://localhost:8000/api/person/${candidatura.id_person}`);
                         return { ...responsePerson.data, id_person: candidatura.id_person, id_candidacy: candidatura.id };
                     })
@@ -46,20 +46,19 @@ export default function VerCandidatos() {
                 setPerson(personsData);
 
                 setCandidatura(
-                    responseCandidacy.data.map((candidatura: any) => ({
+                    responseCandidacy.data.map((candidatura: { id_person: string; id: string; data_candidatura: string }) => ({
                         ...candidatura,
                         data_candidatura: candidatura.data_candidatura ? candidatura.data_candidatura.split("-").reverse().join("/") : null
                     }))
                 );
                 
             } catch (error) {
-                console.log(error)
-                return;
+                return error;
             }
         };
 
         fetchVacancy();
-    }, []);
+    }, [vancancyId]);
 
     return (
         <AppLayout>

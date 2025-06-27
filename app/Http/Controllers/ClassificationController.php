@@ -79,7 +79,7 @@ class ClassificationController extends Controller
         }
     }
 
-    public function store(Request $request, $candidacyId, $adminId)
+    public function store(Request $request, $adminId, $candidacyId)
     {
         try {
             $candidacy = Candidacy::find($candidacyId);
@@ -100,7 +100,6 @@ class ClassificationController extends Controller
             $validatedData['id_vacancy'] = $candidacy->id_vacancy;
 
             $validatedData['situacao'] = $validatedData['situacao'] ?? 'Habilitado';
-            $validatedData['motivo_situacao'] = $validatedData['motivo_situacao'] ?? 'Esperar RH';
 
             $coeficienteRendimento = $validatedData['nota_coeficiente_rendimento'] ?? null;
 
