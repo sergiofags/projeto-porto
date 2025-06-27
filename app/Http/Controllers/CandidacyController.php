@@ -8,6 +8,7 @@ use App\Models\Candidacy;
 use App\Models\Person;
 use App\Models\Vacancy;
 use App\Models\Process;
+use Dotenv\Exception\ValidationException;
 
 class CandidacyController extends Controller
 {
@@ -183,7 +184,7 @@ class CandidacyController extends Controller
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Erro de validação.',
-                'error' => $e->error()
+                'error' => $e->getMessage()
             ], 422);
 
         } catch (\Illuminate\Database\QueryException $e) {
@@ -229,7 +230,7 @@ class CandidacyController extends Controller
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Erro de validação.',
-                'error' => $e->error()
+                'error' => $e->getMessage()
             ], 422);
 
         } catch (\Illuminate\Database\QueryException $e) {

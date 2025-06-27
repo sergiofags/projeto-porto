@@ -26,6 +26,10 @@ export default function Inicio({ }: InicioProps) {
   const [modalAberto, setModalAberto] = useState(false);
   const [produtoSelecionado, setProdutoSelecionado] = useState<ProdutoCatalogo | null>(null);
 
+  const queryParams = new URLSearchParams(window.location.search);
+  const processId = queryParams.get('id');
+  const idUser = auth.user.id;
+
 const [vaga, setVaga] = useState<Array<{
     edital: any;
     id: number;
@@ -63,26 +67,23 @@ const [vaga, setVaga] = useState<Array<{
         fetchProcess();
     });
 
-  // const produtos: ProdutoCatalogo[] = [
-  //   {
-  //     id: 1,
-  //     nome: 'Vaga T.I',
-  //     curso: 'SCPAR',
-  //     imagem: '/vaga-ti.png',
-  //   },
-  //   {
-  //     id: 2,
-  //     nome: 'Vaga Comunicação',
-  //     curso: 'SCPAR',
-  //     imagem: '/vaga-ti.png',
-  //   },
-  //   {
-  //     id: 3,
-  //     nome: 'Vaga Operações',
-  //     curso: 'SCPAR',
-  //     imagem: '/vaga-ti.png',
-  //   }
-  // ];
+    const candidatura = async (vacancyId: number) => {
+      try {
+        const response = await axios.post(`http://localhost:8000/api/person/${idUser}/vacancy/${vacancyId}/candidacy`, {
+          id_process: processId,
+          status: 'Analise',
+          data_candidatura: new Date().toISOString().split('T')[0],
+        });
+
+        if (response.status === 200 || response.status === 201) {
+          alert(response.data.message || 'Candidatura realizada com sucesso');
+        }
+
+      } catch (error) {
+        const errorMessage = (axios.isAxiosError(error) && error.response?.data?.message) || (error instanceof Error && error.message) || 'Erro ao realizar candidatura';
+        alert('Erro ao realizar candidatura: ' + errorMessage);
+      }
+    };
 
   return (
     <>
@@ -232,9 +233,9 @@ const [vaga, setVaga] = useState<Array<{
             </div>
             )}
 
-          <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-            Candidatar-se
-          </button>
+            <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" onClick={() => candidatura(vaga.find(v => v.id === produtoSelecionado.id)?.id)}>
+              Candidatar-se
+            </button>
               </motion.div>
             </motion.div>
           )}
