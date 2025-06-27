@@ -38,7 +38,7 @@ class InterviewController extends Controller
         }
     }
 
-    public function store(Request $request, $candidacyId, $adminId)
+    public function store(Request $request, $adminId, $candidacyId)
     {
         try {
             $admin = User::where('id', $adminId)->where('tipo_perfil', 'Admin')->first();
@@ -88,7 +88,7 @@ class InterviewController extends Controller
         }
     }
 
-    public function update(Request $request, $candidacyId, $interviewId, $adminId)
+    public function update(Request $request, $adminId, $candidacyId)
     {
         try {
             $admin = User::where('id', $adminId)->where('tipo_perfil', 'Admin')->first();
