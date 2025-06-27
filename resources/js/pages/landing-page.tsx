@@ -101,28 +101,28 @@ const LandingPage: React.FC = () => {
                                                 {processo.length > 0 ? processo[0].numero_processo : ''}
                                             </h3> */}
                                             <ul className="space-y-4">
-                                                {processo.map((processo) => (
-                                                    <>
-                                                        <div key={processo.numero_processo}>
-                                                            <div className="space-y-6 space-x-2">
-                                                                <ul>   
-                                                                    <h3 className="font-semibold">{processo.descricao} - {processo.numero_processo}</h3>
-                                                                    <li className="list-disc list-inside text-blue-600 underline">
-                                                                        <a
-                                                                        href={`/storage/${processo.edital}`}
-                                                                        target="_blank"
-                                                                        rel="noopener noreferrer">
-                                                                            {/* <Button className="p-4 sm:p-6 bg-blue-500 hover:bg-blue-600 text-sm sm:text-base"> */}
-                                                                                {processo.edital ? 'Edital' : 'Edital'}
-                                                                        </a>
-                                                                    </li>
-                                                                    <button className="mt-2 px-4 py-1 text-white bg-blue-500 rounded-full hover:bg-blue-600">
-                                                                        <Link href={`/process/inicio-vaga?id=${processo.id}`}>Visualizar</Link>
-                                                                    </button>
-                                                                </ul>
-                                                            </div>
+                                                {processo
+                                                .filter((processo) => processo.status === 'Aberto')
+                                                .map((processo) => (
+                                                    <div key={processo.numero_processo}>
+                                                        <div className="space-y-6 space-x-2">
+                                                            <ul>   
+                                                                <h3 className="font-semibold">{processo.descricao} - {processo.numero_processo}</h3>
+                                                                <li className="list-disc list-inside text-blue-600 underline">
+                                                                    <a
+                                                                    href={`/storage/${processo.edital}`}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer">
+                                                                        {/* <Button className="p-4 sm:p-6 bg-blue-500 hover:bg-blue-600 text-sm sm:text-base"> */}
+                                                                            {processo.edital ? 'Edital' : 'Edital'}
+                                                                    </a>
+                                                                </li>
+                                                                <button className="mt-2 px-4 py-1 text-white bg-blue-500 rounded-full hover:bg-blue-600">
+                                                                    <Link href={`/process/inicio-vaga?id=${processo.id}`}>Visualizar</Link>
+                                                                </button>
+                                                            </ul>
                                                         </div>
-                                                    </>
+                                                    </div>
                                                 ))}
                                             </ul>
                                         </div>
@@ -147,28 +147,25 @@ const LandingPage: React.FC = () => {
                                             <div className="text-gray-600">
                                                 <p>Nenhum edital encerrado no momento.</p>
                                             </div>
-                                        ) : (
+                                            ) : (
                                             processo
-                                                .filter(p => p.status === 'Fechado')
-                                                .map((processo) => (
-                                                    <div key={processo.id} className="mb-4">
-                                                        <h3 className="font-semibold">{processo.descricao} - {processo.numero_processo}</h3>
-                                                        <ul className="list-disc list-inside text-blue-600 underline">
-                                                            <li>
-                                                                <a
-                                                                    href={`/storage/${processo.edital}`}
-                                                                    target="_blank"
-                                                                    rel="noopener noreferrer"
-                                                                >
-                                                                    {processo.edital ? 'Edital' : 'Edital'}
-                                                                </a>
-                                                            </li>
-                                                        </ul>
-                                                        <button className="mt-2 px-4 py-1 text-white bg-blue-500 rounded-full hover:bg-blue-600">
-                                                            <Link href={`/process/inicio-vaga?id=${processo.id}`}>Visualizar</Link>
-                                                        </button>
-                                                    </div>
-                                                ))
+                                            .filter(p => p.status === 'Fechado')
+                                            .map((processo) => (
+                                                <div key={processo.id} className="mb-4">
+                                                    <h3 className="font-semibold">{processo.descricao} - {processo.numero_processo}</h3>
+                                                    <ul className="list-disc list-inside text-blue-600 underline">
+                                                        <li>
+                                                            <a
+                                                                href={`/storage/${processo.edital}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                            >
+                                                                {processo.edital ? 'Edital' : 'Edital'}
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            ))
                                         )}
                                     </div>
                                 )}
