@@ -24,6 +24,8 @@ export default function AdicionarEntrevista() {
     const nome = queryParams.get('nome');
     const email = queryParams.get('email');
     const telefone = queryParams.get('telefone');
+    const processId = queryParams.get('id-processo') || '';
+    const vacancyId = queryParams.get('id-vaga') || '';
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -135,7 +137,7 @@ export default function AdicionarEntrevista() {
                     </div>
                     <div className="md:col-span-6 flex justify-between gap-2 mt-4">
                         <Link
-                            href={`/entrevista-candidato?nome=${encodeURIComponent(nome || '')}&email=${encodeURIComponent(email || '')}&telefone=${encodeURIComponent(telefone || '')}&id-candidatura=${candidacyId}`}
+                            href={`/entrevista-candidato?nome=${encodeURIComponent(nome || '')}&email=${encodeURIComponent(email || '')}&telefone=${encodeURIComponent(telefone || '')}&id-candidatura=${candidacyId}&id-processo=${processId}&id-vaga=${vacancyId}`}
                             className="w-full md:w-auto"
                         >
                             <Button type="button" variant="secondary" className="flex items-center bg-[#808080] hover:bg-[#404040] gap-2 rounded-md px-4 py-2 text-sm shadow-md transition-colors duration-200 text-white">
@@ -163,7 +165,17 @@ export default function AdicionarEntrevista() {
                             <h2 className="text-xl font-semibold mb-4 text-green-600">Entrevista adicionada com sucesso!</h2>
                             <button
                                 className="mt-2 px-6 py-2 bg-[#008DD0] hover:bg-[#0072d0] text-white rounded shadow"
-                                onClick={() => router.visit(route('inicio-processo'))}
+                                onClick={() =>
+                                    router.visit(
+                                        `/entrevista-candidato?` +
+                                        `id-candidatura=${candidacyId}` +
+                                        `&nome=${encodeURIComponent(nome || '')}` +
+                                        `&email=${encodeURIComponent(email || '')}` +
+                                        `&telefone=${encodeURIComponent(telefone || '')}` +
+                                        `&id-processo=${processId}` +
+                                        `&id-vaga=${vacancyId}`
+                                    )
+                                }
                             >
                                 Voltar para Entrevista Candidato
                             </button>
