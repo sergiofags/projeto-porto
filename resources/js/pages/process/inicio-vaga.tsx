@@ -21,6 +21,7 @@ export default function Inicio({ }: InicioProps) {
   const segments = pathname.split('/').filter(Boolean);
 
   const { auth } = usePage<SharedData>().props;
+  const isUser = auth?.user?.id;
   const nomeCompleto = auth?.user?.name || '';
   const partes = nomeCompleto.trim().split(' ');
   const [modalAberto, setModalAberto] = useState(false);
@@ -47,43 +48,26 @@ const [vaga, setVaga] = useState<Array<{
   }>>([]);
 
   const [editalProcesso, setEditalProcesso] = useState<string | null>(null);
+  const queryParams = new URLSearchParams(window.location.search);
+  const processId = queryParams.get('id');
+  const [processo, setProcesso] = useState<any>(null); // Novo estado para o processo
 
   useEffect(() => {
-        const fetchProcess = async () => {
-            try {
-              const response = await axios.get(`http://localhost:8000/api/process/${processId}/vacancy`);
-              setVaga(response.data);
-              const processResponse = await axios.get(`http://localhost:8000/api/process/${processId}`);
-              setEditalProcesso(processResponse.data.edital);
-            } catch (error) {
-                alert(error)
-                return;
-            }
-        }
-        fetchProcess();
-    });
-
-  // const produtos: ProdutoCatalogo[] = [
-  //   {
-  //     id: 1,
-  //     nome: 'Vaga T.I',
-  //     curso: 'SCPAR',
-  //     imagem: '/vaga-ti.png',
-  //   },
-  //   {
-  //     id: 2,
-  //     nome: 'Vaga Comunicação',
-  //     curso: 'SCPAR',
-  //     imagem: '/vaga-ti.png',
-  //   },
-  //   {
-  //     id: 3,
-  //     nome: 'Vaga Operações',
-  //     curso: 'SCPAR',
-  //     imagem: '/vaga-ti.png',
-  //   }
-  // ];
-
+    const fetchProcess = async () => {
+      try {
+        const response = await axios.get(`http://localhost:8000/api/process/${processId}/vacancy`);
+        setVaga(response.data);
+        const processResponse = await axios.get(`http://localhost:8000/api/process/${processId}`);
+        setEditalProcesso(processResponse.data.edital);
+        setProcesso(processResponse.data); // Salva o processo inteiro
+      } catch (error) {
+        alert(error)
+        return;
+      }
+    }
+    fetchProcess();
+  }, [processId]);
+  
   return (
     <>
       <AppLayout>
@@ -116,7 +100,11 @@ const [vaga, setVaga] = useState<Array<{
           <main className="flex flex-col items-center">
             <section id="container-produto" className="flex flex-wrap justify-center gap-4 max-w-6xl w-full mt-4">
               <div className="mb-6 w-full">
-                <h1 className="text-xl font-semibold">Processo Seletivo de Estágio Nº 001/2025</h1>
+                <h1 className="text-xl font-semibold">
+                  {processo
+                    ? `${processo.descricao} - Nº ${processo.numero_processo}`
+                    : 'Carregando...'}
+                </h1>
                 <hr className="mt-4 mb-4 w-full bg-[#008DD0] h-0.5" />
                 <h2 className="text-md font-medium">Cadastro Reserva</h2>
                 <h2 className="text-md">Cursos de Tecnólogo, Graduação e Pós-graduação Disponíveis para Estágio</h2>

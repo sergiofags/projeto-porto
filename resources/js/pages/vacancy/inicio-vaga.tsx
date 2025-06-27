@@ -21,6 +21,7 @@ export default function Inicio({ }: InicioProps) {
   const segments = pathname.split('/').filter(Boolean);
 
   const { auth } = usePage<SharedData>().props;
+  const isUser = auth?.user?.id;
   const nomeCompleto = auth?.user?.name || '';
   const partes = nomeCompleto.trim().split(' ');
   const [modalAberto, setModalAberto] = useState(false);
