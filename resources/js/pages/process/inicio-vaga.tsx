@@ -21,14 +21,11 @@ export default function Inicio({ }: InicioProps) {
   const segments = pathname.split('/').filter(Boolean);
 
   const { auth } = usePage<SharedData>().props;
+  const isUser = auth?.user?.id;
   const nomeCompleto = auth?.user?.name || '';
   const partes = nomeCompleto.trim().split(' ');
   const [modalAberto, setModalAberto] = useState(false);
   const [produtoSelecionado, setProdutoSelecionado] = useState<ProdutoCatalogo | null>(null);
-
-  const queryParams = new URLSearchParams(window.location.search);
-  const processId = queryParams.get('id');
-  const idUser = auth.user.id;
 
 const [vaga, setVaga] = useState<Array<{
     edital: any;
@@ -51,40 +48,26 @@ const [vaga, setVaga] = useState<Array<{
   }>>([]);
 
   const [editalProcesso, setEditalProcesso] = useState<string | null>(null);
+  const queryParams = new URLSearchParams(window.location.search);
+  const processId = queryParams.get('id');
+  const [processo, setProcesso] = useState<any>(null); // Novo estado para o processo
 
   useEffect(() => {
-        const fetchProcess = async () => {
-            try {
-              const response = await axios.get(`http://localhost:8000/api/process/${processId}/vacancy`);
-              setVaga(response.data);
-              const processResponse = await axios.get(`http://localhost:8000/api/process/${processId}`);
-              setEditalProcesso(processResponse.data.edital);
-            } catch (error) {
-                alert(error)
-                return;
-            }
-        }
-        fetchProcess();
-    });
-
-    const candidatura = async (vacancyId: number) => {
+    const fetchProcess = async () => {
       try {
-        const response = await axios.post(`http://localhost:8000/api/person/${idUser}/vacancy/${vacancyId}/candidacy`, {
-          id_process: processId,
-          status: 'Analise',
-          data_candidatura: new Date().toISOString().split('T')[0],
-        });
-
-        if (response.status === 200 || response.status === 201) {
-          alert(response.data.message || 'Candidatura realizada com sucesso');
-        }
-
+        const response = await axios.get(`http://localhost:8000/api/process/${processId}/vacancy`);
+        setVaga(response.data);
+        const processResponse = await axios.get(`http://localhost:8000/api/process/${processId}`);
+        setEditalProcesso(processResponse.data.edital);
+        setProcesso(processResponse.data); // Salva o processo inteiro
       } catch (error) {
-        const errorMessage = (axios.isAxiosError(error) && error.response?.data?.message) || (error instanceof Error && error.message) || 'Erro ao realizar candidatura';
-        alert('Erro ao realizar candidatura: ' + errorMessage);
+        alert(error)
+        return;
       }
-    };
-
+    }
+    fetchProcess();
+  }, [processId]);
+  
   return (
     <>
       <AppLayout>
@@ -117,7 +100,11 @@ const [vaga, setVaga] = useState<Array<{
           <main className="flex flex-col items-center">
             <section id="container-produto" className="flex flex-wrap justify-center gap-4 max-w-6xl w-full mt-4">
               <div className="mb-6 w-full">
-                <h1 className="text-xl font-semibold">Processo Seletivo de Estágio Nº 001/2025</h1>
+                <h1 className="text-xl font-semibold">
+                  {processo
+                    ? `${processo.descricao} - Nº ${processo.numero_processo}`
+                    : 'Carregando...'}
+                </h1>
                 <hr className="mt-4 mb-4 w-full bg-[#008DD0] h-0.5" />
                 <h2 className="text-md font-medium">Cadastro Reserva</h2>
                 <h2 className="text-md">Cursos de Tecnólogo, Graduação e Pós-graduação Disponíveis para Estágio</h2>
@@ -233,9 +220,9 @@ const [vaga, setVaga] = useState<Array<{
             </div>
             )}
 
-            <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" onClick={() => candidatura(vaga.find(v => v.id === produtoSelecionado.id)?.id)}>
-              Candidatar-se
-            </button>
+          <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            Candidatar-se
+          </button>
               </motion.div>
             </motion.div>
           )}
