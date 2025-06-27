@@ -306,8 +306,8 @@ export default function Inicio({ processos = [] }: Props) {
                     )}
                 </AnimatePresence>
 
-        {/* Modal de sucesso */}
-        <AnimatePresence>
+                {/* Modal de sucesso */}
+                <AnimatePresence>
                     {modalSucesso && (
                         <motion.div
                             className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"

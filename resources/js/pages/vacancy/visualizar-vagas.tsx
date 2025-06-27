@@ -1,6 +1,6 @@
 import axios from 'axios';
 import AppLayout from '@/layouts/app-layout';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     Table,
     TableBody,
@@ -74,10 +74,8 @@ export default function CadastrarVaga() {
     }, [processId]);
 
 
-    // Estado do modal de confirmação para exclusão de vaga
     const [modalFechar, setModalFechar] = useState<{ aberto: boolean; vagaId?: string }>({ aberto: false });
-
-    // Route::delete('/admin/{adminId}/process/{processId}/vacancy/{vacancyId}/delete', [VacancyController::class, 'delete'])->name('vacancy.delete');//Deleta uma vaga
+    const [modalSucesso, setModalSucesso] = useState(false); // 1. Novo estado
 
     async function handleDelete(vagaId: string) {
         const queryParams = new URLSearchParams(window.location.search);
@@ -90,17 +88,24 @@ export default function CadastrarVaga() {
         }
 
         try {
-            const response = await fetch(`http://localhost:8000/api/admin/${adminId}/process/${processId}/vacancy/${vagaId}/delete`, {
+            await fetch(`http://localhost:8000/api/admin/${adminId}/process/${processId}/vacancy/${vagaId}/delete`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
                 },
             });
-            window.location.reload();
+            setModalFechar({ aberto: false }); // Fecha modal de confirmação
+            setModalSucesso(true); // 2. Abre modal de sucesso
+            // Remover a vaga da lista sem recarregar (opcional):
+            setVagas(vagas => vagas.filter(v => v.id !== vagaId));
         } catch (error) {
             console.error('Erro ao excluir vaga:', error);
         }
     }
+
+    // function setModalSucesso(arg0: boolean): void {
+    //     throw new Error('Function not implemented.');
+    // }
 
     return (
         <AppLayout>
@@ -197,10 +202,7 @@ export default function CadastrarVaga() {
                                                                             <div className="flex gap-4 mt-2">
                                                                                 <button
                                                                                     className="mt-2 px-6 py-2 bg-[#008DD0] hover:bg-[#0072d0] text-white rounded shadow"
-                                                                                    onClick={() => {
-                                                                                        handleDelete(vaga.id);
-                                                                                        setModalFechar({ aberto: false });
-                                                                                    }}>
+                                                                                    onClick={() => handleDelete(vaga.id)}>
                                                                                     Confirmar
                                                                                 </button>
                                                                                 <button
@@ -223,6 +225,33 @@ export default function CadastrarVaga() {
                     </div>
                 </>
             )}
+            <AnimatePresence>
+                {modalSucesso && (
+                    <motion.div
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setModalSucesso(false)}
+                    >
+                        <motion.div
+                            className="bg-white w-full max-w-sm rounded-xl shadow-lg p-8 relative flex flex-col items-center"
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                            onClick={e => e.stopPropagation()}>
+                            <h2 className="text-xl font-semibold mb-4 text-green-600">Cadastro Reserva encerrado com sucesso!</h2>
+                            <button
+                                className="mt-2 px-6 py-2 bg-[#008DD0] hover:bg-[#0072d0] text-white rounded shadow"
+                                onClick={() => router.visit(`/processo/vagas?id=${processId}`)}
+                            >
+                                Concluir
+                            </button>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
             <div className="mt-6 mb-6 pl-2">
                 <Link className="w-fit flex" href="/">
                     <Button

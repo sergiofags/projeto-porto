@@ -8,6 +8,8 @@ import AppLayout from '@/layouts/app-layout';
 import { SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 
 export default function CadastrarVaga() {
     const { auth } = usePage<SharedData>().props;
@@ -53,6 +55,8 @@ export default function CadastrarVaga() {
 
     }, []);
 
+    const [modalSucesso, setModalSucesso] = useState(false);
+
     const submitVacancy = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -80,8 +84,7 @@ export default function CadastrarVaga() {
                 return;
             }
 
-            alert('Vaga atualizada com sucesso!');
-            window.location.href = `/processo/vagas?id=${processId}`;
+            setModalSucesso(true); // Exibe o modal de sucesso
 
         } catch (error) {
             alert(error)
@@ -233,16 +236,43 @@ export default function CadastrarVaga() {
                         />
                     </div>
                     <div className="flex flex-row gap-2">
-                        <Link href={`/processo/vagas?id=${processId}`} className="w-full">
-                            <Button type="button" variant="secondary">
-                                Voltar
-                            </Button>
-                        </Link>
-                        <Button type="submit">
-                            Atualizar Vaga
+                    <Link href={`/processo/vagas?id=${processId}`} className="w-full">
+                        <Button type="button" variant="secondary">
+                            Voltar
                         </Button>
-                    </div>
-                </form>
+                    </Link>
+                    <Button type="submit">
+                        Atualizar Vaga
+                    </Button>
+                </div>
+            </form>
+                <AnimatePresence>
+                    {modalSucesso && (
+                        <motion.div
+                            className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setModalSucesso(false)}
+                        >
+                            <motion.div
+                                className="bg-white w-full max-w-sm rounded-xl shadow-lg p-8 relative flex flex-col items-center"
+                                initial={{ scale: 0.9, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 0.9, opacity: 0 }}
+                                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                                onClick={e => e.stopPropagation()}>
+                                <h2 className="text-xl font-semibold mb-4 text-green-600">Vaga atualizada com sucesso!</h2>
+                                <button
+                                    className="mt-2 px-6 py-2 bg-[#008DD0] hover:bg-[#0072d0] text-white rounded shadow"
+                                    onClick={() => router.visit(`/processo/vagas?id=${processId}`)}
+                                >
+                                    Voltar para Vagas
+                                </button>
+                            </motion.div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
         </AppLayout> 
     );
