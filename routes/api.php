@@ -62,5 +62,6 @@ Route::put('/admin/{adminId}/candidacy/{candidacyId}/interview/{interviewId}', [
 
 Route::get('/vacancy/{vacancyId}/classification', [ClassificationController::class, 'index'])->name('classification.index'); //Retorna todas as classificações de uma vaga
 Route::post('/admin/{adminId}/candidacy/{candidacyId}/classification', [ClassificationController::class, 'store'])->name('classification.store'); //Cria uma nova classificação para uma candidatura
-Route::get('/vacancy/{vacancyId}/candidacy/{candidacyId}/note', [ClassificationController::class, 'showByCandidacy'])->name('classification.showByCandidacy');
+Route::get('/vacancy/{vacancyId}/candidacy/{candidacyId}/note', [ClassificationController::class, 'showByCandidacy'])->name('classification.showByCandidacy'); //Retorna a nota/classificação de uma candidatura específica em uma vaga
 Route::put('/admin/{adminId}/candidacy/{candidacyId}/classification/{classificationId}/note', [ClassificationController::class, 'update'])->name('classification.update'); //Atualiza uma classificação para uma candidatura
+
