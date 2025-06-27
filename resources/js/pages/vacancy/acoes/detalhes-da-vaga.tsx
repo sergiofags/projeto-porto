@@ -1,10 +1,11 @@
 import axios from 'axios';
 import AppLayout from '@/layouts/app-layout';
 import { SharedData } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 
 export default function DetalhesVaga() {
 
@@ -56,23 +57,21 @@ export default function DetalhesVaga() {
             fetchVacancy();
         }, []);
 
+        const [modalConfirmar, setModalConfirmar] = useState<{ aberto: boolean; vagaId?: string }>({ aberto: false, vagaId: undefined });
+        const [modalSucesso, setModalSucesso] = useState(false);
+
         async function handleDelete(vagaId: string) {
             if (!processId || !vagaId) {
-                alert("Id do processo ou vaga inválido")
+                alert("Id do processo ou vaga inválido");
                 return;
             }
-    
+
             try {
-                const selectedVaga = vaga.find((v: { id: string; titulo: string }) => v.id === vagaId);
-                if (!selectedVaga || !confirm(`Você tem certeza que deseja deletar a vaga "${selectedVaga.titulo}"?`)) {
-                    return;
-                }
                 await axios.delete(`http://localhost:8000/api/admin/${adminId}/process/${processId}/vacancy/${vagaId}/delete`);
-                alert("Vaga deletada com sucesso!")
-                window.location.href = `/processo/vagas?id=${processId}`;
-    
+                setModalConfirmar({ aberto: false, vagaId: undefined });
+                setModalSucesso(true);
             } catch (error) {
-                return error;
+                alert("Erro ao deletar vaga!");
             }
         }
 
@@ -104,9 +103,12 @@ export default function DetalhesVaga() {
                                     </Link>
                                 </Button>
                                 <Button type="button" className="flex-1 p-4 sm:p-6  bg-red-600 hover:bg-red-800 mt-4 text-sm ">
-                                    <Link href="#" onClick={() => handleDelete(item.id)} className="w-full">
-                                    Fechar
-                                    </Link>
+                                    <span
+                                        className="w-full cursor-pointer"
+                                        onClick={() => setModalConfirmar({ aberto: true, vagaId: item.id })}
+                                    >
+                                        Fechar
+                                    </span>
                                 </Button>
                             </div>
 
@@ -152,8 +154,73 @@ export default function DetalhesVaga() {
                         </Link>
                     </div>
                 </div>
-
             </div>
+            <AnimatePresence>
+                {modalConfirmar.aberto && (
+                    <motion.div
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setModalConfirmar({ aberto: false, vagaId: undefined })}
+                    >
+                        <motion.div
+                            className="bg-white w-full max-w-sm rounded-xl shadow-lg p-8 relative flex items-center"
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                            onClick={e => e.stopPropagation()}>
+                            <div>
+                                <h2 className="text-xl font-semibold mb-4 text-red-600">Você tem certeza que deseja excluir esta vaga?</h2>
+                                <div className="flex gap-4 mt-2">
+                                    <button
+                                        className="mt-2 px-6 py-2 bg-[#008DD0] hover:bg-[#0072d0] text-white rounded shadow"
+                                        onClick={() => handleDelete(modalConfirmar.vagaId!)}
+                                    >
+                                        Confirmar
+                                    </button>
+                                    <button
+                                        className="mt-2 px-6 py-2 bg-gray-400 hover:bg-gray-600 text-white rounded shadow"
+                                        onClick={() => setModalConfirmar({ aberto: false, vagaId: undefined })}
+                                    >
+                                        Cancelar
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Modal de sucesso */}
+            <AnimatePresence>
+                {modalSucesso && (
+                    <motion.div
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setModalSucesso(false)}
+                    >
+                        <motion.div
+                            className="bg-white w-full max-w-sm rounded-xl shadow-lg p-8 relative flex flex-col items-center"
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                            onClick={e => e.stopPropagation()}>
+                            <h2 className="text-xl font-semibold mb-4 text-green-600">Vaga encerrada com sucesso!</h2>
+                            <button
+                                className="mt-2 px-6 py-2 bg-[#008DD0] hover:bg-[#0072d0] text-white rounded shadow"
+                                onClick={() => router.visit(`/processo/vagas?id=${processId}`)}
+                            >
+                                Voltar para Vagas
+                            </button>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </AppLayout> 
     );
 }
