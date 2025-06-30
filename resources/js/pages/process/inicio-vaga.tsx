@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import AppLayout from '@/layouts/app-layout';
-import { SharedData, type BreadcrumbItem } from '@/types';
+import { SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion'; 
 import axios from 'axios';
@@ -21,7 +21,7 @@ export default function Inicio({ }: InicioProps) {
   const segments = pathname.split('/').filter(Boolean);
 
   const { auth } = usePage<SharedData>().props;
-  const isUser = auth?.user?.id;
+  const idUser = auth?.user?.id;
   const nomeCompleto = auth?.user?.name || '';
   const partes = nomeCompleto.trim().split(' ');
   const [modalAberto, setModalAberto] = useState(false);
@@ -67,6 +67,24 @@ const [vaga, setVaga] = useState<Array<{
     }
     fetchProcess();
   }, [processId]);
+
+  const candidatura = async (vacancyId: number) => {
+    try {
+      const response = await axios.post(`http://localhost:8000/api/person/${idUser}/vacancy/${vacancyId}/candidacy`, {
+        id_process: processId,
+        status: 'Analise',
+        data_candidatura: new Date().toISOString().split('T')[0],
+      });
+
+      if (response.status === 200 || response.status === 201) {
+        alert(response.data.message || 'Candidatura realizada com sucesso');
+      }
+
+    } catch (error) {
+      const errorMessage = (axios.isAxiosError(error) && error.response?.data?.message) || (error instanceof Error && error.message) || 'Erro ao realizar candidatura';
+      alert('Erro ao realizar candidatura: ' + errorMessage);
+    }
+  };
   
   return (
     <>
@@ -220,7 +238,17 @@ const [vaga, setVaga] = useState<Array<{
             </div>
             )}
 
-          <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+          <button
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            onClick={() => {
+              const vacancyId = vaga.find(v => v.id === produtoSelecionado.id)?.id;
+              if (vacancyId !== undefined) {
+                candidatura(vacancyId);
+              } else {
+                return;
+              }
+            }}
+          >
             Candidatar-se
           </button>
               </motion.div>
