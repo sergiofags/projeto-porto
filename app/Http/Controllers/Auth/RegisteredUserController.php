@@ -48,6 +48,10 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
+        if ($user->tipo_perfil === 'Candidato') {
+            return to_route('landing-page');
+        }
+
         return to_route('inicio-processo');
     }
 }
