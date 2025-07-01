@@ -27,8 +27,6 @@ export default function CadastrarVaga() {
         quantidade: null,
         tipo_vaga: '',
         status: '',
-        data_inicio: '',
-        data_fim: '' as string | null,
     });
 
     useEffect(() => {
@@ -41,32 +39,21 @@ const [modalSucesso, setModalSucesso] = useState(false);
     const submitVacancy = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (vaga.data_fim === '') {
-            setVaga({ ...vaga, data_fim: null });
-        }
-
         if (!processId) {
             console.error('Process ID não encontrado.');
             return;
         }
 
         try {
-            const formattedVaga = {
-                ...vaga,
-                data_inicio: vaga.data_inicio.split("/").reverse().join("-"),
-                data_fim: vaga.data_fim ? vaga.data_fim.split("/").reverse().join("-") : null
-            };
-
-            const response = await axios.post(`http://localhost:8000/api/admin/${adminId}/process/${processId}/vacancy`, formattedVaga);
+            const response = await axios.post(`http://localhost:8000/api/admin/${adminId}/process/${processId}/vacancy`, vaga);
             const data = await response.data;
-            console.log(data);
 
             if (data.error) {
                 alert(data.error);
                 return;
             }
 
-            setModalSucesso(true); // Exibe o modal de sucesso
+            setModalSucesso(true);
 
         } catch (error) {
             alert(error)
@@ -187,35 +174,6 @@ const [modalSucesso, setModalSucesso] = useState(false);
                                 </SelectGroup>
                             </SelectContent>
                         </Select>
-                    </div>
-                    <div className="grid gap-2">
-                        <Label htmlFor="data_inicio">Data início</Label>
-                        <Input
-                            id="data_inicio"
-                            value={vaga.data_inicio}
-                            onChange={(e) => {
-                                let value = e.target.value.replace(/\D/g, ''); // Remove non-numeric characters
-                                if (value.length > 2) value = value.slice(0, 2) + '/' + value.slice(2);
-                                if (value.length > 5) value = value.slice(0, 5) + '/' + value.slice(5, 9);
-                                    setVaga({ ...vaga, data_inicio: value });
-                                }}
-                            placeholder="Data início"
-                            required
-                        />
-                    </div>
-                    <div className="grid gap-2">
-                        <Label htmlFor="data_fim">Data fim</Label>
-                        <Input
-                            id="data_fim"
-                            value={vaga.data_fim ?? ''}
-                            onChange={(e) => {
-                                let value = e.target.value.replace(/\D/g, ''); // Remove non-numeric characters
-                                if (value.length > 2) value = value.slice(0, 2) + '/' + value.slice(2);
-                                if (value.length > 5) value = value.slice(0, 5) + '/' + value.slice(5, 9);
-                                    setVaga({ ...vaga, data_fim: value });
-                                }}
-                            placeholder="Data fim"
-                        />
                     </div>
                     <div className="flex flex-row gap-2">
                         <Link href={`/processo/vagas?id=${processId}`} className="w-full">
