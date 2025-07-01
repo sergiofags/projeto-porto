@@ -47,6 +47,10 @@ const [vaga, setVaga] = useState<Array<{
     updated_at: string;
   }>>([]);
 
+  const queryParams = new URLSearchParams(window.location.search);
+  const processId = queryParams.get('id');
+  const idUser = auth.user.id;
+
   const [editalProcesso, setEditalProcesso] = useState<string | null>(null);
   const queryParams = new URLSearchParams(window.location.search);
   const processId = queryParams.get('id');
