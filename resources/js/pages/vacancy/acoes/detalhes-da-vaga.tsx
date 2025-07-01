@@ -25,8 +25,6 @@ export default function DetalhesVaga() {
             remuneracao: number;
             beneficios: string | null;
             quantidade: number;
-            data_inicio: string;
-            data_fim: string;
             status: 'Aberto' | 'Fechado';
             tipo_vaga: 'Graduacao' | 'Pos-Graduacao';
         }>>([]);
@@ -41,15 +39,8 @@ export default function DetalhesVaga() {
                     }
 
                     setVaga(Array.isArray(response.data) ? response.data : [response.data]);
-
-                    setVaga([{
-                        ...response.data,
-                        data_inicio: response.data.data_inicio.split("-").reverse().join("/"),
-                        data_fim: response.data.data_fim ? response.data.data_fim.split("-").reverse().join("/") : null
-                    }])
-
-                } catch (error) {
-                    alert(error)
+                } catch {
+                    alert("An error occurred while fetching the vacancy data.");
                     return;
                 }
             };
@@ -70,8 +61,8 @@ export default function DetalhesVaga() {
                 await axios.delete(`http://localhost:8000/api/admin/${adminId}/process/${processId}/vacancy/${vagaId}/delete`);
                 setModalConfirmar({ aberto: false, vagaId: undefined });
                 setModalSucesso(true);
-            } catch (error) {
-                alert("Erro ao deletar vaga!");
+            } catch {
+                return
             }
         }
 
@@ -124,15 +115,6 @@ export default function DetalhesVaga() {
                             <br></br>
                             <h1 className="text-xl"><strong>Benefícios:</strong></h1>
                             <p>{item.beneficios || 'Não informado'}</p>
-
-                            <br></br>
-                            {/* <p><strong>Quantidade:</strong> <br></br>{item.quantidade}</p> */}
-                            <h1 className="text-xl"><strong>Data de Início:</strong></h1>
-                            <p>{item.data_inicio}</p>
-
-                            <br></br>
-                            <h1 className="text-xl"><strong>Data de Fim:</strong></h1>
-                            <p>{item.data_fim}</p>
 
                             <br></br>
                             <h1 className="text-xl"><strong>Status:</strong></h1>
