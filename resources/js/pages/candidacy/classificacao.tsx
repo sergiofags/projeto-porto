@@ -3,108 +3,92 @@ import AppLayout from '@/layouts/app-layout';
 import { Head, Link } from '@inertiajs/react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from '@/components/ui/button';
-import { Undo2 } from 'lucide-react';
+import { BookText, Undo2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+
+type Candidatura = {
+    id: string;
+    id_person: string;
+    id_vacancy: string;
+    id_process: string;
+    status: 'Cancelado' | 'Analise' | 'Completo';
+    data_candidatura: string;
+};
+
+type Person = {
+    id_person: string;
+    name: string;
+    email: string;
+    telefone: string;
+    id_candidacy: string;
+};
+
+type Classificacao = {
+    name: string;
+    id_candidacy: string;
+    id_vacancy: string;
+    id_admin: string;
+    nota_coeficiente_rendimento: string | null;
+    nota_entrevista: string | null;
+    nota_historico: string | null;
+    situacao: 'Habilitado' | 'Inabilitado' | 'Desclassificado';
+    motivo_situacao: string | null;
+};
+
 
 export default function VerCandidatos() {
     const queryParams = new URLSearchParams(window.location.search);
     const vancancyId = queryParams.get('id-vaga');
     const processId = queryParams.get('id-processo');
 
-    const [candidatura, setCandidatura] = useState<Array<{
-        id: string;
-        id_person: string;
-        id_vacancy: string;
-        id_process: string;
-        status: 'Cancelado' | 'Analise' | 'Completo';
-        data_candidatura: string;
-    }>>([]);
-
-    const [person, setPerson] = useState<Array<{
-        id_person: string;
-        name: string;
-        email: string;
-        telefone: string;
-        id_candidacy: string;
-    }>>([]);
-
-    const [classificacao, setClassificacao] = useState<Array<{
-        name: string;
-        id_candidacy: string;
-        id_vacancy: string;
-        id_admin: string;
-        nota_coeficiente_rendimento: string | null;
-        nota_entrevista: string | null;
-        nota_historico: string | null;
-        situacao: 'Habilitado' | 'Inabilitado' | 'Desclassificado';
-        motivo_situacao: string | null;
-    }>>([]);
+    const [candidatura, setCandidatura] = useState<Candidatura[]>([]);
+    const [person, setPerson] = useState<Person[]>([]);
+    const [classificacao, setClassificacao] = useState<Classificacao[]>([]);
 
     useEffect(() => {
-        const fetchVacancy = async () => {
+        if (!vancancyId) {
+            console.error("ID da vaga não encontrado na URL.");
+            return;
+        }
+
+        const fetchVacancyData = async () => {
             try {
                 const responseCandidacy = await axios.get(`http://localhost:8000/api/vacancy/${vancancyId}/candidacy`);
-                setCandidatura(responseCandidacy.data);
-                setCandidatura(
-                    responseCandidacy.data.map((candidatura: { id_person: string; id_vacancy: string; id_process: string; status: 'Cancelado' | 'Analise' | 'Completo'; data_candidatura: string; }) => ({
-                        ...candidatura,
-                        data_candidatura: candidatura.data_candidatura ? candidatura.data_candidatura.split("-").reverse().join("/") : null
-                    }))
-                );
+                const candidaturasData: Candidatura[] = responseCandidacy.data.map((cand: { id: string; id_person: string; id_vacancy: string; id_process: string; status: 'Cancelado' | 'Analise' | 'Completo'; data_candidatura: string; }) => ({
+                    ...cand,
+                    data_candidatura: cand.data_candidatura ? cand.data_candidatura.split("-").reverse().join("/") : "N/A"
+                }));
+                setCandidatura(candidaturasData);
 
                 const personsData = await Promise.all(
-                    responseCandidacy.data.map(async (candidatura: { id_person: string; id_vacancy: string; id_process: string; status: 'Cancelado' | 'Analise' | 'Completo'; data_candidatura: string; }) => {
-                        const responsePerson = await axios.get(`http://localhost:8000/api/person/${candidatura.id_person}`);
-                        return { ...responsePerson.data, id_person: candidatura.id_person };
+                    candidaturasData.map(async (cand: Candidatura) => {
+                        const responsePerson = await axios.get(`http://localhost:8000/api/person/${cand.id_person}`);
+                        return { ...responsePerson.data, id_person: cand.id_person };
                     })
                 );
                 setPerson(personsData);
                 
-                if (!vancancyId) {
-                    alert("Vaga não encontrada")
-                    return;
-                }
-
                 const responseClassificacao = await axios.get(`http://localhost:8000/api/vacancy/${vancancyId}/classification`);
-                console.log(responseClassificacao)
-
                 if (responseClassificacao.data && responseClassificacao.data.length > 0) {
-                    setClassificacao(
-                        responseClassificacao.data.map((classificacao: {
-                            id_candidacy: string;
-                            id_vacancy: string;
-                            id_admin: string;
-                            nota_coeficiente_rendimento: string | null;
-                            nota_entrevista: string | null;
-                            nota_historico: string | null;
-                            situacao: 'Habilitado' | 'Inabilitado' | 'Desclassificado';
-                            motivo_situacao: string | null;
-                        }) => ({
-                            ...classificacao,
-                            nota_coeficiente_rendimento: classificacao.nota_coeficiente_rendimento || null,
-                            nota_entrevista: classificacao.nota_entrevista || null,
-                            nota_historico: classificacao.nota_historico || null,
-                            situacao: classificacao.situacao || 'Desclassificado',
-                            motivo_situacao: classificacao.motivo_situacao || null
-                        }))
-                    );
+                    setClassificacao(responseClassificacao.data);
                 }
                 
-            } catch (error) {
-                alert(error)
-                return;
+            } catch (err) {
+                console.error("Erro ao buscar dados da vaga:", err);
             }
         };
 
-        fetchVacancy();
+        fetchVacancyData();
     }, [vancancyId]);
 
     return (
         <AppLayout>
             <Head title="Classificação" />
-            <Link href={`/processo/vagas/detalhes?id-processo=${processId}&id-vaga=${vancancyId}`}><Button><Undo2 /> Voltar</Button></Link>
-            <h1 className='text-3xl'>Classificação</h1>
-            <div className='container mt-5'>
+            <Link href={`/processo/vagas/detalhes?id-processo=${processId}&id-vaga=${vancancyId}`}>
+                <Button><Undo2 className="mr-2 h-4 w-4" /> Voltar</Button>
+            </Link>
+            <h1 className='text-3xl font-bold my-4'>Classificação</h1>
+            <div className='container mx-auto mt-5 border rounded-lg p-4'>
                 <Table>
                     <TableHeader>
                         <TableRow>
@@ -116,6 +100,7 @@ export default function VerCandidatos() {
                             <TableHead>Nota Total</TableHead>
                             <TableHead>Situação</TableHead>
                             <TableHead>Motivo</TableHead>
+                            <TableHead>Ações</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -125,25 +110,35 @@ export default function VerCandidatos() {
                                 const notaFinalB = Number(b.nota_historico || 0) + Number(b.nota_entrevista || 0);
                                 return notaFinalB - notaFinalA;
                             })
-                            .map((classificacaoItem) => (
-                                <TableRow key={classificacaoItem.id_candidacy}>
-                                    <TableCell>{classificacao.findIndex(c => c.id_candidacy === classificacaoItem.id_candidacy) + 1}</TableCell>
-                                    <TableCell>
-                                        {(() => {
-                                            const cand = candidatura.find(c => c.id === classificacaoItem.id_candidacy);
-                                            if (!cand) return "Não informado";
-                                            const p = person.find(p => p.id_person === cand.id_person);
-                                            return p ? p.name : "Não informado";
-                                        })()}
-                                    </TableCell>
-                                    <TableCell>{classificacaoItem.nota_coeficiente_rendimento || "Não informado"}</TableCell>
-                                    <TableCell>{classificacaoItem.nota_entrevista || "Não informado"}</TableCell>
-                                    <TableCell>{classificacaoItem.nota_historico || "Não informado"}</TableCell>
-                                    <TableCell>{(Number(classificacaoItem.nota_historico || 0) + Number(classificacaoItem.nota_entrevista || 0)) || "Não informado"}</TableCell>
-                                    <TableCell>{classificacaoItem.situacao}</TableCell>
-                                    <TableCell>{classificacaoItem.motivo_situacao || ""}</TableCell>
-                                </TableRow>
-                            ))}
+                            .map((classificacaoItem, index) => {
+                                const cand = candidatura.find(c => c.id === classificacaoItem.id_candidacy);
+                                const personInfo = cand ? person.find(p => p.id_person === cand.id_person) : null;
+                                
+                                const candidatoId = personInfo ? personInfo.id_person : null;
+                                const notaFinal = (Number(classificacaoItem.nota_historico || 0) + Number(classificacaoItem.nota_entrevista || 0));
+
+                                return (
+                                    <TableRow key={classificacaoItem.id_candidacy}>
+                                        <TableCell className="font-medium">{index + 1}º</TableCell>
+                                        <TableCell>{personInfo ? personInfo.name : "Candidato não encontrado"}</TableCell>
+                                        <TableCell>{classificacaoItem.nota_coeficiente_rendimento || "N/A"}</TableCell>
+                                        <TableCell>{classificacaoItem.nota_entrevista || "N/A"}</TableCell>
+                                        <TableCell>{classificacaoItem.nota_historico || "N/A"}</TableCell>
+                                        <TableCell>{notaFinal > 0 ? notaFinal : "N/A"}</TableCell>
+                                        <TableCell>{classificacaoItem.situacao}</TableCell>
+                                        <TableCell>{classificacaoItem.motivo_situacao || ""}</TableCell>
+                                        <TableCell>
+                                            {candidatoId && (
+                                                <Link href={`/processo/vagas/ver-candidatos/candidato-contratacao?id-processo=${processId}&id-vaga=${vancancyId}&id-candidato=${candidatoId}`}>
+                                                    <Button className='bg-yellow-600 hover:bg-yellow-700 cursor-pointer text-white'>
+                                                        <BookText className="mr-2 h-4 w-4" /> Contratação
+                                                    </Button>
+                                                </Link>
+                                            )}
+                                        </TableCell>
+                                    </TableRow>
+                                );
+                            })}
                     </TableBody>
                 </Table>
             </div>
