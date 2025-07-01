@@ -2,7 +2,71 @@ import axios from 'axios';
 import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, FileDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+
+type Person = {
+    id_user: string;
+    id_person: string ,
+    name: string;
+    foto_perfil?: string;
+    sobre?: string;
+    linkedin?: string;
+    instagram?: string;
+    facebook?: string;
+    cpf?: string;
+    data_nascimento?: string;
+    genero?: 'Masculino' | 'Feminino' | 'Outro';
+    deficiencia?: boolean;
+    qual_deficiencia?: string | null;
+    servico_militar?: boolean;
+    telefone?: string;
+    rua?: string;
+    bairro?: string;
+    cidade?: string;
+    estado?: string;
+    numero?: string;
+    complemento?: string;
+    cep?: string;
+    referencia?: string;
+    estou_ciente?: boolean;
+    email?: string;
+};
+
+type Experiences = {
+    id: string;
+    tipo_experiencia: string;
+    empresa_instituicao?: string;
+    nivel?: string;
+    status?: string;
+    curso_cargo?: string;
+    atividades?: string;
+    semestre_modulo?: string;
+    data_inicio?: string;
+    data_fim?: string | null;
+    emprego_atual?: string;
+};
+
+type ComplementaruExperiences = {
+    id: string,
+    tipo_experiencia: string,
+    titulo: string,
+    descricao: string,
+    nivel_idioma?: string,
+    certificado?: string| null,
+    data_inicio?: string,
+    data_fim?: string | null,
+    instituicao: string,
+    status: string,
+};
+
+type Documentos = {
+    id: string;
+    id_person: string;
+    tipo_documento: 'Candidatura' | 'Contratacao';
+    documento?: string | null;
+    nome_documento: 'AtestadoMatricula' | 'HistoricoEscolar' | 'Curriculo' | 'CoeficienteRendimento' | 'Foto3x4' | 'CedulaIdentidadeOuCNH' | 'CadastroPessoaFisica' | 'CTPS' | 'CarteiraDeReservista' | 'ComprovanteDeResidencia' | 'AntecedentesCriminaisECivel' | 'AntecedentesCriminaisPoliciaFederal' | 'VacinacaFebreAmarela' | 'VacinacaCovid19' | 'GrupoSanguineo' | 'ComprovanteMatricula' | 'AtestadadoFrequencia';
+};
 
 export default function CadastrarVaga() {
     const queryParams = new URLSearchParams(window.location.search);
@@ -12,60 +76,10 @@ export default function CadastrarVaga() {
     const [abertoSobre, setAbertoSobre] = useState(false);
     const [abertoExperiencias, setAbertoExperiencias] = useState(false);
 
-    const [person, setPerson] = useState<Array<{
-        id_user: string;
-        id_person: string ,
-        name: string;
-        foto_perfil?: string;
-        sobre?: string;
-        linkedin?: string;
-        instagram?: string;
-        facebook?: string;
-        cpf?: string;
-        data_nascimento?: string;
-        genero?: 'Masculino' | 'Feminino' | 'Outro';
-        deficiencia?: boolean;
-        qual_deficiencia?: string | null;
-        servico_militar?: boolean;
-        telefone?: string;
-        rua?: string;
-        bairro?: string;
-        cidade?: string;
-        estado?: string;
-        numero?: string;
-        complemento?: string;
-        cep?: string;
-        referencia?: string;
-        estou_ciente?: boolean;
-        email?: string;
-    }>>([]);
-
-    const [experiences, setExperiences] = useState<Array<{
-        id: string;
-        tipo_experiencia: string;
-        empresa_instituicao?: string;
-        nivel?: string;
-        status?: string;
-        curso_cargo?: string;
-        atividades?: string;
-        semestre_modulo?: string;
-        data_inicio?: string;
-        data_fim?: string | null;
-        emprego_atual?: string;
-    }>>([]);
-
-    const [complementaruExperiences, setComplementaryExperiences] = useState<Array<{
-        id: string,
-        tipo_experiencia: string,
-        titulo: string,
-        descricao: string,
-        nivel_idioma?: string,
-        certificado?: string| null,
-        data_inicio?: string,
-        data_fim?: string | null,
-        instituicao: string,
-        status: string,
-    }>>([]);
+    const [person, setPerson] = useState<Person[]>([]);
+    const [experiences, setExperiences] = useState<Experiences[]>([]);
+    const [complementaruExperiences, setComplementaryExperiences] = useState<ComplementaruExperiences[]>([]);
+    const [documentos, setDocumentos] = useState<Documentos[]>([]);
 
     useEffect(() => {
         const fetchVacancy = async () => {
@@ -79,7 +93,7 @@ export default function CadastrarVaga() {
 
                 const responseExperience = await axios.get(`http://localhost:8000/api/person/${candidatoId}/experience`);
                 setExperiences(responseExperience.data);
-                setExperiences(responseExperience.data.map((experience: any) => ({
+                setExperiences(responseExperience.data.map((experience: Experiences) => ({
                     ...experience,
                     data_inicio: experience.data_inicio ? experience.data_inicio.split(" ")[0].split("-").reverse().join("/") : 'Não informado',
                     data_fim: experience.data_fim ? experience.data_fim.split(" ")[0].split("-").reverse().join("/") : 'Não informado',
@@ -87,11 +101,14 @@ export default function CadastrarVaga() {
                 
                 const responseComplementaryExperience = await axios.get(`http://localhost:8000/api/person/${candidatoId}/complementaryexperience`);
                 setComplementaryExperiences(responseComplementaryExperience.data);
-                setComplementaryExperiences(responseComplementaryExperience.data.map((complementaruExperiences: any) => ({
+                setComplementaryExperiences(responseComplementaryExperience.data.map((complementaruExperiences: ComplementaruExperiences) => ({
                     ...complementaruExperiences,
                     data_inicio: complementaruExperiences.data_inicio ? complementaruExperiences.data_inicio.split(" ")[0].split("-").reverse().join("/") : 'Não informado',
                     data_fim: complementaruExperiences.data_fim ? complementaruExperiences.data_fim.split(" ")[0].split("-").reverse().join("/") : 'Não informado',
                 })));
+
+                const responseDocuments = await axios.get(`http://localhost:8000/api/person/${candidatoId}/document`);
+                setDocumentos(responseDocuments.data);
                 
             } catch (error) {
                 alert(error)
@@ -108,6 +125,29 @@ export default function CadastrarVaga() {
             <div className="tracking-wide w-full break-words">
                 <h1 className='text-3xl mt-10 pl-4 pr-4'>Documentos da candidatura de {person[0]?.name}</h1>
                 <hr className="max-w-md mb-4 ml-4 mr-4 bg-[#008DD0] h-0.5" />
+                <div className='flex gap-4'>
+                    {documentos
+                        .filter((documento) => documento.tipo_documento === 'Candidatura').length > 0 ? (
+                        documentos
+                            .filter((documento) => documento.tipo_documento === 'Candidatura')
+                            .map((documento) => (
+                                <div key={documento.id} className="mb-4 text-center">
+                                    <p className='mb-2'>{documento.nome_documento}</p>
+                                    <a
+                                        href={`/storage/app/public/${documento.documento}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        <Button className="bg-blue-600 hover:bg-blue-700 text-xs">
+                                            <FileDown /> {documento.documento}
+                                        </Button>
+                                    </a>
+                                </div>
+                            ))
+                    ) : (
+                        <p>Candidato não possui documentos de candidatura</p>
+                    )}
+                </div>
             </div>
             
             <h1 className='text-3xl mt-10 pl-4 pr-4'>Confira o currículo de {person[0]?.name}</h1>
