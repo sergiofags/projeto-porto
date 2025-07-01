@@ -26,6 +26,8 @@ export default function Inicio({ }: InicioProps) {
   const partes = nomeCompleto.trim().split(' ');
   const [modalAberto, setModalAberto] = useState(false);
   const [produtoSelecionado, setProdutoSelecionado] = useState<ProdutoCatalogo | null>(null);
+  const [modalPerfil, setModalPerfil] = useState(false);
+  const [modalLogin, setModalLogin] = useState(false); // Novo estado para modal de login
 
 const [vaga, setVaga] = useState<Array<{
     edital: any;
@@ -69,7 +71,19 @@ const [vaga, setVaga] = useState<Array<{
   }, [processId]);
 
   const candidatura = async (vacancyId: number) => {
+    // Verifica se o usuário está logado
+    if (!idUser) {
+      setModalLogin(true);
+      return;
+    }
     try {
+      // Verifica se a pessoa existe antes de tentar candidatar
+      const pessoaResponse = await axios.get(`http://localhost:8000/api/person/${idUser}`);
+      if (!pessoaResponse.data || pessoaResponse.data.message === 'Usuário não encontrado.') {
+        setModalPerfil(true);
+        return;
+      }
+
       const response = await axios.post(`http://localhost:8000/api/person/${idUser}/vacancy/${vacancyId}/candidacy`, {
         id_process: processId,
         status: 'Analise',
@@ -81,6 +95,10 @@ const [vaga, setVaga] = useState<Array<{
       }
 
     } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        setModalPerfil(true);
+        return;
+      }
       const errorMessage = (axios.isAxiosError(error) && error.response?.data?.message) || (error instanceof Error && error.message) || 'Erro ao realizar candidatura';
       alert('Erro ao realizar candidatura: ' + errorMessage);
     }
@@ -232,7 +250,7 @@ const [vaga, setVaga] = useState<Array<{
 
             {editalProcesso && (
             <div className="text-sm text-blue-600 underline mb-4">
-              <a href={editalProcesso} target="_blank" rel="noopener noreferrer">
+              <a href={`/storage/${processo.edital}`} target="_blank" rel="noopener noreferrer">
               EDITAL
               </a>
             </div>
@@ -255,6 +273,107 @@ const [vaga, setVaga] = useState<Array<{
             </motion.div>
           )}
         </AnimatePresence>
+
+        <AnimatePresence>
+          {/* Modal de perfil/documentos não cadastrados */}
+          {modalPerfil && (
+            <motion.div
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setModalPerfil(false)}
+            >
+              <motion.div
+                className="bg-white w-full max-w-md rounded-xl shadow-lg p-6 relative flex flex-col items-center"
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                onClick={e => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => setModalPerfil(false)}
+                  className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl"
+                >
+                  &times;
+                </button>
+                <h2 className="text-lg font-semibold mb-4 text-center">
+                  Suas informações pessoais e/ou documentos ainda não foram cadastrados.
+                </h2>
+                <p className="mb-6 text-center">
+                  Gostaria de ir para a página do perfil para cadastrar?
+                </p>
+                <div className="flex gap-4">
+                  <button
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                    onClick={() => {
+                      setModalPerfil(false);
+                      window.location.href = '/settings/profile';
+                    }}
+                  >
+                    Sim
+                  </button>
+                  <button
+                    className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400"
+                    onClick={() => setModalPerfil(false)}
+                  >
+                    Não
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+  {/* Modal de login não autenticado */}
+  {modalLogin && (
+    <motion.div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={() => setModalLogin(false)}
+    >
+      <motion.div
+        className="bg-white w-full max-w-md rounded-xl shadow-lg p-6 relative flex flex-col items-center"
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+        onClick={e => e.stopPropagation()}
+      >
+        <button
+          onClick={() => setModalLogin(false)}
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl"
+        >
+          &times;
+        </button>
+        <h2 className="text-lg font-semibold mb-4 text-center">
+          Você não está logado. Faça login ou cadastre.
+        </h2>
+        <div className="flex gap-4">
+          <button
+            className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400"
+            onClick={() => setModalLogin(false)}
+          >
+            Cancelar
+          </button>
+          <button
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            onClick={() => {
+              setModalLogin(false);
+              window.location.href = '/login';
+            }}
+          >
+            Entrar/Cadastrar
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
     </AppLayout>
   </>
 );}

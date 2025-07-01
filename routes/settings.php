@@ -27,4 +27,8 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('settings/complementary-experience');
     })->name('complementary-experience');
     
+    Route::get('settings/documents', function () {
+        return Inertia::render('settings/documents');
+    })->name('documents');
+
 });
