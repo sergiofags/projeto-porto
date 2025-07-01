@@ -9,7 +9,7 @@ import { SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
 
 export default function CadastrarVaga() {
     const { auth } = usePage<SharedData>().props;
@@ -29,8 +29,6 @@ export default function CadastrarVaga() {
         quantidade: null,
         tipo_vaga: '',
         status: '',
-        data_inicio: '',
-        data_fim: '' as string | null,
     });
 
     useEffect(() => {
@@ -38,12 +36,6 @@ export default function CadastrarVaga() {
             try {
                 const response = await axios.get(`http://localhost:8000/api/process/${processId}/vacancy/${vacancyId}`);
                 setVaga(response.data);
-
-                setVaga({
-                    ...response.data,
-                    data_inicio: response.data.data_inicio.split("-").reverse().join("/"),
-                    data_fim: response.data.data_fim ? response.data.data_fim.split("-").reverse().join("/") : null
-                })
 
             } catch (error) {
                 alert(error)
@@ -60,23 +52,13 @@ export default function CadastrarVaga() {
     const submitVacancy = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (vaga.data_fim === '') {
-            setVaga({ ...vaga, data_fim: null });
-        }
-
         if (!processId) {
             alert('Id do processo não encontrado.');
             return;
         }
 
         try {
-            const formattedVaga = {
-                ...vaga,
-                data_inicio: vaga.data_inicio.split("/").reverse().join("-"),
-                data_fim: vaga.data_fim ? vaga.data_fim.split("/").reverse().join("-") : null
-            };
-
-            const response = await axios.put(`http://localhost:8000/api/admin/${adminId}/process/${processId}/vacancy/${vacancyId}`, formattedVaga);
+            const response = await axios.put(`http://localhost:8000/api/admin/${adminId}/process/${processId}/vacancy/${vacancyId}`, vaga);
             const data = await response.data;
 
             if (data.error) {
@@ -84,7 +66,7 @@ export default function CadastrarVaga() {
                 return;
             }
 
-            setModalSucesso(true); // Exibe o modal de sucesso
+            setModalSucesso(true);
 
         } catch (error) {
             alert(error)
@@ -205,35 +187,6 @@ export default function CadastrarVaga() {
                                 </SelectGroup>
                             </SelectContent>
                         </Select>
-                    </div>
-                    <div className="grid gap-2">
-                        <Label htmlFor="data_inicio">Data início</Label>
-                        <Input
-                            id="data_inicio"
-                            value={vaga.data_inicio}
-                            onChange={(e) => {
-                                let value = e.target.value.replace(/\D/g, ''); // Remove non-numeric characters
-                                if (value.length > 2) value = value.slice(0, 2) + '/' + value.slice(2);
-                                if (value.length > 5) value = value.slice(0, 5) + '/' + value.slice(5, 9);
-                                    setVaga({ ...vaga, data_inicio: value });
-                                }}
-                            placeholder="Data início"
-                            required
-                        />
-                    </div>
-                    <div className="grid gap-2">
-                        <Label htmlFor="data_fim">Data fim</Label>
-                        <Input
-                            id="data_fim"
-                            value={vaga.data_fim ?? ''}
-                            onChange={(e) => {
-                                let value = e.target.value.replace(/\D/g, ''); // Remove non-numeric characters
-                                if (value.length > 2) value = value.slice(0, 2) + '/' + value.slice(2);
-                                if (value.length > 5) value = value.slice(0, 5) + '/' + value.slice(5, 9);
-                                    setVaga({ ...vaga, data_fim: value });
-                                }}
-                            placeholder="Data fim"
-                        />
                     </div>
                     <div className="flex flex-row gap-2">
                     <Link href={`/processo/vagas?id=${processId}`} className="w-full">

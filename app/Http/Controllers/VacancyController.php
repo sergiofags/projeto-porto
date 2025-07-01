@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\Vacancy;
 use App\Models\Process;
 Use App\Models\User;
+use Dotenv\Exception\ValidationException;
+use Exception;
 
 class VacancyController extends Controller
 {
@@ -95,7 +97,7 @@ class VacancyController extends Controller
                 'remuneracao' => 'nullable|numeric|min:0',
                 'beneficios' => 'nullable|string',
                 'quantidade' => 'nullable|integer|min:1',
-                'data_inicio' => 'required|date|before_or_equal:data_fim',
+                'data_inicio' => 'nullable|date|before_or_equal:data_fim',
                 'data_fim' => 'nullable|date|after_or_equal:data_inicio',
                 'tipo_vaga' => 'required|in:Graduacao,Pos-Graduacao',
                 'status' => 'required|in:Aberto,Fechado',
@@ -121,7 +123,7 @@ class VacancyController extends Controller
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Erro de validação.',
-                'error' => $e->error()
+                'error' => $e->getMessage()
             ], 422);
 
         } catch (\Illuminate\Database\QueryException $e) {
@@ -170,7 +172,7 @@ class VacancyController extends Controller
                 'remuneracao' => 'nullable|numeric|min:0',
                 'beneficios' => 'nullable|string',
                 'quantidade' => 'nullable|integer|min:1',
-                'data_inicio' => 'required|date|before_or_equal:data_fim',
+                'data_inicio' => 'nullable|date|before_or_equal:data_fim',
                 'data_fim' => 'nullable|date|after_or_equal:data_inicio',
                 'tipo_vaga' => 'required|in:Graduacao,Pos-Graduacao',
                 'status' => 'required|in:Aberto,Fechado',
@@ -190,7 +192,7 @@ class VacancyController extends Controller
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Erro de validação.',
-                'error' => $e->error()
+                'error' => $e->getMessage()
             ], 422);
 
         } catch (\Illuminate\Database\QueryException $e) {
@@ -237,8 +239,11 @@ class VacancyController extends Controller
                 'message' => 'Vaga excluída com sucesso.'
             ], 204);
 
-        } catch (err){
-            console.log(err);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erro interno no servidor.',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 }

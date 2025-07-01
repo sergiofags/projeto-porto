@@ -24,8 +24,8 @@ return new class extends Migration
             $table->float('remuneracao')->nullable();
             $table->string('beneficios')->nullable();
             $table->integer('quantidade')->nullable();
-            $table->date('data_inicio');
-            $table->date('data_fim');
+            $table->date('data_inicio')->nullable();
+            $table->date('data_fim')->nullable();
             $table->enum('tipo_vaga', ['Graduacao', 'Pos-Graduacao']);
             $table->enum('status', ['Aberto', 'Fechado']);
             $table->timestamps();
