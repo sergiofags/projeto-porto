@@ -22,7 +22,7 @@ class DocumentSeeder extends Seeder
             [
                 'id_person' => $person->id,
                 'tipo_documento' => 'Candidatura',
-                'documento' => 'curriculo_sergio.pdf',
+                'documento' => 'curriculo.pdf',
                 'nome_documento' => 'Curriculo',
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -30,7 +30,7 @@ class DocumentSeeder extends Seeder
             [
                 'id_person' => $person->id,
                 'tipo_documento' => 'Contratacao',
-                'documento' => 'cnh_sergio.pdf',
+                'documento' => 'cnh.pdf',
                 'nome_documento' => 'CedulaIdentidadeOuCNH',
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -38,7 +38,7 @@ class DocumentSeeder extends Seeder
             [
                 'id_person' => $person->id,
                 'tipo_documento' => 'Contratacao',
-                'documento' => 'cpf_sergio.pdf',
+                'documento' => 'cpf.pdf',
                 'nome_documento' => 'CadastroPessoaFisica',
                 'created_at' => now(),
                 'updated_at' => now(),
