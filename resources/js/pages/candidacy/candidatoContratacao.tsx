@@ -119,14 +119,33 @@ export default function CandidatoContratacao() {
         <AppLayout>
             <Head title="Visualizar Vaga" />
             <h1 className='text-3xl'>Documentos da contratação de {person[0]?.name}</h1>
-            <div className='flex gap-4'>
-                {documentos
-                    .filter((documento) => documento.tipo_documento === 'Contratacao').length > 0 ? (
-                    documentos
-                        .filter((documento) => documento.tipo_documento === 'Contratacao')
-                        .map((documento) => (
-                            <div key={documento.id} className="mb-4 text-center">
-                                <p className='mb-2'>{documento.nome_documento}</p>
+            <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 3xl:grid-cols-7 gap-4'>
+                {[
+                    'AtestadoMatricula',
+                    'HistoricoEscolar',
+                    'Curriculo',
+                    'CoeficienteRendimento',
+                    'Foto3x4',
+                    'CedulaIdentidadeOuCNH',
+                    'CadastroPessoaFisica',
+                    'CTPS',
+                    'CarteiraDeReservista',
+                    'ComprovanteDeResidencia',
+                    'AntecedentesCriminaisECivel',
+                    'AntecedentesCriminaisPoliciaFederal',
+                    'VacinacaFebreAmarela',
+                    'VacinacaCovid19',
+                    'GrupoSanguineo',
+                    'ComprovanteMatricula',
+                    'AtestadadoFrequencia',
+                ].map((docName) => {
+                    const documento = documentos.find(
+                        (doc) => doc.tipo_documento === 'Contratacao' && doc.nome_documento === docName
+                    );
+                    return (
+                        <div key={docName} className="mb-4 text-center">
+                            <p className="mb-2">{docName}</p>
+                            {documento ? (
                                 <a
                                     href={`/storage/app/public/${documento.documento}`}
                                     target="_blank"
@@ -136,11 +155,12 @@ export default function CandidatoContratacao() {
                                         <FileDown /> {documento.documento}
                                     </Button>
                                 </a>
-                            </div>
-                        ))
-                ) : (
-                    <p>Candidato não possui documentos de contratação</p>
-                )}
+                            ) : (
+                                <p>Documento não informado</p>
+                            )}
+                        </div>
+                    );
+                })}
             </div>
 
             <h1 className='text-3xl'>Currículo de {person[0]?.name}</h1>
