@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Person;
+use Illuminate\Support\Facades\Storage;
 
 use Illuminate\Validation\ValidationException;
 use Exception;
@@ -178,6 +179,11 @@ class PersonController extends Controller
 
             $validatedData['id'] = $validatedData['id_user'];
             $person = Person::create($validatedData);
+
+            // Cria a pasta do candidato
+            $userId = $person->id_user ?? $person->id;
+            $folder = "Documentos_Candidato/Candidato{$userId}";
+            Storage::disk('public')->makeDirectory($folder);
 
             return response()->json($person, 201);
 

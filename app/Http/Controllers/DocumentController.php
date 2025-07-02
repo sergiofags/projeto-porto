@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Person;
 use App\Models\Document;
 use Dotenv\Exception\ValidationException;
+use Illuminate\Support\Facades\Storage;
 
 class DocumentController extends Controller
 {
@@ -81,29 +82,36 @@ class DocumentController extends Controller
 
             $validatedData = $request->validate([
                 'tipo_documento' => 'required|in:Contratacao,Candidatura',
-                'documento' => 'nullable|string|max:255',
-                'nome_documento' => 'required|in:AtestadoMatricula,HistoricoEscolar,Curriculo,CoeficienteRendimento,Foto3x4,CedulaIdentidadeOuCNH,CadastroPessoaFisica,CTPS,CarteiraDeReservista,ComprovanteDeResidencia,AntecedentesCriminaisECivel,AntecedentesCriminaisPoliciaFederal,VacinacaFebreAmarela,VacinacaCovid19,GrupoSanguineo,ComprovanteMatricula,AtestadadoFrequencia',    
+                'documento' => 'nullable|file|mimes:pdf|max:20480', // 20MB e só PDF
+                'nome_documento' => 'required|in:AtestadoMatricula,HistoricoEscolar,Curriculo,CoeficienteRendimento',    
             ]);
 
             $validatedData['id_person'] = $person->id;
 
-            // Precisa verificar pois não consegui converter o arquivo para path, irei corrigir posteriormente
+            // Cria a pasta do candidato se não existir
+            $userId = $person->id_user ?? $person->id;
+            $folder = "Documentos_Candidato/Candidato{$userId}";
+            Storage::disk('public')->makeDirectory($folder); // Garante a criação da pasta
+
+            if ($request->hasFile('documento')) {
+                $file = $request->file('documento');
+                $path = $file->store($folder, 'public');
+                $validatedData['documento'] = $path;
+            } else {
+                return response()->json([
+                    'message' => 'Arquivo não enviado.'
+                ], 422);
+            }
 
             $document = Document::create($validatedData);
 
             return response()->json($document, 201);
 
-        } catch (ValidationException $e) {
+        } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'message' => 'Erro de validação.',
                 'error' => $e->getMessage()
             ], 422);
-
-        } catch (\Illuminate\Database\QueryException $e) {
-            return response()->json([
-                'message' => 'Erro ao acessar o banco de dados.',
-                'error' => $e->getMessage()
-            ], 500);
 
         } catch (\Exception $e) {
             return response()->json([

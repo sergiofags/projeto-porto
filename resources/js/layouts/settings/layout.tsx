@@ -32,6 +32,12 @@ const sidebarNavItems: NavItem[] = [
         href: '/settings/appearance',
         icon: null,
     },
+    {
+        title: 'Documentos',
+        href: '/settings/documents',
+        icon: null,
+    },
+
 ];
 
 
