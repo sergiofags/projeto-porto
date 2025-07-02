@@ -75,7 +75,7 @@ export default function EditaProcesso() {
             });
 
             if (res.ok) {
-                setMensagem('Processo atualizado com sucesso!');
+                setMensagem('');
                 setModalSucesso(true); // abre o modal de sucesso
             } else {
                 const err = await res.json();

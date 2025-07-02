@@ -232,8 +232,10 @@ const [vaga, setVaga] = useState<Array<{
 
             {editalProcesso && (
             <div className="text-sm text-blue-600 underline mb-4">
-              <a href={editalProcesso} target="_blank" rel="noopener noreferrer">
-              EDITAL
+              <a href={`/storage/${processo.edital}`} target="_blank" rel="noopener noreferrer">
+              {processo
+                    ? `Edital ${processo.descricao} - Nº ${processo.numero_processo}`
+                    : 'Carregando...'}
               </a>
             </div>
             )}
