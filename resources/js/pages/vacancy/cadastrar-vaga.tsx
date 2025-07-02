@@ -54,9 +54,15 @@ const [modalSucesso, setModalSucesso] = useState(false);
             }
 
             setModalSucesso(true);
+        } 
 
-        } catch (error) {
-            alert(error)
+        catch (error: any) {
+            // Mostra mensagem de erro detalhada do backend
+            if (error.response && error.response.data && error.response.data.message) {
+                alert(error.response.data.message);
+            } else {
+                alert('Erro ao cadastrar vaga');
+            }
             return;
         }
     };

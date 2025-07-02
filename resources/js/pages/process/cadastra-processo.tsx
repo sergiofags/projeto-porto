@@ -43,7 +43,7 @@ export default function CadastraProcesso() {
             });
 
             if (res.ok) {
-                setMensagem('Processo cadastrado com sucesso!');
+                setMensagem('');
                 setDescricao('');
                 setNumeroProcesso('');
                 setEdital(null);
