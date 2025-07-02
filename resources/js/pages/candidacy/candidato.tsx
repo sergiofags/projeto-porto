@@ -126,13 +126,14 @@ export default function CadastrarVaga() {
                 <h1 className='text-3xl mt-10 pl-4 pr-4'>Documentos da candidatura de {person[0]?.name}</h1>
                 <hr className="max-w-md mb-4 ml-4 mr-4 bg-[#008DD0] h-0.5" />
                 <div className='flex gap-4'>
-                    {documentos
-                        .filter((documento) => documento.tipo_documento === 'Candidatura').length > 0 ? (
-                        documentos
-                            .filter((documento) => documento.tipo_documento === 'Candidatura')
-                            .map((documento) => (
-                                <div key={documento.id} className="mb-4 text-center">
-                                    <p className='mb-2'>{documento.nome_documento}</p>
+                    {['AtestadoMatricula', 'HistoricoEscolar', 'Curriculo'].map((docName) => {
+                        const documento = documentos.find(
+                            (doc) => doc.tipo_documento === 'Candidatura' && doc.nome_documento === docName
+                        );
+                        return (
+                            <div key={docName} className="mb-4 text-center">
+                                <p className="mb-2">{docName}</p>
+                                {documento ? (
                                     <a
                                         href={`/storage/app/public/${documento.documento}`}
                                         target="_blank"
@@ -142,11 +143,12 @@ export default function CadastrarVaga() {
                                             <FileDown /> {documento.documento}
                                         </Button>
                                     </a>
-                                </div>
-                            ))
-                    ) : (
-                        <p>Candidato não possui documentos de candidatura</p>
-                    )}
+                                ) : (
+                                    <p>Documento não informado</p>
+                                )}
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
             
