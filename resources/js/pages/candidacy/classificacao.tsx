@@ -3,8 +3,9 @@ import AppLayout from '@/layouts/app-layout';
 import { Head, Link } from '@inertiajs/react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from '@/components/ui/button';
-import { BookText, Undo2 } from 'lucide-react';
+import { BookText, Undo2, ChevronLeft } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 type Candidatura = {
     id: string;
@@ -84,12 +85,25 @@ export default function VerCandidatos() {
     return (
         <AppLayout>
             <Head title="Classificação" />
-            <Link href={`/processo/vagas/detalhes?id-processo=${processId}&id-vaga=${vancancyId}`}>
-                <Button><Undo2 className="mr-2 h-4 w-4" /> Voltar</Button>
-            </Link>
-            <h1 className='text-3xl font-bold my-4'>Classificação</h1>
-            <div className='container mx-auto mt-5 border rounded-lg p-4'>
-                <Table>
+            {/* <h1 className='text-3xl mt-6'>Classificação</h1>
+            <div className="flex justify-end mt-6 mb-6 pl-2">
+                <Link className="w-fit flex" href={``}>
+                    <Button
+                        className="flex items-center gap-2 rounded-md px-4 py-2 text-sm duration-200 bg-gray-500 text-white shadow-xs hover:bg-gray-600">
+                        <ChevronLeft /> Voltar
+                    </Button>
+                </Link>
+            </div> */}
+            <div className="flex items-center justify-between mt-6">
+                <h1 className="text-3xl">Classificação</h1>
+                <Link className="w-fit flex" href={``}>
+                    <Button className="flex items-center gap-2 rounded-md px-4 py-2 text-sm text-white">
+                        Gerar PDF
+                    </Button>
+                </Link>
+            </div>
+            <Table>
+                <ScrollArea className="max-h-[500px] w-full rounded-md border border-[#008DD0] p-4 overflow-auto">
                     <TableHeader>
                         <TableRow>
                             <TableHead>Classificação</TableHead>
@@ -140,7 +154,16 @@ export default function VerCandidatos() {
                                 );
                             })}
                     </TableBody>
-                </Table>
+                </ScrollArea>
+            </Table>
+
+            <div className="mt-6 mb-6 pl-2">
+                <Link className="w-fit flex" href={`/processo/vagas/detalhes?id-processo=${processId}&id-vaga=${vancancyId}`}>
+                    <Button
+                        className="flex items-center gap-2 rounded-md px-4 py-2 text-sm duration-200 bg-gray-500 text-white shadow-xs hover:bg-gray-600">
+                        <ChevronLeft /> Voltar
+                    </Button>
+                </Link>
             </div>
         </AppLayout> 
     );
