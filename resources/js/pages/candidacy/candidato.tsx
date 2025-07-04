@@ -1,8 +1,8 @@
 import axios from 'axios';
 import AppLayout from '@/layouts/app-layout';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-import { ChevronDown, ChevronUp, FileDown } from 'lucide-react';
+import { ChevronDown, ChevronUp, FileDown, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 type Person = {
@@ -80,6 +80,10 @@ export default function CadastrarVaga() {
     const [experiences, setExperiences] = useState<Experiences[]>([]);
     const [complementaruExperiences, setComplementaryExperiences] = useState<ComplementaruExperiences[]>([]);
     const [documentos, setDocumentos] = useState<Documentos[]>([]);
+
+    // Get processId and vacancyId from query params
+    const processId = queryParams.get('id-processo');
+    const vacancyId = queryParams.get('id-vaga');
 
     useEffect(() => {
         const fetchVacancy = async () => {
@@ -755,7 +759,14 @@ export default function CadastrarVaga() {
                     </>
                 )}
             </div> 
-        
+            <div className="mt-6 mb-6 pl-2">
+                <Link className="w-fit flex" href={`/processo/vagas/ver-candidatos?id-processo=${processId}&id-vaga=${vacancyId}`}>
+                    <Button
+                        className="flex items-center gap-2 rounded-md px-4 py-2 text-sm duration-200 bg-gray-500 text-white shadow-xs hover:bg-gray-600">
+                        <ChevronLeft /> Voltar
+                    </Button>
+                </Link>
+            </div>
         </AppLayout> 
     );
 }
