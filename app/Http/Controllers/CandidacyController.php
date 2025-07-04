@@ -161,16 +161,19 @@ class CandidacyController extends Controller
                 'data_candidatura' => 'required|date',
             ]);
 
-            $existingCandidacy = Candidacy::where('id_person', $person->id)
-                ->where('id_vacancy', $vacancy->id)
-                ->first();
-
-            if ($vacancy->data_fim < now()) {
-                return response()->json(['message' => 'A vaga já foi encerrada'], 409);
-            }
+            // Verifica se a pessoa já tem candidatura em qualquer vaga
+            $existingCandidacy = Candidacy::where('id_person', $person->id)->first();
 
             if ($existingCandidacy) {
-                return response()->json(['message' => 'Essa pessoa já possui uma candidatura para essa vaga'], 409);
+                $existingVacancy = Vacancy::find($existingCandidacy->id_vacancy);
+                return response()->json([
+                    'message' => 'Você já se candidatou em uma vaga',
+                    'vacancy_title' => $existingVacancy ? $existingVacancy->titulo : 'Vaga não encontrada'
+                ], 409);
+            }
+
+            if ($vacancy->data_fim && $vacancy->data_fim < now()) {
+                return response()->json(['message' => 'A vaga já foi encerrada'], 409);
             }
 
             $validatedData['id_person'] = $person->id;
@@ -232,6 +235,44 @@ class CandidacyController extends Controller
                 'message' => 'Erro de validação.',
                 'error' => $e->getMessage()
             ], 422);
+
+        } catch (\Illuminate\Database\QueryException $e) {
+            return response()->json([
+                'message' => 'Erro ao acessar o banco de dados.',
+                'error' => $e->getMessage()
+            ], 500);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erro interno no servidor.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function cancel(Request $request, $personId, $candidacyId)
+    {
+        try {
+            $person = Person::find($personId);
+            if (!$person) {
+                return response()->json([
+                    'message' => 'Pessoa não encontrada'
+                ], 404);
+            }
+
+            $candidacy = $person->candidacy()->find($candidacyId);
+            if (!$candidacy) {
+                return response()->json([
+                    'message' => 'Candidatura não encontrada'
+                ], 404);
+            }
+
+            // Deleta a candidatura
+            $candidacy->delete();
+
+            return response()->json([
+                'message' => 'Candidatura cancelada com sucesso'
+            ], 200);
 
         } catch (\Illuminate\Database\QueryException $e) {
             return response()->json([

@@ -55,6 +55,7 @@ Route::get('/vacancy/{vacancyId}/candidacy', [CandidacyController::class, 'allCa
 Route::get('/vacancy/{vacancyId}/candidacy/{candidacyId}', [CandidacyController::class, 'specificCandidacyByVacancy'])->name('candidacy.specificCandidacyByVacancy'); //Retorna uma candidatura especifica de uma vaga
 Route::post('/person/{personId}/vacancy/{vacancyId}/candidacy', [CandidacyController::class, 'store'])->name('candidacy.store'); //Cria uma nova candidatura
 Route::put('/person/{personId}/candidacy/{candidacyId}', [CandidacyController::class, 'update'])->name('candidacy.update'); //Atualiza uma candidatura
+Route::delete('/person/{personId}/candidacy/{candidacyId}', [CandidacyController::class, 'cancel'])->name('candidacy.cancel'); //Cancela uma candidatura
 
 Route::get('/candidacy/{candidacyId}/interview', [InterviewController::class, 'index'])->name('interview.index'); //Retorna a entrevista relacionada a candidatura
 Route::post('/admin/{adminId}/candidacy/{candidacyId}/interview', [InterviewController::class, 'store'])->name('interview.store'); //Cria uma nova entrevista

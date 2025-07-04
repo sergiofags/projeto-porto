@@ -31,6 +31,7 @@ class PersonController extends Controller
                 ];
 
                 $personData = [
+                    'id' => optional($person)->id, // Adicionar o ID do Person
                     'foto_perfil' => optional($person)->foto_perfil,
                     'sobre' => optional($person)->sobre,
                     'linkedin' => optional($person)->linkedin,
@@ -91,6 +92,7 @@ class PersonController extends Controller
                 'id_user' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'person_exists' => $person !== null, // Indicador se o registro Person existe
                 'foto_perfil' => optional($person)->foto_perfil,
                 'sobre' => optional($person)->sobre,
                 'linkedin' => optional($person)->linkedin,
@@ -152,9 +154,9 @@ class PersonController extends Controller
                 'instagram' => 'nullable|string|max:255',
                 'facebook' => 'nullable|string|max:255',
                 'twitter' => 'nullable|string|max:255',
-                'cpf' => 'required|string|max:14|unique:person,cpf',
+                'cpf' => 'nullable|string|max:14|unique:person,cpf',
                 'data_nascimento' => 'nullable|date',
-                'genero' => 'required|in:Masculino,Feminino,Outro',
+                'genero' => 'nullable|in:Masculino,Feminino,Outro',
                 'deficiencia' => 'nullable|in:true,false',
                 'qual_deficiencia' => 'nullable|string|max:255',
                 'servico_militar' => 'nullable|in:true,false',
@@ -170,11 +172,14 @@ class PersonController extends Controller
                 'estou_ciente' => 'nullable|in:true,false',
             ]);
 
-            $cpf = $validatedData['cpf'];
-            if (!$this->validCPF($cpf)) {
-                return response()->json([
-                    'message' => 'CPF inválido.'
-                ], 422);
+            // Só valida CPF se foi fornecido
+            if (!empty($validatedData['cpf'])) {
+                $cpf = $validatedData['cpf'];
+                if (!$this->validCPF($cpf)) {
+                    return response()->json([
+                        'message' => 'CPF inválido.'
+                    ], 422);
+                }
             }
 
             $validatedData['id'] = $validatedData['id_user'];
