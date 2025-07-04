@@ -22,12 +22,23 @@ export default function Inicio({ }: InicioProps) {
 
   const { auth } = usePage<SharedData>().props;
   const idUser = auth?.user?.id;
-  const nomeCompleto = auth?.user?.name || '';
-  const partes = nomeCompleto.trim().split(' ');
+  // const nomeCompleto = auth?.user?.name || '';
+  // const partes = nomeCompleto.trim().split(' ');
   const [modalAberto, setModalAberto] = useState(false);
   const [produtoSelecionado, setProdutoSelecionado] = useState<ProdutoCatalogo | null>(null);
   const [modalPerfil, setModalPerfil] = useState(false);
-  const [modalLogin, setModalLogin] = useState(false); // Novo estado para modal de login
+  const [modalLogin, setModalLogin] = useState(false);
+  const [modalInfoPessoais, setModalInfoPessoais] = useState(false); // Modal apenas para informações pessoais
+  const [modalDocumentos, setModalDocumentos] = useState(false); // Modal apenas para documentos
+  const [modalJaCandidatado, setModalJaCandidatado] = useState(false); // Modal para vaga já candidatada
+  const [modalCancelarCandidatura, setModalCancelarCandidatura] = useState(false); // Modal para confirmação de cancelamento
+  const [modalVisualizarCandidatura, setModalVisualizarCandidatura] = useState(false); // Modal para visualizar candidatura
+  const [erroCancelamento, setErroCancelamento] = useState<string | null>(null); // Erro no cancelamento
+  const [vagaCandidatada, setVagaCandidatada] = useState<string>(''); // Nome da vaga que já foi candidatada
+  const [candidacyId, setCandidacyId] = useState<number | null>(null); // ID da candidatura para cancelamento
+  const [candidacyDetails, setCandidacyDetails] = useState<any>(null); // Detalhes da candidatura
+  const [jaTemCandidatura, setJaTemCandidatura] = useState(false); // Verifica se já tem candidatura ativa
+  const [interviewDetails, setInterviewDetails] = useState<any>(null); // Detalhes da entrevista
 
 const [vaga, setVaga] = useState<Array<{
     edital: any;
@@ -62,13 +73,43 @@ const [vaga, setVaga] = useState<Array<{
         const processResponse = await axios.get(`http://localhost:8000/api/process/${processId}`);
         setEditalProcesso(processResponse.data.edital);
         setProcesso(processResponse.data); // Salva o processo inteiro
-      } catch (error) {
-        alert(error)
+      } catch {
+        alert("Erro ao carregar dados")
         return;
       }
     }
     fetchProcess();
   }, [processId]);
+
+  // Verificar se o usuário já tem candidatura ativa
+  useEffect(() => {
+    const checkExistingCandidacy = async () => {
+      if (!idUser) return;
+      
+      try {
+        const candidaciesResponse = await axios.get(`http://localhost:8000/api/person/${idUser}/candidacy`);
+        if (candidaciesResponse.data && candidaciesResponse.data.length > 0) {
+          setJaTemCandidatura(true);
+          setCandidacyId(candidaciesResponse.data[0].id);
+          setCandidacyDetails(candidaciesResponse.data[0]); // Salvar detalhes da candidatura
+          
+          // Buscar o nome da vaga
+          const candidatura = candidaciesResponse.data[0];
+          const vagaResponse = await axios.get(`http://localhost:8000/api/process/${candidatura.id_process}/vacancy/${candidatura.id_vacancy}`);
+          setVagaCandidatada(vagaResponse.data.titulo);
+        } else {
+          setJaTemCandidatura(false);
+          setCandidacyId(null);
+          setCandidacyDetails(null);
+          setVagaCandidatada('');
+        }
+      } catch {
+        setJaTemCandidatura(false);
+      }
+    };
+
+    checkExistingCandidacy();
+  }, [idUser]);
 
   const candidatura = async (vacancyId: number) => {
     // Verifica se o usuário está logado
@@ -79,8 +120,56 @@ const [vaga, setVaga] = useState<Array<{
     try {
       // Verifica se a pessoa existe antes de tentar candidatar
       const pessoaResponse = await axios.get(`http://localhost:8000/api/person/${idUser}`);
+      
       if (!pessoaResponse.data || pessoaResponse.data.message === 'Usuário não encontrado.') {
         setModalPerfil(true);
+        return;
+      }
+
+      // Verifica se há informações pessoais e documentos
+      const pessoa = pessoaResponse.data;
+      console.log('Dados da pessoa:', pessoa); // Debug
+      console.log('Objeto completo da pessoa:', JSON.stringify(pessoa, null, 2)); // Debug mais detalhado
+      
+      // Verificar se o registro de pessoa existe (usando o campo retornado pela API)
+      const personExists = pessoa.person_exists;
+      console.log('personExists:', personExists); // Debug
+      
+      // Se não existe registro de pessoa, considerar que não tem informações pessoais
+      const hasPersonalInfo = personExists && !!(pessoa.cpf && pessoa.telefone && pessoa.data_nascimento);
+      console.log('hasPersonalInfo:', hasPersonalInfo); // Debug
+      console.log('CPF:', pessoa.cpf, 'Telefone:', pessoa.telefone, 'Data nascimento:', pessoa.data_nascimento); // Debug
+      
+      // Verificar se existem documentos (corrigindo a URL da API)
+      let hasDocuments = false;
+      try {
+        const documentsResponse = await axios.get(`http://localhost:8000/api/person/${idUser}/document`);
+        hasDocuments = documentsResponse.data && documentsResponse.data.length > 0;
+        console.log('hasDocuments:', hasDocuments); // Debug
+        console.log('Resposta dos documentos:', documentsResponse.data); // Debug
+      } catch (docError) {
+        hasDocuments = false;
+        console.log('Erro ao buscar documentos:', docError); // Debug
+        console.log('Considerando hasDocuments como false'); // Debug
+      }
+
+      // Determina qual modal mostrar baseado no que está faltando
+      console.log('Verificação final - hasPersonalInfo:', hasPersonalInfo, 'hasDocuments:', hasDocuments); // Debug
+      
+      if (!hasPersonalInfo && !hasDocuments) {
+        console.log('Abrindo modal geral - ambos faltando'); // Debug
+        // Ambos estão faltando - modal geral
+        setModalPerfil(true);
+        return;
+      } else if (!hasPersonalInfo && hasDocuments) {
+        console.log('Abrindo modal info pessoais - só info pessoais faltando'); // Debug
+        // Só informações pessoais estão faltando
+        setModalInfoPessoais(true);
+        return;
+      } else if (hasPersonalInfo && !hasDocuments) {
+        console.log('Abrindo modal documentos - só documentos faltando'); // Debug
+        // Só documentos estão faltando
+        setModalDocumentos(true);
         return;
       }
 
@@ -92,6 +181,16 @@ const [vaga, setVaga] = useState<Array<{
 
       if (response.status === 200 || response.status === 201) {
         alert(response.data.message || 'Candidatura realizada com sucesso');
+        setModalAberto(false);
+        
+        // Atualizar estados para refletir a nova candidatura
+        setJaTemCandidatura(true);
+        const novaVaga = vaga.find(v => v.id === vacancyId);
+        if (novaVaga) {
+          setVagaCandidatada(novaVaga.titulo);
+        }
+        setCandidacyId(response.data.id);
+        setCandidacyDetails(response.data);
       }
 
     } catch (error) {
@@ -99,8 +198,93 @@ const [vaga, setVaga] = useState<Array<{
         setModalPerfil(true);
         return;
       }
+      
+      // Verifica se é o erro de já candidatado
+      if (axios.isAxiosError(error) && error.response?.status === 409) {
+        const responseData = error.response.data;
+        if (responseData.message === 'Você já se candidatou em uma vaga') {
+          // Atualizar os estados para refletir que já tem candidatura
+          setVagaCandidatada(responseData.vacancy_title || 'Vaga não identificada');
+          setJaTemCandidatura(true);
+          
+          // Buscar o ID da candidatura existente se não tiver
+          if (!candidacyId) {
+            try {
+              const candidaciesResponse = await axios.get(`http://localhost:8000/api/person/${idUser}/candidacy`);
+              if (candidaciesResponse.data && candidaciesResponse.data.length > 0) {
+                setCandidacyId(candidaciesResponse.data[0].id);
+              }
+            } catch (candidacyError) {
+              console.log('Erro ao buscar candidatura:', candidacyError);
+            }
+          }
+          
+          // Abrir modal ao invés de alert
+          setModalJaCandidatado(true);
+          return;
+        }
+      }
+      
       const errorMessage = (axios.isAxiosError(error) && error.response?.data?.message) || (error instanceof Error && error.message) || 'Erro ao realizar candidatura';
       alert('Erro ao realizar candidatura: ' + errorMessage);
+    }
+  };
+  
+  const abrirModalCancelamento = async () => {
+    // Se não temos candidacyId ou idUser, tentar recarregar os dados da candidatura
+    if (!candidacyId || !idUser) {
+      if (idUser) {
+        try {
+          const candidaciesResponse = await axios.get(`http://localhost:8000/api/person/${idUser}/candidacy`);
+          if (candidaciesResponse.data && candidaciesResponse.data.length > 0) {
+            const candidatura = candidaciesResponse.data[0];
+            setCandidacyId(candidatura.id);
+          }
+        } catch (error) {
+          console.error('Erro ao recarregar candidatura:', error);
+        }
+      }
+    }
+    
+    setErroCancelamento(null);
+    setModalCancelarCandidatura(true);
+  };
+
+  const abrirModalVisualizacao = async () => {
+    // Buscar dados da entrevista se houver candidatura
+    if (candidacyId) {
+      try {
+        const interviewResponse = await axios.get(`http://localhost:8000/api/candidacy/${candidacyId}/interview`);
+        setInterviewDetails(interviewResponse.data);
+      } catch {
+        // Se não houver entrevista, mantém como null
+        setInterviewDetails(null);
+      }
+    }
+    setModalVisualizarCandidatura(true);
+  };
+
+  const cancelarCandidatura = async () => {
+    if (!candidacyId || !idUser) {
+      setErroCancelamento('Não foi possível identificar a candidatura para cancelamento.');
+      return;
+    }
+
+    try {
+      const response = await axios.delete(`http://localhost:8000/api/person/${idUser}/candidacy/${candidacyId}`);
+      
+      if (response.status === 200) {
+        setModalAberto(false);
+        setCandidacyId(null);
+        setCandidacyDetails(null);
+        setVagaCandidatada('');
+        setJaTemCandidatura(false);
+        setErroCancelamento(null);
+        // Modal permanece aberto para mostrar sucesso
+      }
+    } catch (error) {
+      const errorMessage = (axios.isAxiosError(error) && error.response?.data?.message) || 'Erro ao cancelar candidatura';
+      setErroCancelamento(errorMessage);
     }
   };
   
@@ -159,14 +343,52 @@ const [vaga, setVaga] = useState<Array<{
                   <p className="text-sm font-semibold">{item.titulo}</p>
                   <p className="text-sm text-slate-400">{item.tipo_vaga}</p>
                   <button
-                    onClick={() => {
+                    onClick={async () => {
                       setProdutoSelecionado({
                         id: item.id,
                         nome: item.titulo,
                         curso: item.tipo_vaga,
                         imagem: '/vaga-ti.png',
-                        // Add other fields as needed for modal
+                        // Adicione outros campos conforme necessário para o modal
                       } as ProdutoCatalogo);
+                      
+                      // Verificar se usuário tem candidatura para essa vaga específica
+                      if (idUser) {
+                        try {
+                          const candidaciesResponse = await axios.get(`http://localhost:8000/api/person/${idUser}/candidacy`);
+                          if (candidaciesResponse.data && candidaciesResponse.data.length > 0) {
+                            const candidatura = candidaciesResponse.data[0];
+                            // Buscar informações da vaga da candidatura existente
+                            const vagaResponse = await axios.get(`http://localhost:8000/api/process/${candidatura.id_process}/vacancy/${candidatura.id_vacancy}`);
+                            
+                            if (candidatura.id_vacancy === item.id) {
+                              // Usuário tem candidatura para esta vaga específica
+                              setJaTemCandidatura(true);
+                              setCandidacyId(candidatura.id);
+                              setCandidacyDetails(candidatura);
+                              setVagaCandidatada(item.titulo);
+                            } else {
+                              // Usuário tem candidatura para outra vaga
+                              setJaTemCandidatura(true);
+                              setCandidacyId(candidatura.id);
+                              setCandidacyDetails(candidatura);
+                              setVagaCandidatada(vagaResponse.data.titulo || 'Vaga não identificada');
+                            }
+                          } else {
+                            // Usuário não tem candidatura
+                            setJaTemCandidatura(false);
+                            setCandidacyId(null);
+                            setCandidacyDetails(null);
+                            setVagaCandidatada('');
+                          }
+                        } catch {
+                          setJaTemCandidatura(false);
+                          setCandidacyId(null);
+                          setCandidacyDetails(null);
+                          setVagaCandidatada('');
+                        }
+                      }
+                      
                       setModalAberto(true);
                     }}
                     className="mt-4 px-4 py-2 bg-[#207FCD] text-white rounded-full shadow hover:bg-[#1a6fb3] transition-colors">Saiba mais
@@ -256,19 +478,61 @@ const [vaga, setVaga] = useState<Array<{
             </div>
             )}
 
-          <button
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-            onClick={() => {
-              const vacancyId = vaga.find(v => v.id === produtoSelecionado.id)?.id;
-              if (vacancyId !== undefined) {
-                candidatura(vacancyId);
-              } else {
-                return;
-              }
-            }}
-          >
-            Candidatar-se
-          </button>
+          <div className="flex gap-4">
+            {jaTemCandidatura && produtoSelecionado && candidacyId ? (
+              // Verificar se a candidatura é para esta vaga ou para outra
+              (() => {
+                // Buscar a candidatura atual para verificar se é para esta vaga
+                const vagaAtual = vaga.find(v => v.id === produtoSelecionado.id);
+                const temCandidaturaNestaVaga = vagaAtual && vagaAtual.titulo === vagaCandidatada;
+                
+                if (temCandidaturaNestaVaga) {
+                  // Usuário tem candidatura para esta vaga específica
+                  return (
+                    <div className="flex gap-2">
+                      <button
+                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                        onClick={abrirModalVisualizacao}
+                      >
+                        Visualizar Candidatura
+                      </button>
+                      <button
+                        className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                        onClick={abrirModalCancelamento}
+                      >
+                        Cancelar Candidatura
+                      </button>
+                    </div>
+                  );
+                } else {
+                  // Usuário tem candidatura para outra vaga
+                  return (
+                    <button
+                      className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
+                      onClick={() => setModalJaCandidatado(true)}
+                    >
+                      Você já tem uma candidatura ativa
+                    </button>
+                  );
+                }
+              })()
+            ) : (
+              // Usuário não tem candidatura
+              <button
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                onClick={() => {
+                  const vacancyId = vaga.find(v => v.id === produtoSelecionado.id)?.id;
+                  if (vacancyId !== undefined) {
+                    candidatura(vacancyId);
+                  } else {
+                    return;
+                  }
+                }}
+              >
+                Candidatar-se
+              </button>
+            )}
+          </div>
               </motion.div>
             </motion.div>
           )}
@@ -299,10 +563,10 @@ const [vaga, setVaga] = useState<Array<{
                   &times;
                 </button>
                 <h2 className="text-lg font-semibold mb-4 text-center">
-                  Suas informações pessoais e/ou documentos ainda não foram cadastrados.
+                  Suas informações pessoais e documentos ainda não foram cadastrados.
                 </h2>
                 <p className="mb-6 text-center">
-                  Gostaria de ir para a página do perfil para cadastrar?
+                  É necessário completar os dados pessoais e enviar os documentos para se candidatar. Gostaria de ir para a página do perfil?
                 </p>
                 <div className="flex gap-4">
                   <button
@@ -372,8 +636,346 @@ const [vaga, setVaga] = useState<Array<{
         </div>
       </motion.div>
     </motion.div>
-  )}
-</AnimatePresence>
+  )}        </AnimatePresence>
+
+        <AnimatePresence>
+          {/* Modal apenas para informações pessoais não cadastradas */}
+          {modalInfoPessoais && (
+            <motion.div
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setModalInfoPessoais(false)}
+            >
+              <motion.div
+                className="bg-white w-full max-w-md rounded-xl shadow-lg p-6 relative flex flex-col items-center"
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                onClick={e => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => setModalInfoPessoais(false)}
+                  className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl"
+                >
+                  &times;
+                </button>
+                <h2 className="text-lg font-semibold mb-4 text-center">
+                  Suas informações pessoais ainda não foram cadastradas.
+                </h2>
+                <p className="mb-6 text-center">
+                  É necessário completar os dados pessoais para se candidatar. Gostaria de ir para a página do perfil?
+                </p>
+                <div className="flex gap-4">
+                  <button
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                    onClick={() => {
+                      setModalInfoPessoais(false);
+                      window.location.href = '/settings/profile';
+                    }}
+                  >
+                    Sim
+                  </button>
+                  <button
+                    className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400"
+                    onClick={() => setModalInfoPessoais(false)}
+                  >
+                    Não
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {/* Modal apenas para documentos não cadastrados */}
+          {modalDocumentos && (
+            <motion.div
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setModalDocumentos(false)}
+            >
+              <motion.div
+                className="bg-white w-full max-w-md rounded-xl shadow-lg p-6 relative flex flex-col items-center"
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                onClick={e => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => setModalDocumentos(false)}
+                  className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl"
+                >
+                  &times;
+                </button>
+                <h2 className="text-lg font-semibold mb-4 text-center">
+                  Seus documentos ainda não foram cadastrados.
+                </h2>
+                <p className="mb-6 text-center">
+                  É necessário enviar os documentos para se candidatar. Gostaria de ir para a página de documentos?
+                </p>
+                <div className="flex gap-4">
+                  <button
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                    onClick={() => {
+                      setModalDocumentos(false);
+                      window.location.href = '/settings/documents';
+                    }}
+                  >
+                    Sim
+                  </button>
+                  <button
+                    className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400"
+                    onClick={() => setModalDocumentos(false)}
+                  >
+                    Não
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {/* Modal para vaga já candidatada */}
+          {modalJaCandidatado && (
+            <motion.div
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setModalJaCandidatado(false)}
+            >
+              <motion.div
+                className="bg-white w-full max-w-md rounded-xl shadow-lg p-6 relative flex flex-col items-center"
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                onClick={e => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => setModalJaCandidatado(false)}
+                  className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl"
+                >
+                  &times;
+                </button>
+                <h2 className="text-lg font-semibold mb-4 text-center">
+                  Você já se candidatou em uma vaga
+                </h2>
+                <p className="mb-6 text-center">
+                  Você já possui uma candidatura ativa na vaga: <strong>{vagaCandidatada}</strong>
+                </p>
+                <p className="mb-6 text-center text-sm text-gray-600">
+                  Para se candidatar em outra vaga, cancele sua candidatura atual.
+                </p>
+                <button
+                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                  onClick={() => setModalJaCandidatado(false)}
+                >
+                  Entendido
+                </button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {/* Modal para confirmação de cancelamento de candidatura */}
+          {modalCancelarCandidatura && (
+            <motion.div
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setModalCancelarCandidatura(false)}
+            >
+              <motion.div
+                className="bg-white w-full max-w-md rounded-xl shadow-lg p-6 relative flex flex-col items-center"
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                onClick={e => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => setModalCancelarCandidatura(false)}
+                  className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl"
+                >
+                  &times;
+                </button>
+                {erroCancelamento ? (
+                  // Modal de erro no cancelamento
+                  <>
+                    <h2 className="text-lg font-semibold mb-4 text-center text-red-600">
+                      Erro ao cancelar candidatura
+                    </h2>
+                    <p className="mb-6 text-center">
+                      {erroCancelamento}
+                    </p>
+                    <div className="flex gap-4">
+                      <button
+                        className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400"
+                        onClick={() => setModalCancelarCandidatura(false)}
+                      >
+                        Fechar
+                      </button>
+                      <button
+                        className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                        onClick={() => {
+                          setErroCancelamento(null);
+                          cancelarCandidatura();
+                        }}
+                      >
+                        Tentar novamente
+                      </button>
+                    </div>
+                  </>
+                ) : jaTemCandidatura ? (
+                  // Modal de confirmação
+                  <>
+                    <h2 className="text-lg font-semibold mb-4 text-center">
+                      Confirmar cancelamento de candidatura
+                    </h2>
+                    <p className="mb-6 text-center">
+                      Tem certeza de que deseja cancelar sua candidatura na vaga: <strong>{vagaCandidatada}</strong>?
+                    </p>
+                    <p className="mb-6 text-center text-sm text-gray-600">
+                      Esta ação não pode ser desfeita.
+                    </p>
+                    <div className="flex gap-4">
+                      <button
+                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                        onClick={() => setModalCancelarCandidatura(false)}
+                      >
+                        Não, manter candidatura
+                      </button>
+                      <button
+                        className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                        onClick={cancelarCandidatura}
+                      >
+                        Sim, cancelar
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  // Modal de sucesso
+                  <>
+                    <h2 className="text-lg font-semibold mb-4 text-center text-green-600">
+                      Candidatura cancelada com sucesso!
+                    </h2>
+                    <p className="mb-6 text-center">
+                      Sua candidatura foi cancelada. Agora você pode se candidatar a outra vaga.
+                    </p>
+                    <button
+                      className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                      onClick={() => setModalCancelarCandidatura(false)}
+                    >
+                      Entendido
+                    </button>
+                  </>
+                )}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {/* Modal para visualizar candidatura */}
+          {modalVisualizarCandidatura && (
+            <motion.div
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setModalVisualizarCandidatura(false)}
+            >
+              <motion.div
+                className="bg-white w-full max-w-md rounded-xl shadow-lg p-6 relative flex flex-col items-center"
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                onClick={e => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => setModalVisualizarCandidatura(false)}
+                  className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl"
+                >
+                  &times;
+                </button>
+                <h2 className="text-lg font-semibold mb-4 text-center text-blue-600">
+                  Detalhes da Candidatura
+                </h2>
+                
+                <div className="w-full space-y-3">
+                  <div className="text-center">
+                    <p className="text-sm text-gray-600">Vaga:</p>
+                    <p className="font-semibold text-blue-800">{vagaCandidatada}</p>
+                  </div>
+                  
+                  {candidacyDetails && (
+                    <>
+                      <div className="text-center">
+                        <p className="text-sm text-gray-600">Data da Candidatura:</p>
+                        <p className="font-medium">
+                          {candidacyDetails.data_candidatura 
+                            ? new Date(candidacyDetails.data_candidatura).toLocaleDateString('pt-BR')
+                            : 'Não informado'}
+                        </p>
+                      </div>
+                      
+                      <div className="text-center">
+                        <p className="text-sm text-gray-600">Status:</p>
+                        <p className={`font-medium px-3 py-1 rounded-full text-sm inline-block ${
+                          candidacyDetails.status === 'Analise' 
+                            ? 'bg-yellow-100 text-yellow-800' 
+                            : candidacyDetails.status === 'Completo'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {candidacyDetails.status === 'Analise' ? 'Em Análise' : candidacyDetails.status}
+                        </p>
+                      </div>
+                      
+                      <div className="text-center">
+                        <p className="text-sm text-gray-600">Status da Entrevista:</p>
+                        {interviewDetails ? (
+                          <div>
+                            {interviewDetails.status === 'Agendada' ? (
+                              <div>
+                                <p className="font-medium px-3 py-1 rounded-full text-sm inline-block bg-blue-100 text-blue-800">
+                                  Agendada
+                                </p>
+                                <p className="text-sm text-gray-600 mt-1">
+                                  Data: {new Date(interviewDetails.data_hora).toLocaleDateString('pt-BR')} às {new Date(interviewDetails.data_hora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                </p>
+                              </div>
+                            ) : (
+                              <p className="font-medium px-3 py-1 rounded-full text-sm inline-block bg-yellow-100 text-yellow-800">
+                                Em análise
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <p className="font-medium px-3 py-1 rounded-full text-sm inline-block bg-yellow-100 text-yellow-800">
+                            Em análise
+                          </p>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
     </AppLayout>
   </>
 );}

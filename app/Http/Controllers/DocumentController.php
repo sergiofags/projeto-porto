@@ -13,15 +13,22 @@ class DocumentController extends Controller
     public function index(Request $request, $personId)
     {
         try {
+            // Primeiro, tenta encontrar a pessoa pelo ID direto
             $person = Person::find($personId);
+            
+            // Se não encontrar, tenta encontrar pelo id_user
+            if (!$person) {
+                $person = Person::where('id_user', $personId)->first();
+            }
+            
             if (!$person) {
                 return response()->json([
                     'message' => 'Pessoa não encontrada'
                 ], 404);
             }
 
-            $document = $person->document;
-            return response()->json($document);
+            $documents = $person->document; // Retorna a collection de documentos
+            return response()->json($documents);
 
         } catch (\Illuminate\Database\QueryException $e) {
             return response()->json([
@@ -81,9 +88,9 @@ class DocumentController extends Controller
             }
 
             $validatedData = $request->validate([
-                'tipo_documento' => 'required|in:Contratacao,Candidatura',
-                'documento' => 'nullable|file|mimes:pdf|max:20480', // 20MB e só PDF
-                'nome_documento' => 'required|in:AtestadoMatricula,HistoricoEscolar,Curriculo,CoeficienteRendimento',    
+                'tipo_documento' => 'required|in:Candidatura,Contratacao',
+                'documento' => 'required|file|mimes:pdf|max:20480', // 20MB e só PDF
+                'nome_documento' => 'required|in:AtestadoMatricula,HistoricoEscolar,Curriculo,CoeficienteRendimento',
             ]);
 
             $validatedData['id_person'] = $person->id;
@@ -95,7 +102,21 @@ class DocumentController extends Controller
 
             if ($request->hasFile('documento')) {
                 $file = $request->file('documento');
-                $path = $file->store($folder, 'public');
+                
+                // Mapear nomes dos documentos para nomes de arquivo
+                $nomeArquivoMap = [
+                    'AtestadoMatricula' => 'Atestado_de_matricula',
+                    'HistoricoEscolar' => 'Historico_escolar',
+                    'Curriculo' => 'Curriculo',
+                    'CoeficienteRendimento' => 'Coeficiente_de_rendimento'
+                ];
+                
+                $nomeDocumento = $validatedData['nome_documento'];
+                $nomeArquivo = $nomeArquivoMap[$nomeDocumento] ?? $nomeDocumento;
+                $extensao = $file->getClientOriginalExtension();
+                $nomeCompleto = $nomeArquivo . '.' . $extensao;
+                
+                $path = $file->storeAs($folder, $nomeCompleto, 'public');
                 $validatedData['documento'] = $path;
             } else {
                 return response()->json([
@@ -141,10 +162,40 @@ class DocumentController extends Controller
             $validatedData = $request->validate([
                 'tipo_documento' => 'required|in:Candidatura,Contratacao',
                 'documento' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-                'nome_documento' => 'required|in:AtestadoMatricula,HistoricoEscolar,Curriculo,CoeficienteRendimento,Foto3x4,CedulaIdentidadeOuCNH,CadastroPessoaFisica,CTPS,CarteiraDeReservista,ComprovanteDeResidencia,AntecedentesCriminaisECivel,AntecedentesCriminaisPoliciaFederal,VacinacaFebreAmarela,VacinacaCovid19,GrupoSanguineo,ComprovanteMatricula,AtestadadoFrequencia',    
+                'nome_documento' => 'nullable|in:AtestadoMatricula,HistoricoEscolar,Curriculo,CoeficienteRendimento',    
             ]);
 
-            // Precisa verificar pois não consegui converter o arquivo para path, irei corrigir posteriormente
+            // Se um novo arquivo foi enviado, processar o upload
+            if ($request->hasFile('documento')) {
+                $file = $request->file('documento');
+                
+                // Mapear nomes dos documentos para nomes de arquivo
+                $nomeArquivoMap = [
+                    'AtestadoMatricula' => 'Atestado_de_matricula',
+                    'HistoricoEscolar' => 'Historico_escolar',
+                    'Curriculo' => 'Curriculo',
+                    'CoeficienteRendimento' => 'Coeficiente_de_rendimento'
+                ];
+                
+                // Usar o nome_documento fornecido ou manter o existente
+                $nomeDocumento = $validatedData['nome_documento'] ?? $document->nome_documento;
+                $nomeArquivo = $nomeArquivoMap[$nomeDocumento] ?? $nomeDocumento;
+                $extensao = $file->getClientOriginalExtension();
+                $nomeCompleto = $nomeArquivo . '.' . $extensao;
+                
+                // Criar pasta se necessário
+                $userId = $person->id_user ?? $person->id;
+                $folder = "Documentos_Candidato/Candidato{$userId}";
+                Storage::disk('public')->makeDirectory($folder);
+                
+                // Deletar arquivo antigo se existir
+                if ($document->documento && Storage::disk('public')->exists($document->documento)) {
+                    Storage::disk('public')->delete($document->documento);
+                }
+                
+                $path = $file->storeAs($folder, $nomeCompleto, 'public');
+                $validatedData['documento'] = $path;
+            }
 
             $document->update($validatedData);
 
