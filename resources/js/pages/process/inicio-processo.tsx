@@ -134,19 +134,9 @@ export default function Inicio({ processos = [] }: Props) {
         <div className="flex h-full max-h-full flex-1 flex-col gap-4 rounded-xl p-4">
             <nav className="text-sm text-muted-foreground mb-4 items-center">
                 <ol className="flex items-center space-x-2">
-                    {/*<li>
-                        <Link href="/inicio-processo" className="hover:underline">Processos</Link>
-                    </li>*/}
-                    {segments.filter((seg, i) => !(i === 0 && seg === 'inicio-processo')).map((segment, index) => {
-                        const href = '/' + segments.slice(0, index + 1).join('/');
-                        const label = segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
-                        return (
-                            <li key={index} className="flex items-center space-x-2">
-                                <span>/</span>
-                                <Link href={href} className="hover:underline">{label}</Link>
-                            </li>
-                        );
-                    })}
+                   <li>
+                        <Link href="/" className="hover:underline text-[#008DD0]">Início</Link>
+                    </li>
                 </ol>
                 <h1 className="text-2xl font-semibold mt-4 text-black">Olá, {nome}.</h1>
             </nav>
@@ -177,76 +167,78 @@ export default function Inicio({ processos = [] }: Props) {
             ) : (
                 <>
                     {/* Nova Estrutura da Tabela de Processos */}
-                    <div className="container mt-5 pl-2 pr-2">
-                        <Table>
-                            <ScrollArea className="max-h-[400px] w-full rounded-md border border-[#008DD0] p-4 overflow-auto">
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead className="sticky top-0 bg-white w-[500px] font-semibold">Processo</TableHead>
-                                        <TableHead className="sticky top-0 bg-white font-semibold">Data Início</TableHead>
-                                        <TableHead className="sticky top-0 bg-white font-semibold">Data Fim</TableHead>
-                                        <TableHead className="sticky top-0 bg-white font-semibold">Status</TableHead>
-                                        <TableHead className="sticky top-0 bg-white text-center align-middle font-semibold">Opções</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {[...process]
-                                        .sort((a, b) => {
-                                            const ordemStatus = ['Pendente', 'Aberto', 'Fechado'];
-                                            return ordemStatus.indexOf(a.status) - ordemStatus.indexOf(b.status);
-                                        })
-                                        .map((processo) => (
-                                            <TableRow key={processo.numero_processo}>
-                                                <TableCell>{processo.descricao} Nº {processo.numero_processo}</TableCell>
-                                                <TableCell>{formatarData(processo.data_inicio)}</TableCell>
-                                                <TableCell>{formatarData(processo.data_fim)}</TableCell>
-                                                <TableCell className={`font-semibold ${
-                                                    processo.status === 'Aberto'
-                                                        ? 'text-[#20CD4E]'
-                                                        : processo.status === 'Pendente'
-                                                        ? 'text-gray-400'
-                                                        : 'text-red-600'
-                                                }`}>
-                                                    {processo.status}
-                                                </TableCell>
-                                                <TableCell className="text-center space-x-2 align-middle">
-                                                    {auth.user.tipo_perfil === 'Admin' && (
-                                                        <>
-                                                            <Link href={`/process/edita-processo?id=${processo.id}`}>
-                                                                <Button className="bg-[#20CD4E] hover:bg-green-600 text-xs">
-                                                                    <Pencil /> Editar
-                                                                </Button>
-                                                            </Link>
-                                                            {processo.status !== 'Fechado' && (
-                                                                <Button
-                                                                    className="bg-red-600 hover:bg-red-700 text-xs"
-                                                                    onClick={() => setModalFechar({ aberto: true, processoId: processo.id })}
-                                                                >
-                                                                    <Trash /> Fechar
-                                                                </Button>
-                                                            )}
-                                                        </>
-                                                    )}
-                                                    <Link href={`/processo/vagas?id=${processo.id}`}>
-                                                        <Button className="bg-[#008DD0] hover:bg-[#0072d0] text-xs">
-                                                            <TableOfContents /> Visualizar
-                                                        </Button>
-                                                    </Link>
-                                                    <a
-                                                        href={`/storage/${processo.edital}`}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                    >
-                                                        <Button className="bg-[#CD5C20] hover:bg-[#943400] text-xs">
-                                                            <FileDown /> Edital
-                                                        </Button>
-                                                    </a>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                </TableBody>
-                            </ScrollArea>
-                        </Table>
+                    <div className="max-w mx-auto w-full bg-white pt-0 pb-10">
+                        <div className="container mt-5 ">
+                            <Table>
+                                <ScrollArea className="max-h-[400px] w-full rounded-md border border-[#008DD0] p-4 overflow-auto">
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead className="sticky top-0 bg-white w-[500px] font-semibold">Processo</TableHead>
+                                            <TableHead className="sticky top-0 bg-white font-semibold">Data Início</TableHead>
+                                            <TableHead className="sticky top-0 bg-white font-semibold">Data Fim</TableHead>
+                                            <TableHead className="sticky top-0 bg-white font-semibold">Status</TableHead>
+                                            <TableHead className="sticky top-0 bg-white text-center align-middle font-semibold">Opções</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {[...process]
+                                            .sort((a, b) => {
+                                                const ordemStatus = ['Pendente', 'Aberto', 'Fechado'];
+                                                return ordemStatus.indexOf(a.status) - ordemStatus.indexOf(b.status);
+                                            })
+                                            .map((processo) => (
+                                                <TableRow key={processo.numero_processo}>
+                                                    <TableCell>{processo.descricao} Nº {processo.numero_processo}</TableCell>
+                                                    <TableCell>{formatarData(processo.data_inicio)}</TableCell>
+                                                    <TableCell>{formatarData(processo.data_fim)}</TableCell>
+                                                    <TableCell className={`font-semibold ${
+                                                        processo.status === 'Aberto'
+                                                            ? 'text-[#20CD4E]'
+                                                            : processo.status === 'Pendente'
+                                                            ? 'text-yellow-600'
+                                                            : 'text-red-600'
+                                                    }`}>
+                                                        {processo.status}
+                                                    </TableCell>
+                                                    <TableCell className="text-center space-x-2 align-middle">
+                                                        {auth.user.tipo_perfil === 'Admin' && (
+                                                            <>
+                                                                <Link href={`/process/edita-processo?id=${processo.id}`}>
+                                                                    <Button className=" bg-green-600 hover:bg-green-700 text-xs">
+                                                                        <Pencil /> Editar
+                                                                    </Button>
+                                                                </Link>
+                                                                {processo.status !== 'Fechado' && (
+                                                                    <Button
+                                                                        className="bg-red-600 hover:bg-red-700 text-xs"
+                                                                        onClick={() => setModalFechar({ aberto: true, processoId: processo.id })}
+                                                                    >
+                                                                        <Trash /> Fechar
+                                                                    </Button>
+                                                                )}
+                                                            </>
+                                                        )}
+                                                        <Link href={`/processo/vagas?id=${processo.id}`}>
+                                                            <Button className="bg-[#008DD0] hover:bg-[#0072d0] text-xs">
+                                                                <TableOfContents /> Visualizar
+                                                            </Button>
+                                                        </Link>
+                                                        <a
+                                                            href={`/storage/${processo.edital}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                        >
+                                                            <Button className="bg-[#CD5C20] hover:bg-[#943400] text-xs">
+                                                                <FileDown /> Edital
+                                                            </Button>
+                                                        </a>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                    </TableBody>
+                                </ScrollArea>
+                            </Table>
+                        </div>
                     </div>
 
                     {/* Botão Adicionar Processo */}

@@ -50,7 +50,7 @@ export default function CadastrarVaga() {
                 const response = await axios.get(`http://localhost:8000/api/process/${processId}/vacancy`);
                 setVagas(response.data);
             } catch (error) {
-                console.error('Erro ao buscar vagas:', error);
+                console.error('Erro ao buscar cadastros reserva:', error);
             }
         };
 
@@ -99,7 +99,7 @@ export default function CadastrarVaga() {
             // Remover a vaga da lista sem recarregar (opcional):
             setVagas(vagas => vagas.filter(v => v.id !== vagaId));
         } catch (error) {
-            console.error('Erro ao excluir vaga:', error);
+            console.error('Erro ao excluir cadastro reserva:', error);
         }
     }
 
@@ -109,33 +109,46 @@ export default function CadastrarVaga() {
 
     return (
         <AppLayout>
-            <Head title="Visualizar Vaga" />
+            <Head title="Visualizar Cadastro Reserva" />
 
-            {processo && (
-                <div className="pl-4 pr-4 mt-4">
-                    <h2 className="text-2xl font-semibold text-[#008DD0]">
-                        {processo.descricao} - {processo.numero_processo}
-                    </h2>
-                </div>
-            )}
+             {vagas.length === 0 ? (
+        <>
+         <div className="flex h-full max-h-full flex-1 flex-col  rounded-xl p-4">
+        <nav className="text-sm text-muted-foreground mb-4">
+                        <ol className="flex items-center space-x-2">
+                            <li>
+                                <Link href="/" className="hover:underline text-[#008DD0]">Início</Link>
+                            </li>
+                            <li>
+                                <span className="mx-1 text-[#008DD0]">/</span>
+                                <span className="font-medium text-[#008DD0]">Visualizar Cadastros Reserva</span>
+                            </li>
+                        </ol>
+        </nav>
+          {processo && (
+            <div className="pl-4 pr-4 mt-4">
+                <h2 className="text-2xl font-semibold">
+                    {processo.descricao} - {processo.numero_processo}
+                </h2>
+            </div>
+          )}
 
-            {vagas.length === 0 ? (
-                <div className="flex h-full max-h-full flex-1 flex-col gap-4 rounded-xl p-4">
-                    <div className="border-sidebar-border/70 dark:border-sidebar-border relative max-h-[100vh] flex-1 overflow-hidden rounded-xl border md:min-h-min flex items-center justify-center ">
+            <div className="flex h-full max-h-full flex-1 flex-col gap-4 rounded-xl p-4">
+                <div className="border-sidebar-border/70 dark:border-sidebar-border relative max-h-[100vh] flex-1 overflow-hidden rounded-xl border md:min-h-min flex items-center justify-center">
                         <div className="text-center flex items-center justify-center h-full px-4">
                             <div className="tracking-wide max-w-md w-full break-words whitespace-normal">
                                 <h2 className="text-xl font-semibold block leading-tight break-words">
-                                No momento não há vagas cadastradas
+                                No momento não há cadastros reserva cadastrado
                                 </h2>
                                 <hr className="mt-4 mb-4 w-full bg-[#008DD0] h-0.5" />
                                 <p className="text-sm text-[#008DD0] mt-1">
-                                Clique no botão para adicionar uma vaga
+                                Clique no botão para adicionar um cadastro reserva
                                 </p>
 
                                 {auth.user.tipo_perfil === 'Admin' && (
                                     <Link href={`/processo/cadastrar-vaga?id=${processId}`}>
                                         <Button className="p-4 sm:p-6 bg-[#008DD0] hover:bg-[#0072d0] mt-4 text-sm sm:text-base">
-                                        Adicionar vaga <Plus />
+                                        Adicionar cadastro reserva <Plus />
                                         </Button>
                                     </Link>
                                 )}
@@ -143,123 +156,123 @@ export default function CadastrarVaga() {
                         </div>
                     </div>
                 </div>
+            </div>
+             </>
             ) : (
                 <>
-                    <div className="tracking-wide max-w-md w-full break-words">
-                        <h1 className="text-3xl  mt-10 pl-4 pr-4">Adicione vagas ao processo</h1>
-                        <hr className="mb-4 ml-4 mr-4 bg-[#008DD0] h-0.5" />
-                    </div>
-                    <div className="flex items-end justify-end w-full">
-                        <div className="ml-0">
-                            <Link href={`/processo/cadastrar-vaga?id=${processId}`} className="w-fit">
-                            <Button className="flex items-center gap-2 rounded-md p-4 mr-4 sm:p-6 bg-[#008DD0] hover:bg-[#0072d0] text-sm sm:text-base">
-                                Adicionar Vaga <Plus />
-                            </Button>
-                            </Link>
+                 <div className="flex h-full max-h-full flex-1 flex-col  rounded-xl p-4">
+                    <nav className="text-sm text-muted-foreground mb-4">
+                        <ol className="flex items-center space-x-2">
+                            <li>
+                                <Link href="/" className="hover:underline text-[#008DD0]">Início</Link>
+                            </li>
+                            <li>
+                                <span className="mx-1 text-[#008DD0]">/</span>
+                                <span className="font-medium text-[#008DD0]">Visualizar Cadastros Reserva</span>
+                            </li>
+                        </ol>
+                    </nav>
+                    <div className="max-w mx-auto w-full bg-white pt-0 pb-10">
+                        <div className="mt-2 mb-1 w-fit">
+                                <h1 className="text-2xl text-black">Adicione cadastros reserva ao processo</h1>
+                                <hr className="mt-1 bg-[#008DD0] h-0.5" />
+                        </div>
+                
+                    {processo && (
+                        <div className="flex items-center justify-between mt-4">
+                                <h2 className="text-2xl">
+                                    Processo {processo.numero_processo}
+                                </h2>
+                                <Link href={`/processo/cadastrar-vaga?id=${processId}`} className="w-fit">
+                                    <Button className="flex items-center gap-2 rounded-md p-4 sm:p-6 bg-[#008DD0] hover:bg-[#0072d0] text-sm sm:text-base">
+                                        Adicionar Cadastro Reserva <Plus />
+                                    </Button>
+                                </Link>
+                        </div>
+                    )}
+                            <div className='container mt-5'>
+                                <Table>
+                                    <ScrollArea className="max-h-[400px] w-full rounded-md border border-[#008DD0] p-4 overflow-auto">
+                                        <TableHeader>
+                                            <TableRow>
+                                            <TableHead className="sticky top-0 bg-white w-[400px] font-semibold">Cadastro Reserva</TableHead>
+                                            <TableHead className="sticky top-0 bg-white text-center font-semibold">Status</TableHead>
+                                            <TableHead className="sticky top-0 bg-white text-center font-semibold">Tipo</TableHead>
+                                            <TableHead className="sticky top-0 bg-white text-center font-semibold">Quantidade</TableHead>
+                                            <TableHead className="sticky top-0 bg-white text-center align-middle font-semibold">Opções</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {vagas
+                                                .filter((vaga) => vaga.status === 'Aberto')
+                                                .map((vaga) => (
+                                                    <TableRow key={vaga.id}>
+                                                        <TableCell className=" align-middle">{vaga.titulo}</TableCell>
+                                                        <TableCell className="text-center align-middle">{vaga.status}</TableCell>
+                                                        <TableCell className="text-center align-middle">{vaga.tipo_vaga}</TableCell>
+                                                        <TableCell className="text-center align-middle">{vaga.quantidade}</TableCell>
+                                                        <TableCell className="text-center space-x-2 align-middle">
+                                                            <Link href={`/processo/vagas/editar?id-processo=${vaga.id_process}&id-vaga=${vaga.id}`}><Button className='bg-green-600 hover:bg-green-700'><Pen /> Editar</Button></Link>
+                                                            <Button onClick={() => setModalFechar({ aberto: true, vagaId: vaga.id })} className='bg-red-600 hover:bg-red-700'><Trash2 /> Excluir</Button>
+                                                            <Link href={`/processo/vagas/detalhes?id-processo=${vaga.id_process}&id-vaga=${vaga.id}`} className='bg-[#008DD0] hover:bg-[#0072d0]'><Button><Eye /> Visualizar</Button></Link>
+                                                            <AnimatePresence>
+                                                                {modalFechar.aberto && modalFechar.vagaId === vaga.id && (
+                                                                    <motion.div
+                                                                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+                                                                        initial={{ opacity: 0 }}
+                                                                        animate={{ opacity: 1 }}
+                                                                        exit={{ opacity: 0 }}
+                                                                        onClick={() => setModalFechar({ aberto: false })}
+                                                                    >
+                                                                        <motion.div
+                                                                            className="bg-white w-full max-w-sm rounded-xl shadow-lg p-8 relative flex items-center"
+                                                                            initial={{ scale: 0.9, opacity: 0 }}
+                                                                            animate={{ scale: 1, opacity: 1 }}
+                                                                            exit={{ scale: 0.9, opacity: 0 }}
+                                                                            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                                                                            onClick={e => e.stopPropagation()}>
+                                                                                <div>
+                                                                                    <h2 className="text-xl font-semibold mb-4 text-red-600">Você tem certeza que deseja excluir este cadastro reserva?</h2>
+                                                                                    <div className="flex gap-4 mt-2">
+                                                                                        <button
+                                                                                            className="mt-2 px-6 py-2 bg-[#008DD0] hover:bg-[#0072d0] text-white rounded shadow"
+                                                                                            onClick={() => {
+                                                                                                handleDelete(vaga.id);
+                                                                                                setModalFechar({ aberto: false });
+                                                                                            }}>
+                                                                                            Confirmar
+                                                                                        </button>
+                                                                                        <button
+                                                                                            className="mt-2 px-6 py-2 bg-gray-400 hover:bg-gray-600 text-white rounded shadow"
+                                                                                            onClick={() => setModalFechar({ aberto: false })} >
+                                                                                            Cancelar
+                                                                                        </button>
+                                                                                    </div>
+                                                                                </div>
+                                                                        </motion.div>
+                                                                    </motion.div>
+                                                                )}
+                                                            </AnimatePresence>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                        </TableBody>
+                                    </ScrollArea>
+                                </Table>
+                            </div>
+                            <div className="mt-6 mb-6 py-2">
+                                <Link className="w-full md:w-auto"href="/">
+                                    <Button
+                                        type="button"  className="flex items-center bg-[#808080] hover:bg-[#404040] gap-2 rounded-md px-4 py-2 text-sm shadow-md transition-colors duration-200 text-white">
+                                        <ChevronLeft /> Voltar
+                                    </Button>
+                                </Link>
+                            </div>
                         </div>
                     </div>
-                    <div className="container mt-5 pl-2 pr-2">
-                        <Table>
-                            <ScrollArea className="max-h-[400px] w-full rounded-md border border-[#008DD0] p-4 overflow-auto">
-                                <TableHeader>
-                                    <TableRow>
-                                    <TableHead className="sticky top-0 bg-white w-[500px] font-semibold">Vaga</TableHead>
-                                    <TableHead className="sticky top-0 bg-white font-semibold">Data Inicio</TableHead>
-                                    <TableHead className="sticky top-0 bg-white font-semibold">Data Fim</TableHead>
-                                    <TableHead className="sticky top-0 bg-white text-center align-middle font-semibold">Opções</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {vagas
-                                        .filter((vaga) => vaga.status === 'Aberto')
-                                        .map((vaga) => (
-                                            <TableRow key={vaga.id}>
-                                                <TableCell className="">{vaga.titulo}</TableCell>
-                                                <TableCell>{vaga.data_inicio}</TableCell>
-                                                <TableCell>{vaga.data_fim}</TableCell>
-                                                <TableCell className="text-center space-x-2 align-middle">
-                                                    <Link href={`/processo/vagas/editar?id-processo=${vaga.id_process}&id-vaga=${vaga.id}`}><Button className='bg-green-600 hover:bg-green-700'><Pen /> Editar</Button></Link>
-                                                    <Button onClick={() => setModalFechar({ aberto: true, vagaId: vaga.id })} className='bg-red-600 hover:bg-red-700'><Trash2 /> Excluir</Button>
-                                                    <Link href={`/processo/vagas/detalhes?id-processo=${vaga.id_process}&id-vaga=${vaga.id}`}><Button><Eye /> Visualizar</Button></Link>
-                                                    <AnimatePresence>
-                                                        {modalFechar.aberto && modalFechar.vagaId === vaga.id && (
-                                                            <motion.div
-                                                                className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
-                                                                initial={{ opacity: 0 }}
-                                                                animate={{ opacity: 1 }}
-                                                                exit={{ opacity: 0 }}
-                                                                onClick={() => setModalFechar({ aberto: false })}
-                                                            >
-                                                                <motion.div
-                                                                    className="bg-white w-full max-w-sm rounded-xl shadow-lg p-8 relative flex items-center"
-                                                                    initial={{ scale: 0.9, opacity: 0 }}
-                                                                    animate={{ scale: 1, opacity: 1 }}
-                                                                    exit={{ scale: 0.9, opacity: 0 }}
-                                                                    transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                                                                    onClick={e => e.stopPropagation()}>
-                                                                        <div>
-                                                                            <h2 className="text-xl font-semibold mb-4 text-red-600">Você tem certeza que deseja excluir esta vaga?</h2>
-                                                                            <div className="flex gap-4 mt-2">
-                                                                                <button
-                                                                                    className="mt-2 px-6 py-2 bg-[#008DD0] hover:bg-[#0072d0] text-white rounded shadow"
-                                                                                    onClick={() => handleDelete(vaga.id)}>
-                                                                                    Confirmar
-                                                                                </button>
-                                                                                <button
-                                                                                    className="mt-2 px-6 py-2 bg-gray-400 hover:bg-gray-600 text-white rounded shadow"
-                                                                                    onClick={() => setModalFechar({ aberto: false })} >
-                                                                                    Cancelar
-                                                                                </button>
-                                                                            </div>
-                                                                        </div>
-                                                                </motion.div>
-                                                            </motion.div>
-                                                        )}
-                                                    </AnimatePresence>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                </TableBody>
-                            </ScrollArea>
-                        </Table>
-                    </div>
-                </>
+                    </>
             )}
-            <AnimatePresence>
-                {modalSucesso && (
-                    <motion.div
-                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={() => setModalSucesso(false)}
-                    >
-                        <motion.div
-                            className="bg-white w-full max-w-sm rounded-xl shadow-lg p-8 relative flex flex-col items-center"
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.9, opacity: 0 }}
-                            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                            onClick={e => e.stopPropagation()}>
-                            <h2 className="text-xl font-semibold mb-4 text-green-600">Cadastro Reserva encerrado com sucesso!</h2>
-                            <button
-                                className="mt-2 px-6 py-2 bg-[#008DD0] hover:bg-[#0072d0] text-white rounded shadow"
-                                onClick={() => router.visit(`/processo/vagas?id=${processId}`)}
-                            >
-                                Concluir
-                            </button>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-            <div className="mt-6 mb-6 pl-2">
-                <Link className="w-fit flex" href="/">
-                    <Button
-                        className="flex items-center gap-2 rounded-md px-4 py-2 text-sm duration-200 bg-gray-500 text-white shadow-xs hover:bg-gray-600">
-                        <ChevronLeft /> Voltar
-                    </Button>
-                </Link>
-            </div>
+            
         </AppLayout> 
     );
 }
