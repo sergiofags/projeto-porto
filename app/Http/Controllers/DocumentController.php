@@ -5,8 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Person;
 use App\Models\Document;
-use Dotenv\Exception\ValidationException;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class DocumentController extends Controller
 {
@@ -80,7 +81,14 @@ class DocumentController extends Controller
     public function store(Request $request, $personId)
     {
         try {
+            // Primeiro, tenta encontrar a pessoa pelo ID direto
             $person = Person::find($personId);
+            
+            // Se não encontrar, tenta encontrar pelo id_user
+            if (!$person) {
+                $person = Person::where('id_user', $personId)->first();
+            }
+            
             if (!$person) {
                 return response()->json([
                     'message' => 'Pessoa não encontrada'
@@ -145,14 +153,24 @@ class DocumentController extends Controller
     public function update(Request $request, $personId, $documentId)
     {
         try {
+            // Primeiro, tenta encontrar a pessoa pelo ID direto
             $person = Person::find($personId);
+            
+            // Se não encontrar, tenta encontrar pelo id_user
+            if (!$person) {
+                $person = Person::where('id_user', $personId)->first();
+            }
+            
             if (!$person) {
                 return response()->json([
                     'message' => 'Pessoa não encontrada'
                 ], 404);
             }
 
-            $document = $person->document()->find($documentId);
+            // Buscar o documento específico da pessoa
+            $document = Document::where('id', $documentId)
+                              ->where('id_person', $person->id)
+                              ->first();
             if (!$document) {
                 return response()->json([
                     'message' => 'Documento não encontrado'
@@ -161,7 +179,7 @@ class DocumentController extends Controller
 
             $validatedData = $request->validate([
                 'tipo_documento' => 'required|in:Candidatura,Contratacao',
-                'documento' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+                'documento' => 'nullable|file|mimes:pdf|max:20480', // 20MB e só PDF
                 'nome_documento' => 'nullable|in:AtestadoMatricula,HistoricoEscolar,Curriculo,CoeficienteRendimento',    
             ]);
 
@@ -201,7 +219,7 @@ class DocumentController extends Controller
 
             return response()->json($document, 200);
 
-        } catch (ValidationException $e) {
+        } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'message' => 'Erro de validação.',
                 'error' => $e->getMessage()
@@ -214,9 +232,21 @@ class DocumentController extends Controller
             ], 500);
 
         } catch (\Exception $e) {
+            // Log detalhado do erro para debug
+            Log::error('Erro ao atualizar documento:', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             return response()->json([
                 'message' => 'Erro interno no servidor.',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'debug' => [
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine()
+                ]
             ], 500);
         }
     }
