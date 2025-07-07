@@ -182,7 +182,7 @@ class PersonController extends Controller
                 }
             }
 
-            $validatedData['id'] = $validatedData['id_user'];
+            // Remover a linha que define o id manualmente
             $person = Person::create($validatedData);
 
             // Cria a pasta do candidato
