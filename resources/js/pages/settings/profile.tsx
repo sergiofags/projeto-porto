@@ -11,11 +11,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
-import { Save } from 'lucide-react';
+import { Save, FileText, MapPin, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { useEffect } from 'react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { X } from 'lucide-react';
+import { candidacyEventBus, type CandidacyEventData } from '@/utils/candidacy-events';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -30,8 +36,350 @@ type ProfileForm = {
     tipo_perfil: string;
 }
 
+interface Candidacy {
+    id: number;
+    status: 'Cancelado' | 'Analise' | 'Completo';
+    data_candidatura: string;
+    id_person: number;
+    id_vacancy: number;
+    id_process: number;
+    interview?: {
+        id: number;
+        status: string;
+        data_hora: string;
+        localizacao?: string;
+    };
+    vacancy?: {
+        id: number;
+        titulo: string;
+        descricao: string;
+        local: string;
+        data_inicio: string;
+        data_fim: string;
+        salario: number;
+        tipo_contrato: string;
+        carga_horaria: string;
+        nivel: string;
+        processo?: {
+            id: number;
+            titulo: string;
+            status: string;
+        };
+    };
+}
+
 export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: boolean; status?: string }) {
     const { auth } = usePage<SharedData>().props;
+    const [candidaciesModalOpen, setCandidaciesModalOpen] = useState(false);
+    
+    // Estados para candidaturas
+    const [candidacies, setCandidacies] = useState<Candidacy[]>([]);
+    const [candidaciesLoading, setCandidaciesLoading] = useState(false);
+    const [cancelModal, setCancelModal] = useState<{ open: boolean; candidacy: Candidacy | null; loading: boolean; error: string | null }>({
+        open: false,
+        candidacy: null,
+        loading: false,
+        error: null
+    });
+
+    // Carregar candidaturas quando o modal for aberto
+    useEffect(() => {
+        if (candidaciesModalOpen && auth.user.tipo_perfil === 'Candidato') {
+            const loadCandidacies = async () => {
+                try {
+                    setCandidaciesLoading(true);
+                    console.log('Carregando candidaturas para usuário ID:', auth.user.id);
+                    const response = await axios.get(`http://localhost:8000/api/person/${auth.user.id}/candidacy`);
+                    console.log('Resposta da API de candidaturas:', response.data);
+                    
+                    const candidaciesWithDetails = await Promise.all(
+                        (response.data || []).map(async (candidacy: Candidacy) => {
+                            try {
+                                console.log('Processando candidatura:', candidacy);
+                                const [vacancyRes, processRes, interviewRes] = await Promise.all([
+                                    axios.get(`http://localhost:8000/api/process/${candidacy.id_process}/vacancy/${candidacy.id_vacancy}`),
+                                    axios.get(`http://localhost:8000/api/process/${candidacy.id_process}`),
+                                    axios.get(`http://localhost:8000/api/candidacy/${candidacy.id}/interview`).catch(() => null)
+                                ]);
+                                
+                                return {
+                                    ...candidacy,
+                                    vacancy: { ...vacancyRes.data, processo: processRes.data },
+                                    interview: interviewRes?.data || null
+                                };
+                            } catch {
+                                return candidacy;
+                            }
+                        })
+                    );
+                    
+                    console.log('Candidaturas processadas:', candidaciesWithDetails);
+                    setCandidacies(candidaciesWithDetails);
+                    
+                } catch (error) {
+                    console.error('Erro ao carregar candidaturas:', error);
+                    setCandidacies([]);
+                } finally {
+                    setCandidaciesLoading(false);
+                }
+            };
+
+            loadCandidacies();
+        }
+    }, [candidaciesModalOpen, auth.user.tipo_perfil, auth.user.id]);
+
+    // Verificar se a candidatura do modal ainda existe
+    useEffect(() => {
+        if (cancelModal.open && cancelModal.candidacy) {
+            const candidacyStillExists = candidacies.find(c => c.id === cancelModal.candidacy?.id);
+            if (!candidacyStillExists && candidacies.length > 0) {
+                setCancelModal({ open: false, candidacy: null, loading: false, error: null });
+            }
+        }
+    }, [candidacies, cancelModal.open, cancelModal.candidacy]);
+
+    // Listener para sincronização de candidaturas entre páginas
+    useEffect(() => {
+        const unsubscribe = candidacyEventBus.on((eventData: CandidacyEventData) => {
+            console.log('Evento de candidatura recebido:', eventData);
+            
+            // Se uma candidatura foi cancelada em outra página, atualizar nossa lista
+            if (eventData.action === 'cancelled' && eventData.userId === auth.user.id) {
+                setCandidacies(prev => prev.filter(c => c.id !== eventData.candidacyId));
+                
+                // Se o modal de cancelamento está aberto para esta candidatura, fechá-lo
+                if (cancelModal.open && cancelModal.candidacy?.id === eventData.candidacyId) {
+                    setCancelModal({ open: false, candidacy: null, loading: false, error: null });
+                }
+            }
+            
+            // Se uma candidatura foi criada em outra página, recarregar a lista se o modal estiver aberto
+            if (eventData.action === 'created' && eventData.userId === auth.user.id && candidaciesModalOpen) {
+                // Recarregar candidaturas se o modal estiver aberto
+                const loadCandidacies = async () => {
+                    try {
+                        setCandidaciesLoading(true);
+                        const response = await axios.get(`http://localhost:8000/api/person/${auth.user.id}/candidacy`);
+                        
+                        const candidaciesWithDetails = await Promise.all(
+                            (response.data || []).map(async (candidacy: Candidacy) => {
+                                try {
+                                    const [vacancyRes, processRes, interviewRes] = await Promise.all([
+                                        axios.get(`http://localhost:8000/api/process/${candidacy.id_process}/vacancy/${candidacy.id_vacancy}`),
+                                        axios.get(`http://localhost:8000/api/process/${candidacy.id_process}`),
+                                        axios.get(`http://localhost:8000/api/candidacy/${candidacy.id}/interview`).catch(() => null)
+                                    ]);
+                                    
+                                    return {
+                                        ...candidacy,
+                                        vacancy: { ...vacancyRes.data, processo: processRes.data },
+                                        interview: interviewRes?.data || null
+                                    };
+                                } catch {
+                                    return candidacy;
+                                }
+                            })
+                        );
+                        
+                        setCandidacies(candidaciesWithDetails);
+                    } catch (error) {
+                        console.error('Erro ao recarregar candidaturas:', error);
+                    } finally {
+                        setCandidaciesLoading(false);
+                    }
+                };
+                
+                loadCandidacies();
+            }
+        });
+
+        return unsubscribe; // Cleanup quando o componente for desmontado
+    }, [auth.user.id, candidaciesModalOpen, cancelModal.open, cancelModal.candidacy]);
+
+    const abrirModalCancelamento = (candidacy: Candidacy) => {
+        setCancelModal({ open: true, candidacy, loading: false, error: null });
+    };
+
+    const handleCancel = async () => {
+        if (!cancelModal.candidacy || !auth.user.id) {
+            setCancelModal(prev => ({ ...prev, error: 'Não foi possível identificar a candidatura para cancelamento.' }));
+            return;
+        }
+
+        try {
+            setCancelModal(prev => ({ ...prev, loading: true, error: null }));
+            
+            const candidacyId = cancelModal.candidacy.id;
+            const userId = auth.user.id;
+            const url = `http://localhost:8000/api/person/${userId}/candidacy/${candidacyId}`;
+
+            console.log('Tentando cancelar candidatura:', {
+                candidacyId,
+                userId,
+                url,
+                candidacy: cancelModal.candidacy
+            });
+
+            // Primeiro verificar se a candidatura ainda existe
+            const checkResponse = await axios.get(`http://localhost:8000/api/person/${userId}/candidacy`);
+            const currentCandidacies = checkResponse.data || [];
+            const candidacyExists = currentCandidacies.find((c: Candidacy) => c.id === candidacyId);
+            
+            if (!candidacyExists) {
+                setCancelModal(prev => ({ 
+                    ...prev, 
+                    loading: false, 
+                    error: 'Esta candidatura já foi cancelada ou não existe mais.' 
+                }));
+                
+                // Atualizar a lista de candidaturas
+                const candidaciesWithDetails = await Promise.all(
+                    currentCandidacies.map(async (candidacy: Candidacy) => {
+                        try {
+                            const [vacancyRes, processRes, interviewRes] = await Promise.all([
+                                axios.get(`http://localhost:8000/api/process/${candidacy.id_process}/vacancy/${candidacy.id_vacancy}`),
+                                axios.get(`http://localhost:8000/api/process/${candidacy.id_process}`),
+                                axios.get(`http://localhost:8000/api/candidacy/${candidacy.id}/interview`).catch(() => null)
+                            ]);
+                            
+                            return {
+                                ...candidacy,
+                                vacancy: { ...vacancyRes.data, processo: processRes.data },
+                                interview: interviewRes?.data || null
+                            };
+                        } catch {
+                            return candidacy;
+                        }
+                    })
+                );
+                
+                setCandidacies(candidaciesWithDetails);
+                return;
+            }
+
+            const response = await axios.delete(url, {
+                timeout: 10000,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                }
+            });
+            
+            console.log('Resposta do cancelamento:', response.status, response.data);
+            
+            if (response.status === 200) {
+                // Recarregar a lista de candidaturas
+                try {
+                    console.log('Recarregando candidaturas após cancelamento...');
+                    const refreshResponse = await axios.get(`http://localhost:8000/api/person/${userId}/candidacy`);
+                    console.log('Candidaturas recarregadas:', refreshResponse.data);
+                    
+                    const refreshedCandidacies = await Promise.all(
+                        (refreshResponse.data || []).map(async (candidacy: Candidacy) => {
+                            try {
+                                const [vacancyRes, processRes, interviewRes] = await Promise.all([
+                                    axios.get(`http://localhost:8000/api/process/${candidacy.id_process}/vacancy/${candidacy.id_vacancy}`),
+                                    axios.get(`http://localhost:8000/api/process/${candidacy.id_process}`),
+                                    axios.get(`http://localhost:8000/api/candidacy/${candidacy.id}/interview`).catch(() => null)
+                                ]);
+                                
+                                return {
+                                    ...candidacy,
+                                    vacancy: { ...vacancyRes.data, processo: processRes.data },
+                                    interview: interviewRes?.data || null
+                                };
+                            } catch {
+                                return candidacy;
+                            }
+                        })
+                    );
+                    
+                    setCandidacies(refreshedCandidacies);
+                } catch (refreshError) {
+                    console.error('Erro ao recarregar candidaturas:', refreshError);
+                    setCandidacies(prev => prev.filter(c => c.id !== cancelModal.candidacy?.id));
+                }
+                
+                setCancelModal(prev => ({ 
+                    ...prev, 
+                    loading: false, 
+                    error: null,
+                    candidacy: prev.candidacy ? { ...prev.candidacy, status: 'Cancelado' as const } : null
+                }));
+
+                // Emitir evento para sincronizar com outras páginas
+                candidacyEventBus.emit({
+                    candidacyId,
+                    userId,
+                    action: 'cancelled',
+                    timestamp: Date.now()
+                });
+            }
+        } catch (error) {
+            console.error('Erro ao cancelar candidatura:', error);
+            
+            let errorMessage = 'Erro ao cancelar candidatura';
+            
+            if (axios.isAxiosError(error)) {
+                console.log('Detalhes do erro:', {
+                    status: error.response?.status,
+                    statusText: error.response?.statusText,
+                    data: error.response?.data,
+                    code: error.code,
+                    message: error.message
+                });
+
+                if (error.code === 'ECONNABORTED') {
+                    errorMessage = 'Timeout: A requisição demorou muito para responder';
+                } else if (error.code === 'ERR_NETWORK') {
+                    errorMessage = 'Erro de rede: Verifique sua conexão';
+                } else if (error.code === 'ERR_EMPTY_RESPONSE') {
+                    errorMessage = 'Servidor retornou resposta vazia. Tente novamente.';
+                } else if (error.response?.status) {
+                    errorMessage = error.response.data?.message || `Erro ${error.response.status}: ${error.response.statusText || 'Erro no servidor'}`;
+                    
+                    if (error.response.status === 404) {
+                        errorMessage = 'Candidatura não encontrada. Pode ter sido cancelada anteriormente.';
+                    }
+                } else {
+                    errorMessage = `Erro de conexão: ${error.message}`;
+                }
+            } else if (error instanceof Error) {
+                errorMessage = `Erro inesperado: ${error.message}`;
+            }
+            
+            setCancelModal(prev => ({ ...prev, loading: false, error: errorMessage }));
+        }
+    };
+
+    const getStatusBadge = (status: string) => {
+        const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = { 
+            Completo: 'default', 
+            Analise: 'secondary', 
+            Cancelado: 'destructive' 
+        };
+        const icons: Record<string, React.ReactElement> = { 
+            Completo: <CheckCircle className="h-4 w-4" />, 
+            Analise: <AlertCircle className="h-4 w-4" />, 
+            Cancelado: <X className="h-4 w-4" /> 
+        };
+
+        return (
+            <Badge variant={variants[status] || 'outline'} className="flex items-center gap-1">
+                {icons[status]}
+                {status}
+            </Badge>
+        );
+    };
+
+    const formatDate = (dateString: string) => {
+        if (!dateString) return 'Data não informada';
+        const date = new Date(dateString);
+        if (isNaN(date.getTime()) || date.getFullYear() < 1970) {
+            return 'Data não informada';
+        }
+        return date.toLocaleDateString('pt-BR');
+    };
 
     const [pessoaData, setPessoaData] = useState({
         id_user: auth.user.id,
@@ -168,7 +516,28 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
 
             <SettingsLayout>
                 <div className="space-y-6">
-                    <HeadingSmall title="Informações do Perfil" description={data.tipo_perfil} />
+                    <div className="flex items-center justify-between">
+                        <HeadingSmall title="Informações do Perfil" description={data.tipo_perfil} />
+                        
+                        {/* Botão Minhas Candidaturas - apenas para candidatos */}
+                        {auth.user.tipo_perfil === 'Candidato' && (
+                            <Button
+                                variant="outline"
+                                className="flex items-center gap-2"
+                                onClick={() => {
+                                    // Limpar candidaturas antes de abrir o modal para forçar reload
+                                    setCandidacies([]);
+                                    setCandidaciesLoading(false);
+                                    // Fechar qualquer modal de cancelamento aberto
+                                    setCancelModal({ open: false, candidacy: null, loading: false, error: null });
+                                    setCandidaciesModalOpen(true);
+                                }}
+                            >
+                                <FileText className="h-4 w-4" />
+                                Minhas Candidaturas
+                            </Button>
+                        )}
+                    </div>
 
                     <form onSubmit={submit} className="space-y-6">
                         <div className="grid gap-2">
@@ -644,6 +1013,172 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                     </form>
                 </div>
             </SettingsLayout>
+
+            {/* Modal de Candidaturas */}
+            {auth.user.tipo_perfil === 'Candidato' && (
+                <Dialog 
+                    open={candidaciesModalOpen} 
+                    onOpenChange={(open) => {
+                        setCandidaciesModalOpen(open);
+                        if (!open) {
+                            // Limpar dados quando fechar o modal
+                            setCandidacies([]);
+                            setCancelModal({ open: false, candidacy: null, loading: false, error: null });
+                        }
+                    }}
+                >
+                    <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                        <DialogHeader>
+                            <DialogTitle>Minhas Candidaturas</DialogTitle>
+                            <DialogDescription>
+                                Gerencie suas candidaturas a vagas
+                            </DialogDescription>
+                        </DialogHeader>
+
+                        <div className="space-y-6">
+                            <div className="flex justify-between items-center">
+                                <Badge variant="outline">{candidacies.length} candidatura(s)</Badge>
+                            </div>
+
+                            {candidaciesLoading ? (
+                                <div className="animate-pulse space-y-4">
+                                    {[1, 2, 3].map((i) => (
+                                        <div key={i} className="h-48 bg-gray-200 rounded"></div>
+                                    ))}
+                                </div>
+                            ) : candidacies.length === 0 ? (
+                                <Alert>
+                                    <AlertCircle className="h-4 w-4" />
+                                    <AlertTitle>Nenhuma candidatura encontrada</AlertTitle>
+                                    <AlertDescription>
+                                        Você ainda não se candidatou a nenhuma vaga.
+                                    </AlertDescription>
+                                </Alert>
+                            ) : (
+                                candidacies.map((candidacy) => (
+                                    <Card key={candidacy.id}>
+                                        <CardHeader>
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <CardTitle>{candidacy.vacancy?.titulo || 'Vaga não encontrada'}</CardTitle>
+                                                    <div className="flex items-center gap-2 mt-2">
+                                                        {getStatusBadge(candidacy.status)}
+                                                        <span className="text-sm text-muted-foreground">
+                                                            {formatDate(candidacy.data_candidatura)}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </CardHeader>
+
+                                        <CardContent className="space-y-4">
+                                            {candidacy.vacancy && (
+                                                <div className="grid md:grid-cols-2 gap-4 text-sm">
+                                                    <div className="space-y-2">
+                                                        <div><strong>Carga Horária:</strong> {candidacy.vacancy.carga_horaria}</div>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Informações da Entrevista */}
+                                            <div className="bg-blue-50 p-4 rounded-lg">
+                                                <h4 className="font-semibold text-sm mb-2">Status da Entrevista:</h4>
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    {candidacy.interview && candidacy.interview.status === 'Agendada' ? (
+                                                        <>
+                                                            <Badge variant="default">
+                                                                Agendada
+                                                            </Badge>
+                                                            {candidacy.interview.data_hora && (
+                                                                <span className="text-sm text-blue-700">
+                                                                    {formatDate(candidacy.interview.data_hora)} às {new Date(candidacy.interview.data_hora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                                                </span>
+                                                            )}
+                                                        </>
+                                                    ) : (
+                                                        <Badge variant="secondary">
+                                                            Em análise
+                                                        </Badge>
+                                                    )}
+                                                </div>
+                                                {candidacy.interview && candidacy.interview.localizacao && candidacy.interview.status === 'Agendada' && (
+                                                    <div className="flex items-center gap-2 text-sm text-blue-700">
+                                                        <MapPin className="h-4 w-4" />
+                                                        <span>Local: {candidacy.interview.localizacao}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div className="flex gap-2">
+                                                <Button
+                                                    variant="destructive"
+                                                    size="sm"
+                                                    onClick={() => abrirModalCancelamento(candidacy)}
+                                                    disabled={candidacy.status === 'Cancelado'}
+                                                >
+                                                    <X className="h-4 w-4 mr-2" />
+                                                    Cancelar Candidatura
+                                                </Button>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                ))
+                            )}
+                        </div>
+                    </DialogContent>
+                </Dialog>
+            )}
+
+            {/* Modal de Cancelamento */}
+            <Dialog open={cancelModal.open} onOpenChange={() => setCancelModal(prev => ({ ...prev, open: false }))}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>
+                            {cancelModal.error ? 'Erro ao cancelar' : 
+                             !cancelModal.candidacy || cancelModal.candidacy.status === 'Cancelado' ? 
+                             'Candidatura cancelada com sucesso!' : 'Confirmar cancelamento'}
+                        </DialogTitle>
+                        <DialogDescription>
+                            {cancelModal.error ? 
+                                cancelModal.error :
+                                !cancelModal.candidacy || cancelModal.candidacy.status === 'Cancelado' ?
+                                'Sua candidatura foi cancelada. Agora você pode se candidatar a outra vaga.' :
+                                `Deseja cancelar sua candidatura para "${cancelModal.candidacy?.vacancy?.titulo}"? Esta ação não pode ser desfeita.`
+                            }
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex justify-end gap-2">
+                        <Button 
+                            variant="outline" 
+                            onClick={() => setCancelModal(prev => ({ ...prev, open: false }))}
+                            disabled={cancelModal.loading}
+                        >
+                            {cancelModal.error ? 'Fechar' : 
+                             !cancelModal.candidacy || cancelModal.candidacy.status === 'Cancelado' ? 'Entendido' : 'Não, manter'}
+                        </Button>
+                        {!cancelModal.error && cancelModal.candidacy && cancelModal.candidacy.status !== 'Cancelado' && (
+                            <Button 
+                                variant="destructive" 
+                                onClick={handleCancel}
+                                disabled={cancelModal.loading}
+                            >
+                                {cancelModal.loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                                Sim, cancelar
+                            </Button>
+                        )}
+                        {cancelModal.error && (
+                            <Button 
+                                variant="destructive" 
+                                onClick={handleCancel}
+                                disabled={cancelModal.loading}
+                            >
+                                {cancelModal.loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                                Tentar novamente
+                            </Button>
+                        )}
+                    </div>
+                </DialogContent>
+            </Dialog>
         </AppLayout>
         
     );
