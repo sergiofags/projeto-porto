@@ -37,7 +37,6 @@ const sidebarNavItems: NavItem[] = [
         href: '/settings/documents',
         icon: null,
     },
-
 ];
 
 
