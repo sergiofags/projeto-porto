@@ -4,6 +4,7 @@ import { SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion'; 
 import axios from 'axios';
+import { candidacyEventBus, type CandidacyEventData } from '@/utils/candidacy-events';
 
 interface ProdutoCatalogo {
   id: number;
@@ -22,7 +23,6 @@ interface InicioProps {
 export default function Inicio({ }: InicioProps) {
   const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
   const segments = pathname.split('/').filter(Boolean);
-
   const { auth } = usePage<SharedData>().props;
   const idUser = auth?.user?.id;
   const nomeCompleto = auth?.user?.name || '';
@@ -74,38 +74,318 @@ const [vaga, setVaga] = useState<Array<{
     fetchProcess();
   }, [processId]);
 
+
+  // Verificar se o usuário já tem candidatura ativa
+  useEffect(() => {
+    const checkExistingCandidacy = async () => {
+      if (!idUser) return;
+      
+      try {
+        const candidaciesResponse = await axios.get(`http://localhost:8000/api/person/${idUser}/candidacy`);
+        if (candidaciesResponse.data && candidaciesResponse.data.length > 0) {
+          setJaTemCandidatura(true);
+          setCandidacyId(candidaciesResponse.data[0].id);
+          setCandidacyDetails(candidaciesResponse.data[0]); // Salvar detalhes da candidatura
+          
+          // Buscar o nome da vaga
+          const candidatura = candidaciesResponse.data[0];
+          const vagaResponse = await axios.get(`http://localhost:8000/api/process/${candidatura.id_process}/vacancy/${candidatura.id_vacancy}`);
+          setVagaCandidatada(vagaResponse.data.titulo);
+        } else {
+          setJaTemCandidatura(false);
+          setCandidacyId(null);
+          setCandidacyDetails(null);
+          setVagaCandidatada('');
+        }
+      } catch {
+        setJaTemCandidatura(false);
+      }
+    };
+
+    checkExistingCandidacy();
+  }, [idUser]);
+
+  // Listener para sincronização de candidaturas entre páginas
+  useEffect(() => {
+    const unsubscribe = candidacyEventBus.on((eventData: CandidacyEventData) => {
+      console.log('Evento de candidatura recebido em inicio-vaga:', eventData);
+      
+      // Se uma candidatura foi cancelada em outra página
+      if (eventData.action === 'cancelled' && eventData.userId === idUser) {
+        // Atualizar estados locais
+        setJaTemCandidatura(false);
+        setCandidacyId(null);
+        setCandidacyDetails(null);
+        setVagaCandidatada('');
+        
+        // Fechar modais relacionados se estiverem abertos
+        setModalCancelarCandidatura(false);
+        setModalVisualizarCandidatura(false);
+        setModalJaCandidatado(false);
+      }
+      
+      // Se uma candidatura foi criada em outra página
+      if (eventData.action === 'created' && eventData.userId === idUser) {
+        // Recarregar dados da candidatura
+        const checkExistingCandidacy = async () => {
+          try {
+            const candidaciesResponse = await axios.get(`http://localhost:8000/api/person/${idUser}/candidacy`);
+            if (candidaciesResponse.data && candidaciesResponse.data.length > 0) {
+              setJaTemCandidatura(true);
+              setCandidacyId(candidaciesResponse.data[0].id);
+              setCandidacyDetails(candidaciesResponse.data[0]);
+              
+              // Buscar o nome da vaga
+              const candidatura = candidaciesResponse.data[0];
+              const vagaResponse = await axios.get(`http://localhost:8000/api/process/${candidatura.id_process}/vacancy/${candidatura.id_vacancy}`);
+              setVagaCandidatada(vagaResponse.data.titulo);
+            }
+          } catch (error) {
+            console.error('Erro ao recarregar candidatura:', error);
+          }
+        };
+        
+        checkExistingCandidacy();
+      }
+    });
+
+    return unsubscribe; // Cleanup quando o componente for desmontado
+  }, [idUser]);
+
   const candidatura = async (vacancyId: number) => {
     // Verifica se o usuário está logado
     if (!idUser) {
       setModalLogin(true);
       return;
     }
+    
+    console.log('=== INICIO DA CANDIDATURA ===');
+    console.log('idUser:', idUser);
+    console.log('vacancyId:', vacancyId);
+    console.log('window.location.hostname:', window?.location?.hostname);
+    console.log('processo está rodando no navegador:', typeof window !== 'undefined');
+    
     try {
       // Verifica se a pessoa existe antes de tentar candidatar
+
       const pessoaResponse = await axios.get(`http://localhost:8000/api/person/${idUser}`);
+
+      const pessoaUrl = `http://localhost:8000/api/person/${idUser}`;
+      console.log('Fazendo requisição para:', pessoaUrl);
+      
+      const pessoaResponse = await axios.get(pessoaUrl);
+      console.log('Resposta da API person:', pessoaResponse.status, pessoaResponse.data);
+      
       if (!pessoaResponse.data || pessoaResponse.data.message === 'Usuário não encontrado.') {
+        console.log('Usuário não encontrado, abrindo modal perfil');
         setModalPerfil(true);
         return;
       }
 
+
       const response = await axios.post(`http://localhost:8000/api/person/${idUser}/vacancy/${vacancyId}/candidacy`, {
+      // Verifica se há informações pessoais e documentos
+      const pessoa = pessoaResponse.data;
+      console.log('Dados da pessoa:', pessoa); // Debug
+      console.log('Objeto completo da pessoa:', JSON.stringify(pessoa, null, 2)); // Debug mais detalhado
+      
+      // Verificar se tem informações pessoais essenciais (independente de person_exists)
+      const hasPersonalInfo = !!(pessoa.cpf && pessoa.telefone && pessoa.data_nascimento);
+      console.log('hasPersonalInfo:', hasPersonalInfo); // Debug
+      console.log('CPF:', pessoa.cpf, 'Telefone:', pessoa.telefone, 'Data nascimento:', pessoa.data_nascimento); // Debug
+      console.log('Validação individual:');
+      console.log('  - CPF existe:', !!pessoa.cpf);
+      console.log('  - Telefone existe:', !!pessoa.telefone);
+      console.log('  - Data nascimento existe:', !!pessoa.data_nascimento);
+      
+      // Verificar se existem documentos
+      let hasDocuments = false;
+      try {
+        const documentsUrl = `http://localhost:8000/api/person/${idUser}/document`;
+        console.log('Fazendo requisição de documentos para:', documentsUrl);
+        
+        const documentsResponse = await axios.get(documentsUrl);
+        console.log('Resposta da API documents:', documentsResponse.status, documentsResponse.data);
+        
+        hasDocuments = documentsResponse.data && documentsResponse.data.length > 0;
+        console.log('hasDocuments:', hasDocuments); // Debug
+        console.log('Resposta dos documentos:', documentsResponse.data); // Debug
+        console.log('Validação de documentos:');
+        console.log('  - Resposta é array:', Array.isArray(documentsResponse.data));
+        console.log('  - Quantidade de documentos:', documentsResponse.data?.length || 0);
+      } catch (docError) {
+        hasDocuments = false;
+        console.log('Erro ao buscar documentos:', docError); // Debug
+        console.log('Considerando hasDocuments como false'); // Debug
+      }
+
+      // Determina qual modal mostrar baseado no que está faltando
+      console.log('=== VERIFICAÇÃO FINAL ===');
+      console.log('hasPersonalInfo:', hasPersonalInfo, 'hasDocuments:', hasDocuments); // Debug
+      
+      if (!hasPersonalInfo && !hasDocuments) {
+        console.log('Abrindo modal geral - ambos faltando'); // Debug
+        // Ambos estão faltando - modal geral
+        setModalPerfil(true);
+        return;
+      } else if (!hasPersonalInfo && hasDocuments) {
+        console.log('Abrindo modal info pessoais - só info pessoais faltando'); // Debug
+        // Só informações pessoais estão faltando
+        setModalInfoPessoais(true);
+        return;
+      } else if (hasPersonalInfo && !hasDocuments) {
+        console.log('Abrindo modal documentos - só documentos faltando'); // Debug
+        // Só documentos estão faltando
+        setModalDocumentos(true);
+        return;
+      }
+
+      console.log('=== VALIDAÇÃO PASSOU - FAZENDO CANDIDATURA ===');
+      console.log('Usuário tem informações pessoais e documentos completos');
+
+      const candidaturaUrl = `http://localhost:8000/api/person/${idUser}/vacancy/${vacancyId}/candidacy`;
+      console.log('Fazendo candidatura para:', candidaturaUrl);
+
+      const response = await axios.post(candidaturaUrl, {
         id_process: processId,
         status: 'Analise',
         data_candidatura: new Date().toISOString().split('T')[0],
       });
 
+      console.log('Resposta da candidatura:', response.status, response.data);
+
       if (response.status === 200 || response.status === 201) {
+
         // alert(response.data.message || 'Candidatura realizada com sucesso');
         setModalSucesso(true);
+
+        alert(response.data.message || 'Candidatura realizada com sucesso');
+        setModalAberto(false);
+        
+        // Atualizar estados para refletir a nova candidatura
+        setJaTemCandidatura(true);
+        const novaVaga = vaga.find(v => v.id === vacancyId);
+        if (novaVaga) {
+          setVagaCandidatada(novaVaga.titulo);
+        }
+        setCandidacyId(response.data.id);
+        setCandidacyDetails(response.data);
+
+        // Emitir evento para sincronizar com outras páginas
+        candidacyEventBus.emit({
+          candidacyId: response.data.id,
+          userId: idUser,
+          action: 'created',
+          timestamp: Date.now()
+        });
+
       }
 
     } catch (error) {
+      console.error('Erro na candidatura:', error);
       if (axios.isAxiosError(error) && error.response?.status === 404) {
         setModalPerfil(true);
         return;
       }
       const errorMessage = (axios.isAxiosError(error) && error.response?.data?.message) || (error instanceof Error && error.message) || 'Erro ao realizar candidatura';
       alert('Erro ao realizar candidatura: ' + errorMessage);
+    }
+  };
+  
+
+
+  const abrirModalCancelamento = async () => {
+    // Se não temos candidacyId ou idUser, tentar recarregar os dados da candidatura
+    if (!candidacyId || !idUser) {
+      if (idUser) {
+        try {
+          const candidaciesResponse = await axios.get(`http://localhost:8000/api/person/${idUser}/candidacy`);
+          if (candidaciesResponse.data && candidaciesResponse.data.length > 0) {
+            const candidatura = candidaciesResponse.data[0];
+            setCandidacyId(candidatura.id);
+          }
+        } catch (error) {
+          console.error('Erro ao recarregar candidatura:', error);
+        }
+      }
+    }
+    
+    setErroCancelamento(null);
+    setModalCancelarCandidatura(true);
+  };
+
+  const abrirModalVisualizacao = async () => {
+    // Buscar dados da entrevista se houver candidatura
+    if (candidacyId) {
+      try {
+        const interviewResponse = await axios.get(`http://localhost:8000/api/candidacy/${candidacyId}/interview`);
+        setInterviewDetails(interviewResponse.data);
+      } catch {
+        // Se não houver entrevista, mantém como null
+        setInterviewDetails(null);
+      }
+    }
+    setModalVisualizarCandidatura(true);
+  };
+
+  const cancelarCandidatura = async () => {
+    if (!candidacyId || !idUser) {
+      setErroCancelamento('Não foi possível identificar a candidatura para cancelamento.');
+      return;
+    }
+
+    try {
+      // Primeiro verificar se a candidatura ainda existe
+      const checkResponse = await axios.get(`http://localhost:8000/api/person/${idUser}/candidacy`);
+      const currentCandidacies = checkResponse.data || [];
+      const candidacyExists = currentCandidacies.find((c: { id: number }) => c.id === candidacyId);
+      
+      if (!candidacyExists) {
+        setErroCancelamento('Esta candidatura já foi cancelada ou não existe mais.');
+        // Atualizar estados locais
+        setJaTemCandidatura(false);
+        setCandidacyId(null);
+        setCandidacyDetails(null);
+        setVagaCandidatada('');
+        return;
+      }
+
+      const response = await axios.delete(`http://localhost:8000/api/person/${idUser}/candidacy/${candidacyId}`);
+      
+      if (response.status === 200) {
+        setModalAberto(false);
+        setCandidacyId(null);
+        setCandidacyDetails(null);
+        setVagaCandidatada('');
+        setJaTemCandidatura(false);
+        setErroCancelamento(null);
+        // Modal permanece aberto para mostrar sucesso
+
+        // Emitir evento para sincronizar com outras páginas
+        candidacyEventBus.emit({
+          candidacyId,
+          userId: idUser,
+          action: 'cancelled',
+          timestamp: Date.now()
+        });
+      }
+    } catch (error) {
+      let errorMessage = 'Erro ao cancelar candidatura';
+      
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 404) {
+          errorMessage = 'Candidatura não encontrada ou já foi cancelada.';
+          // Atualizar estados locais se candidatura não existe mais
+          setJaTemCandidatura(false);
+          setCandidacyId(null);
+          setCandidacyDetails(null);
+          setVagaCandidatada('');
+        } else {
+          errorMessage = error.response?.data?.message || errorMessage;
+        }
+      }
+      
+      setErroCancelamento(errorMessage);
     }
   };
   

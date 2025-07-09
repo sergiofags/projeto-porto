@@ -2,7 +2,7 @@ import axios from 'axios';
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-import { ChevronDown, ChevronUp, FileDown, ChevronLeft } from 'lucide-react';
+import { ChevronDown, ChevronUp, FileDown, ChevronLeft, Paperclip } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 type Person = {
@@ -129,28 +129,54 @@ export default function CadastrarVaga() {
             <div className="tracking-wide w-full break-words">
                 <h1 className='text-3xl mt-10 pl-4 pr-4'>Documentos da candidatura de {person[0]?.name}</h1>
                 <hr className="max-w-md mb-4 ml-4 mr-4 bg-[#008DD0] h-0.5" />
-                <div className='flex gap-4'>
-                    {['AtestadoMatricula', 'HistoricoEscolar', 'Curriculo'].map((docName) => {
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-4 mt-10">
+                    {[
+                        { key: 'AtestadoMatricula', label: 'Atestado de Matrícula ou Frequência' },
+                        { key: 'HistoricoEscolar', label: 'Histórico Escolar' },
+                        { key: 'Curriculo', label: 'Currículo' }
+                    ].map(({ key, label }) => {
                         const documento = documentos.find(
-                            (doc) => doc.tipo_documento === 'Candidatura' && doc.nome_documento === docName
+                        (doc) =>
+                            doc.tipo_documento === 'Candidatura' &&
+                            doc.nome_documento === key
                         );
+
+                        const valorInput = documento
+                        ? documento.documento
+                        : 'Documento não informado';
+
                         return (
-                            <div key={docName} className="mb-4 text-center">
-                                <p className="mb-2">{docName}</p>
-                                {documento ? (
-                                    <a
-                                        href={`/storage/app/public/${documento.documento}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                    >
-                                        <Button className="bg-blue-600 hover:bg-blue-700 text-xs">
-                                            <FileDown /> {documento.documento}
-                                        </Button>
-                                    </a>
-                                ) : (
-                                    <p>Documento não informado</p>
-                                )}
-                            </div>
+                        <div key={key} className="col-span-1 break-inside-avoid sm:w-auto">
+                            <p className="mb-2 break-words min-h-[48px]">{label}</p>
+                            {documento ? (
+                            <a
+                                href={`/storage/app/public/${documento.documento}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                title="Clique para visualizar o documento"
+                            >
+                                <div className="relative w-full mx-auto">
+                                <input
+                                    type="text"
+                                    readOnly
+                                    value={valorInput ?? ''}
+                                    className="w-full h-10 cursor-pointer border border-blue-400 rounded-md p-2 px-3 pr-10 text-sm text-[#008DD0] text-center bg-white focus:outline-none focus:ring-0 focus:border-blue-400"
+                                />
+                                <span className="absolute inset-y-0 right-2 flex items-center">
+                                    <Paperclip className="w-5 h-5" />
+                                </span>
+                                <hr className="absolute bottom-1 left-1/2 -translate-x-1/2 w-[80%] h-0.5 bg-[#008DD0] rounded" />
+                                </div>
+                            </a>
+                            ) : (
+                            <input
+                                type="text"
+                                readOnly
+                                value={valorInput ?? ''}
+                                className="w-full h-10 rounded-md border border-gray-300 p-2 px-3 pr-10 text-center text-gray-500 bg-gray-100 pointer-events-none select-none focus:outline-none"
+                            />
+                            )}
+                        </div>
                         );
                     })}
                 </div>
@@ -160,7 +186,7 @@ export default function CadastrarVaga() {
 
                         {/* esse */}
             {/* COPIADO DE LANDING-PAGE */}
-            <div className="border border-blue-300 rounded-xl p-4">
+            <div className="border border-blue-300 rounded-xl p-4 ml-4 mr-4">
                 <div
                     className="flex justify-between items-center cursor-pointer"
                     onClick={() => setAbertoInformacoes(!abertoInformacoes)}>
@@ -333,7 +359,7 @@ export default function CadastrarVaga() {
                 )}
             </div>
 
-            <div className="border border-blue-300 rounded-xl p-4">
+            <div className="border border-blue-300 rounded-xl p-4 ml-4 mr-4">
                 <div
                     className="flex justify-between items-center cursor-pointer"
                     onClick={() => setAbertoSobre(!abertoSobre)}>
@@ -443,7 +469,7 @@ export default function CadastrarVaga() {
                 )}
             </div>
 
-            <div className="border border-blue-300 rounded-xl p-4">
+            <div className="border border-blue-300 rounded-xl p-4 ml-4 mr-4">
                 <div
                     className="flex justify-between items-center cursor-pointer"
                     onClick={() => setAbertoExperiencias(!abertoExperiencias)}>
@@ -762,7 +788,7 @@ export default function CadastrarVaga() {
                     </>
                 )}
             </div> 
-            <div className="mt-6 mb-6 pl-2">
+            <div className="mt-6 mb-6 pl-4">
                 <Link className="w-fit flex" href={`/processo/vagas/ver-candidatos?id-processo=${processId}&id-vaga=${vacancyId}`}>
                     <Button
                         className="flex items-center gap-2 rounded-md px-4 py-2 text-sm duration-200 bg-gray-500 text-white shadow-xs hover:bg-gray-600">

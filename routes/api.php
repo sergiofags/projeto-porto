@@ -36,6 +36,7 @@ Route::get('/person/{personId}/document', [DocumentController::class, 'index'])-
 Route::post('/person/{personId}/document', [DocumentController::class, 'store'])->name('document.store');; //Cria um novo documento
 Route::get('/person/{personId}/document/{documentId}', [DocumentController::class, 'show'])->name('document.show'); //Retorna um documento específico
 Route::put('/person/{personId}/document/{documentId}', [DocumentController::class, 'update'])->name('document.update');; //Atualiza um documento
+Route::post('/person/{personId}/document/{documentId}', [DocumentController::class, 'update'])->name('document.update.post'); //Atualiza um documento via POST com _method
 
 Route::get('/person/{personId}/experience', [ExperienceController::class, 'index'])->name('experience.index'); //Retorna todas as experiências de uma pessoa
 Route::post('/person/{personId}/experience', [ExperienceController::class, 'store'])->name('experience.store'); //Cria uma nova experiência 

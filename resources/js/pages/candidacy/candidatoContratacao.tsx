@@ -1,9 +1,9 @@
 import axios from 'axios';
 import AppLayout from '@/layouts/app-layout';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { FileDown } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronUp, FileDown, Paperclip } from 'lucide-react';
 
 type Person = {
     id_user: string;
@@ -71,6 +71,12 @@ type Documentos = {
 export default function CandidatoContratacao() {
     const queryParams = new URLSearchParams(window.location.search);
     const candidatoId = queryParams.get('id-candidato');
+    const processId = queryParams.get('id-processo');
+    const vacancyId = queryParams.get('id-vaga');
+
+    const [abertoInformacoes, setAbertoInformacoes] = useState(true);
+    const [abertoSobre, setAbertoSobre] = useState(false);
+    const [abertoExperiencias, setAbertoExperiencias] = useState(false);
 
     const [person, setPerson] = useState<Person[]>([]);
     const [experiences, setExperiences] = useState<Experiences[]>([]);
@@ -118,119 +124,689 @@ export default function CandidatoContratacao() {
     return (
         <AppLayout>
             <Head title="Visualizar Vaga" />
-            <h1 className='text-3xl'>Documentos da contratação de {person[0]?.name}</h1>
-            <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 3xl:grid-cols-7 gap-4'>
-                {[
-                    'AtestadoMatricula',
-                    'HistoricoEscolar',
-                    'Curriculo',
-                    'CoeficienteRendimento',
-                    'Foto3x4',
-                    'CedulaIdentidadeOuCNH',
-                    'CadastroPessoaFisica',
-                    'CTPS',
-                    'CarteiraDeReservista',
-                    'ComprovanteDeResidencia',
-                    'AntecedentesCriminaisECivel',
-                    'AntecedentesCriminaisPoliciaFederal',
-                    'VacinacaFebreAmarela',
-                    'VacinacaCovid19',
-                    'GrupoSanguineo',
-                    'ComprovanteMatricula',
-                    'AtestadadoFrequencia',
-                ].map((docName) => {
-                    const documento = documentos.find(
-                        (doc) => doc.tipo_documento === 'Contratacao' && doc.nome_documento === docName
+            <div className="tracking-wide w-full break-words">
+                <h1 className='text-3xl mt-10 pl-4 pr-4'>Documentos da contratação de {person[0]?.name}</h1>
+                <hr className="max-w-md mb-4 ml-4 mr-4 bg-[#008DD0] h-0.5" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-4 mt-10">
+                    {/* flex flex-wrap gap-4 px-4 mt-10 */}
+                    {[
+                        { key: 'AtestadoMatricula', label: 'Atestado de Matrícula ou Frequência' },
+                        { key: 'HistoricoEscolar', label: 'Histórico Escolar' },
+                        { key: 'Curriculo', label: 'Currículo' },
+                        { key: 'CoeficienteRendimento', label: 'Coeficiente de Rendimento' },
+                        { key: 'Foto3x4', label: 'Foto3x4' },
+                        { key: 'CedulaIdentidadeOuCNH', label: 'Cédula de Identidade ou CNH' },
+                        { key: 'CadastroPessoaFisica', label: 'Cadastro de Pessoa Física (CPF)' },
+                        { key: 'CTPS', label: 'CTPS com inscrição no PIS/PASEP' },
+                        { key: 'CarteiraDeReservista', label: 'Carteira de Reservista' },
+                        { key: 'ComprovanteDeResidencia', label: 'Comprovante de Residência' },
+                        { key: 'ComprovanteMatricula', label: 'Comprovante de Matrícula' },
+                        { key: 'AtestadadoFrequencia', label: 'Atestado de Frequência' },
+                        { key: 'VacinacaFebreAmarela', label: 'Carteira de Vacinação contra Febre Amarela' },
+                        { key: 'VacinacaCovid19', label: 'Carteira de Vacinação contra a COVID-19' },
+                        { key: 'GrupoSanguineo', label: 'Certidão do Grupo Sanguíneo e Fator RH' },
+                        { key: 'AntecedentesCriminaisECivel', label: 'Certidão de Antecedentes Criminais e Cível' },
+                        { key: 'AntecedentesCriminaisPoliciaFederal', label: 'Certidão de Antecedentes Criminais da Policia Federal' },
+                    ].map(({ key, label }) => {
+                        const documento = documentos.find(
+                            (doc) =>
+                            doc.tipo_documento === 'Contratacao' &&
+                            doc.nome_documento === key
                     );
+
+                    const valorInput = documento
+                        ? documento.documento
+                        : 'Documento não informado';
+
                     return (
-                        <div key={docName} className="mb-4 text-center">
-                            <p className="mb-2">{docName}</p>
-                            {documento ? (
-                                <a
-                                    href={`/storage/app/public/${documento.documento}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    <Button className="bg-blue-600 hover:bg-blue-700 text-xs">
-                                        <FileDown /> {documento.documento}
-                                    </Button>
-                                </a>
-                            ) : (
-                                <p>Documento não informado</p>
-                            )}
+                        <div key={key} className="w-full">
+                        <p className="mb-2 break-words min-h-[48px]">{label}</p>
+                        {documento ? (
+                            <a
+                            href={`/storage/app/public/${documento.documento}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title="Clique para visualizar o documento"
+                            >
+                            <div className="relative w-full mx-auto">
+                                <input
+                                type="text"
+                                readOnly
+                                value={valorInput ?? ''}
+                                className="w-full h-10 cursor-pointer border border-blue-400 rounded-md p-2 px-3 pr-10 text-sm text-[#008DD0] text-center bg-white focus:outline-none focus:ring-0 focus:border-blue-400"
+                                />
+                                <span className="absolute inset-y-0 right-2 flex items-center">
+                                <Paperclip className="w-5 h-5" />
+                                </span>
+                                <hr className="absolute bottom-1 left-1/2 -translate-x-1/2 w-[80%] h-0.5 bg-[#008DD0] rounded" />
+                            </div>
+                            </a>
+                        ) : (
+                            <input
+                            type="text"
+                            readOnly
+                            value={valorInput ?? ''}
+                            className="w-full h-10 rounded-md border border-gray-300 p-2 px-3 pr-10 text-center text-gray-500 bg-gray-100 pointer-events-none select-none focus:outline-none"
+                            />
+                        )}
                         </div>
                     );
-                })}
+                    })}
+                </div>
             </div>
 
-            <h1 className='text-3xl'>Currículo de {person[0]?.name}</h1>
+            <h1 className='text-3xl ml-4 mr-4 mt-4 mb-4'>Currículo de {person[0]?.name}</h1>
 
-            <div>
-                <h1 className='text-2xl font-semibold'>Informações pessoais</h1>
-                <p>Nome Completo: {person[0]?.name}</p>
-                <p>CPF: {person[0]?.cpf}</p>
-                <p>Data de nascimento: {person[0]?.data_nascimento}</p>
-                <p>E-mail: {person[0]?.email}</p>
-                <p>Telefone: {person[0]?.telefone}</p>
-            </div>
-            <div>
-                <h1 className='text-2xl font-semibold'>Endereço</h1>
-                <p>CEP: {person[0]?.cep || 'Não informado'}</p>
-                <p>Rua: {person[0]?.rua || 'Não informado'}</p>
-                <p>Bairro: {person[0]?.bairro || 'Não informado'}</p>
-                <p>Cidade: {person[0]?.cidade || 'Não informado'}</p>
-                <p>Estado: {person[0]?.estado || 'Não informado'}</p>
-                <p>Número: {person[0]?.numero || 'Não informado'}</p>
-                <p>Complemento: {person[0]?.complemento || 'Não informado'}</p>
-                <p>Referência: {person[0]?.referencia || 'Não informado'}</p>
-            </div>
-            <div>
-                <h1 className='text-2xl font-semibold'>Sobre você</h1>
-                <p>Gênero: {person[0]?.genero || 'Não informado'}</p>
-                <p>Você tem obrigação legal com o Serviço Militar?: {person[0]?.servico_militar ? 'Sim' : 'Não'}</p>
-                <p>Você possui algum tipo de deficiência?: {person[0]?.deficiencia ? 'Sim' : 'Não'}</p>
-                <p>Qual o tipo de deficiência?: {person[0]?.qual_deficiencia || 'Não informado'}</p>
-                <p>Fale um pouco sobre você: {person[0]?.sobre || 'Não informado'}</p>
-                <p>LinkedIn: {person[0]?.linkedin || 'Não informado'}</p>
-                <p>Instagram: {person[0]?.instagram || 'Não informado'}</p>
-                <p>Facebook: {person[0]?.facebook || 'Não informado'}</p>
-            </div>
-            <div>
-                <h1 className='text-2xl font-semibold'>Experiencias Acadêmica e Profissional</h1>
-                {experiences.map((experience) => (
-                    <div key={experience.id} className="mb-4">
-                        <p className='font-semibold'>Tipo de Experiência: {experience.tipo_experiencia}</p>
-                        <p>Empresa/Instituição: {experience.empresa_instituicao || 'Não informado'}</p>
-                        <p>Nível: {experience.nivel || 'Não informado'}</p>
-                        <p>Status: {experience.status || 'Não informado'}</p>
-                        <p>Curso/Cargo: {experience.curso_cargo || 'Não informado'}</p>
-                        <p>Atividades: {experience.atividades || 'Não informado'}</p>
-                        <p>Semestre/Módulo: {experience.semestre_modulo || 'Não informado'}</p>
-                        <p>Data de Início: {experience.data_inicio || 'Não informado'}</p>
-                        <p>Data de Fim: {experience.data_fim || 'Não informado'}</p>
-                        <p>Emprego Atual: {experience.emprego_atual ? 'Sim' : 'Não'}</p>
-                    </div>
-                ))}
-            </div>
-            <div>
-                <h1 className='text-2xl font-semibold'>Experiencias Complementares</h1>
-                {complementaruExperiences.map((experience) => (
-                    <div key={experience.id} className="mb-4">
-                        <p className='font-semibold'>Tipo de Experiência: {experience.tipo_experiencia}</p>
-                        <p>Título: {experience.titulo}</p>
-                        <p>Descrição: {experience.descricao}</p>
-                        <p>Nível de Idioma: {experience.nivel_idioma || 'Não informado'}</p>
-                        <p>Certificado: {experience.certificado || 'Não informado'}</p>
-                        <p>Data de Início: {experience.data_inicio || 'Não informado'}</p>
-                        <p>Data de Fim: {experience.data_fim || 'Não informado'}</p>
-                        <p>Instituição: {experience.instituicao}</p>
-                        <p>Status: {experience.status}</p>
-                    </div>
-                ))}
+            <div className="border border-blue-300 rounded-xl p-4 ml-4 mr-4">
+                <div
+                    className="flex justify-between items-center cursor-pointer"
+                    onClick={() => setAbertoInformacoes(!abertoInformacoes)}>
+                    <h1 className="text-lg font-medium">Informações pessoais</h1>
+                    {abertoInformacoes ? <ChevronUp /> : <ChevronDown />}
+                </div>
+
+                {abertoInformacoes && (
+                    <>
+                        <div className="pt-6">
+                            <p className="pb-2">Nome Completo</p>
+                            <input
+                                type="text"
+                                id="nome"
+                                name="nome"
+                                value={person[0]?.name}
+                                readOnly // impede edição, se for apenas para visualização
+                                className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+
+                        </div>
+                        
+                        <div className="pt-6">
+                            <p className="pb-2">CPF</p>
+                            <input
+                                type="text"
+                                id="cpf"
+                                name="cpf"
+                                value={person[0]?.cpf}
+                                readOnly // impede edição, se for apenas para visualização
+                                className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+
+                        </div>
+                        
+                        <div className="pt-6">
+                            <p className="pb-2">Data de Nascimento</p>
+                            <input
+                                type="text"
+                                id="data_nascimento"
+                                name="data_nascimento"
+                                value={person[0]?.data_nascimento}
+                                readOnly // impede edição, se for apenas para visualização
+                                className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+
+                        <div className="pt-6">
+                            <p className="pb-2">E-mail</p>
+                            <input
+                                type="text"
+                                id="email"
+                                name="email"
+                                value={person[0]?.email}
+                                readOnly // impede edição, se for apenas para visualização
+                                className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+
+                        <div className="pt-6">
+                            <p className="pb-2">Telefone</p>
+                            <input
+                                type="text"
+                                id="telefone"
+                                name="telefone"
+                                value={person[0]?.telefone}
+                                readOnly // impede edição, se for apenas para visualização
+                                className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+
+                        <h1 className="pt-6 font-semibold">Endereço</h1>
+
+                        <div className="pt-6">
+                            <p className="pb-2">CEP</p>
+                            <input
+                                type="text"
+                                id="cep"
+                                name="cep"
+                                value={person[0]?.cep || 'Não informado'}
+                                readOnly // impede edição, se for apenas para visualização
+                                className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+
+                        <div className="pt-6">
+                            <p className="pb-2">Rua</p>
+                            <input
+                                type="text"
+                                id="rua"
+                                name="rua"
+                                value={person[0]?.rua || 'Não informado'}
+                                readOnly // impede edição, se for apenas para visualização
+                                className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+
+                        <div className="pt-6">
+                            <p className="pb-2">Bairro</p>
+                            <input
+                                type="text"
+                                id="bairro"
+                                name="bairro"
+                                value={person[0]?.bairro || 'Não informado'}
+                                readOnly // impede edição, se for apenas para visualização
+                                className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+
+                        <div className="pt-6">
+                            <p className="pb-2">Cidade</p>
+                            <input
+                                type="text"
+                                id="cidade"
+                                name="cidade"
+                                value={person[0]?.cidade || 'Não informado'}
+                                readOnly // impede edição, se for apenas para visualização
+                                className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+
+                        <div className="pt-6">
+                            <p className="pb-2">Estado</p>
+                            <input
+                                type="text"
+                                id="estado"
+                                name="estado"
+                                value={person[0]?.estado || 'Não informado'}
+                                readOnly // impede edição, se for apenas para visualização
+                                className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+
+                        <div className="pt-6">
+                            <p className="pb-2">Número</p>
+                            <input
+                                type="text"
+                                id="numero"
+                                name="numero"
+                                value={person[0]?.numero || 'Não informado'}
+                                readOnly // impede edição, se for apenas para visualização
+                                className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+
+                        <div className="pt-6">
+                            <p className="pb-2">Complemento</p>
+                            <input
+                                type="text"
+                                id="complemento"
+                                name="complemento"
+                                value={person[0]?.complemento || 'Não informado'}
+                                readOnly // impede edição, se for apenas para visualização
+                                className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+
+                        <div className="pt-6">
+                            <p className="pb-2">Referência</p>
+                            <input
+                                type="text"
+                                id="referencia"
+                                name="referencia"
+                                value={person[0]?.referencia || 'Não informado'}
+                                readOnly // impede edição, se for apenas para visualização
+                                className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+                    </>
+                )}
             </div>
 
-            
-        
+            <div className="border border-blue-300 rounded-xl p-4 ml-4 mr-4">
+                <div
+                    className="flex justify-between items-center cursor-pointer"
+                    onClick={() => setAbertoSobre(!abertoSobre)}>
+                    <h1 className="text-lg font-medium">Sobre você</h1>
+                    {abertoSobre ? <ChevronUp /> : <ChevronDown />}
+                </div>
+                
+                {abertoSobre && (
+                    <>
+                        <div className="pt-6">
+                            <p className="pb-2">Gênero</p>
+                            <input
+                                type="text"
+                                id="genero"
+                                name="genero"
+                                value={person[0]?.genero || 'Não informado'}
+                                readOnly // impede edição, se for apenas para visualização
+                                className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+
+                        <div className="pt-6">
+                            <p className="pb-2">Você tem obrigação legal com o Serviço Militar?</p>
+                            <input
+                                type="text"
+                                id="servico_militar"
+                                name="servico_militar"
+                                value={person[0]?.servico_militar ? 'Sim' : 'Não'}
+                                readOnly // impede edição, se for apenas para visualização
+                                className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+
+                        <div className="pt-6">
+                            <p className="pb-2">Você possui algum tipo de deficiência?</p>
+                            <input
+                                type="text"
+                                id="deficiencia"
+                                name="deficiencia"
+                                value={person[0]?.deficiencia ? 'Sim' : 'Não'}
+                                readOnly // impede edição, se for apenas para visualização
+                                className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+
+                        <div className="pt-6">
+                            <p className="pb-2">Qual o tipo de deficiência?</p>
+                            <input
+                                type="text"
+                                id="qual_deficiencia"
+                                name="qual_deficiencia"
+                                value={person[0]?.qual_deficiencia || 'Não informado'}
+                                readOnly // impede edição, se for apenas para visualização
+                                className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+
+                        <div className="pt-6">
+                            <p className="pb-2">Fale um pouco sobre você</p>
+                            <input
+                                type="text"
+                                id="sobre"
+                                name="sobre"
+                                value={person[0]?.sobre || 'Não informado'}
+                                readOnly // impede edição, se for apenas para visualização
+                                className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+
+                        <div className="pt-6">
+                            <p className="pb-2">LinkedIn</p>
+                            <input
+                                type="text"
+                                id="linkedin"
+                                name="linkedin"
+                                value={person[0]?.linkedin || 'Não informado'}
+                                readOnly // impede edição, se for apenas para visualização
+                                className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+
+                        <div className="pt-6">
+                            <p className="pb-2">Instagram</p>
+                            <input
+                                type="text"
+                                id="instagram"
+                                name="instagram"
+                                value={person[0]?.instagram || 'Não informado'}
+                                readOnly // impede edição, se for apenas para visualização
+                                className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+
+                        <div className="pt-6">
+                            <p className="pb-2">Facebook</p>
+                            <input
+                                type="text"
+                                id="facebook"
+                                name="facebook"
+                                value={person[0]?.facebook || 'Não informado'}
+                                readOnly // impede edição, se for apenas para visualização
+                                className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+
+                    </>
+                )}
+            </div>
+
+            <div className="border border-blue-300 rounded-xl p-4 ml-4 mr-4">
+                <div
+                    className="flex justify-between items-center cursor-pointer"
+                    onClick={() => setAbertoExperiencias(!abertoExperiencias)}>
+                    <h1 className="text-lg font-medium">Experiencias Acadêmica e Profissional</h1>
+                    {abertoExperiencias ? <ChevronUp /> : <ChevronDown />}
+                </div>
+                
+                {abertoExperiencias && (
+                    <>
+                        <h2 className="text-xl font-semibold mt-4 mb-2">Experiências Acadêmicas</h2>
+                        {experiences.filter(e => e.tipo_experiencia === 'Acadêmica').length === 0 && (
+                            <p className="text-gray-500 mb-4">Nenhuma experiência acadêmica cadastrada.</p>
+                        )}
+                        {experiences
+                            .filter(e => e.tipo_experiencia === 'Acadêmica')
+                            .map((experience) => (
+                                <div key={experience.id} className="mb-4">
+                                    <div className="pt-6">
+                                        <p className="pb-2">Empresa/Instituição:</p>
+                                        <input
+                                            type="text"
+                                            id="empresa_instituicao"
+                                            name="empresa_instituicao"
+                                            value={experience.empresa_instituicao || 'Não informado'}
+                                            readOnly
+                                            className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    <div className="pt-6">
+                                        <p className="pb-2">Nível:</p>
+                                        <input
+                                            type="text"
+                                            id="nivel"
+                                            name="nivel"
+                                            value={experience.nivel || 'Não informado'}
+                                            readOnly
+                                            className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    <div className="pt-6">
+                                        <p className="pb-2">Status:</p>
+                                        <input
+                                            type="text"
+                                            id="status"
+                                            name="status"
+                                            value={experience.status || 'Não informado'}
+                                            readOnly
+                                            className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    <div className="pt-6">
+                                        <p className="pb-2">Curso/Cargo:</p>
+                                        <input
+                                            type="text"
+                                            id="curso_cargo"
+                                            name="curso_cargo"
+                                            value={experience.curso_cargo || 'Não informado'}
+                                            readOnly
+                                            className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    <div className="pt-6">
+                                        <p className="pb-2">Atividades:</p>
+                                        <input
+                                            type="text"
+                                            id="atividades"
+                                            name="atividades"
+                                            value={experience.atividades || 'Não informado'}
+                                            readOnly
+                                            className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    <div className="pt-6">
+                                        <p className="pb-2">Semestre/Módulo:</p>
+                                        <input
+                                            type="text"
+                                            id="semestre_modulo"
+                                            name="semestre_modulo"
+                                            value={experience.semestre_modulo || 'Não informado'}
+                                            readOnly
+                                            className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    <div className="pt-6">
+                                        <p className="pb-2">Data de Início:</p>
+                                        <input
+                                            type="text"
+                                            id="data_inicio"
+                                            name="data_inicio"
+                                            value={experience.data_inicio || 'Não informado'}
+                                            readOnly
+                                            className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    <div className="pt-6">
+                                        <p className="pb-2">Data de Fim:</p>
+                                        <input
+                                            type="text"
+                                            id="data_fim"
+                                            name="data_fim"
+                                            value={experience.data_fim || 'Não informado'}
+                                            readOnly
+                                            className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                </div>
+                            ))}
+
+                        <h2 className="text-xl font-semibold mt-8 mb-2">Experiências Profissionais</h2>
+                        {experiences.filter(e => e.tipo_experiencia === 'Profissional').length === 0 && (
+                            <p className="text-gray-500 mb-4">Nenhuma experiência profissional cadastrada.</p>
+                        )}
+                        {experiences
+                            .filter(e => e.tipo_experiencia === 'Profissional')
+                            .map((experience) => (
+                                <div key={experience.id} className="mb-4">
+                                    <div className="pt-6">
+                                        <p className="pb-2">Empresa/Instituição:</p>
+                                        <input
+                                            type="text"
+                                            id="empresa_instituicao"
+                                            name="empresa_instituicao"
+                                            value={experience.empresa_instituicao || 'Não informado'}
+                                            readOnly
+                                            className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    <div className="pt-6">
+                                        <p className="pb-2">Nível:</p>
+                                        <input
+                                            type="text"
+                                            id="nivel"
+                                            name="nivel"
+                                            value={experience.nivel || 'Não informado'}
+                                            readOnly
+                                            className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    <div className="pt-6">
+                                        <p className="pb-2">Status:</p>
+                                        <input
+                                            type="text"
+                                            id="status"
+                                            name="status"
+                                            value={experience.status || 'Não informado'}
+                                            readOnly
+                                            className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    <div className="pt-6">
+                                        <p className="pb-2">Curso/Cargo:</p>
+                                        <input
+                                            type="text"
+                                            id="curso_cargo"
+                                            name="curso_cargo"
+                                            value={experience.curso_cargo || 'Não informado'}
+                                            readOnly
+                                            className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    <div className="pt-6">
+                                        <p className="pb-2">Atividades:</p>
+                                        <input
+                                            type="text"
+                                            id="atividades"
+                                            name="atividades"
+                                            value={experience.atividades || 'Não informado'}
+                                            readOnly
+                                            className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    <div className="pt-6">
+                                        <p className="pb-2">Semestre/Módulo:</p>
+                                        <input
+                                            type="text"
+                                            id="semestre_modulo"
+                                            name="semestre_modulo"
+                                            value={experience.semestre_modulo || 'Não informado'}
+                                            readOnly
+                                            className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    <div className="pt-6">
+                                        <p className="pb-2">Data de Início:</p>
+                                        <input
+                                            type="text"
+                                            id="data_inicio"
+                                            name="data_inicio"
+                                            value={experience.data_inicio || 'Não informado'}
+                                            readOnly
+                                            className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    <div className="pt-6">
+                                        <p className="pb-2">Data de Fim:</p>
+                                        <input
+                                            type="text"
+                                            id="data_fim"
+                                            name="data_fim"
+                                            value={experience.data_fim || 'Não informado'}
+                                            readOnly
+                                            className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    <div className="pt-6">
+                                        <p className="pb-2">Emprego Atual:</p>
+                                        <input
+                                            type="text"
+                                            id="emprego_atual"
+                                            name="emprego_atual"
+                                            value={experience.emprego_atual ? 'Sim' : 'Não'}
+                                            readOnly
+                                            className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                </div>
+                            ))}
+
+                        <h2 className="text-xl font-semibold mt-8 mb-2">Experiências Complementares</h2>
+                        {complementaruExperiences.length === 0 && (
+                            <p className="text-gray-500 mb-4">Nenhuma experiência complementar cadastrada.</p>
+                        )}
+                        {complementaruExperiences.map((experience) => (
+                            <div key={experience.id} className="mb-4">
+                                <div className="pt-6">
+                                    <p className='font-semibold'>Tipo de Experiência: {experience.tipo_experiencia}</p>
+                                    <p className="pb-2">Título:</p>
+                                    <input
+                                        type="text"
+                                        id="titulo"
+                                        name="titulo"
+                                        value={experience.titulo}
+                                        readOnly
+                                        className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+                                <div className="pt-6">
+                                    <p className="pb-2">Descrição:</p>
+                                    <input
+                                        type="text"
+                                        id="descricao"
+                                        name="descricao"
+                                        value={experience.descricao}
+                                        readOnly
+                                        className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+                                <div className="pt-6">
+                                    <p className="pb-2">Nível de Idioma:</p>
+                                    <input
+                                        type="text"
+                                        id="nivel_idioma"
+                                        name="nivel_idioma"
+                                        value={experience.nivel_idioma || 'Não informado'}
+                                        readOnly
+                                        className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+                                <div className="pt-6">
+                                    <p className="pb-2">Certificado:</p>
+                                    <input
+                                        type="text"
+                                        id="certificado"
+                                        name="certificado"
+                                        value={experience.certificado || 'Não informado'}
+                                        readOnly
+                                        className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+                                <div className="pt-6">
+                                    <p className="pb-2">Data de Início:</p>
+                                    <input
+                                        type="text"
+                                        id="data_inicio"
+                                        name="data_inicio"
+                                        value={experience.data_inicio || 'Não informado'}
+                                        readOnly
+                                        className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+                                <div className="pt-6">
+                                    <p className="pb-2">Data de Fim:</p>
+                                    <input
+                                        type="text"
+                                        id="data_fim"
+                                        name="data_fim"
+                                        value={experience.data_fim || 'Não informado'}
+                                        readOnly
+                                        className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+                                <div className="pt-6">
+                                    <p className="pb-2">Instituição:</p>
+                                    <input
+                                        type="text"
+                                        id="instituicao"
+                                        name="instituicao"
+                                        value={experience.instituicao}
+                                        readOnly
+                                        className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+                                <div className="pt-6">
+                                    <p className="pb-2">Status:</p>
+                                    <input
+                                        type="text"
+                                        id="status"
+                                        name="status"
+                                        value={experience.status}
+                                        readOnly
+                                        className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+                            </div>
+                        ))}
+                    </>
+                )}
+            </div> 
+            <div className="mt-6 mb-6 pl-4">
+                <Link className="w-fit flex" href={`/processo/vagas/classificacao?id-processo=${processId}&id-vaga=${vacancyId}`}>
+                    <Button
+                        className="flex items-center gap-2 rounded-md px-4 py-2 text-sm duration-200 bg-gray-500 text-white shadow-xs hover:bg-gray-600">
+                        <ChevronLeft /> Voltar
+                    </Button>
+                </Link>
+            </div>
         </AppLayout> 
     );
 }

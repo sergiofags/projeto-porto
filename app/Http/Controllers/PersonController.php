@@ -79,14 +79,32 @@ class PersonController extends Controller
     public function show(Request $request, $personId)
     {
         try {
-            $user = User::find($personId);
+            // Primeiro, tenta encontrar a pessoa pelo ID direto
+            $person = Person::find($personId);
+            
+            // Se não encontrar, tenta encontrar pelo id_user
+            if (!$person) {
+                $person = Person::where('id_user', $personId)->first();
+            }
+            
+            // Se ainda não encontrou, tenta encontrar o usuário pelo ID
+            if (!$person) {
+                $user = User::find($personId);
+                if (!$user) {
+                    return response()->json([
+                        'message' => 'Usuário não encontrado.'
+                    ], 404);
+                }
+                $person = Person::where('id_user', $user->id)->first();
+            }
+
+            // Buscar dados do usuário
+            $user = $person ? User::find($person->id_user) : User::find($personId);
             if (!$user) {
                 return response()->json([
                     'message' => 'Usuário não encontrado.'
                 ], 404);
             }
-
-            $person = Person::where('id_user', $user->id)->first();
 
             $result = [
                 'id_user' => $user->id,
@@ -182,7 +200,7 @@ class PersonController extends Controller
                 }
             }
 
-            $validatedData['id'] = $validatedData['id_user'];
+            // Remover a linha que define o id manualmente
             $person = Person::create($validatedData);
 
             // Cria a pasta do candidato
