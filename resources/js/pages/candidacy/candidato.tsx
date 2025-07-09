@@ -184,6 +184,7 @@ export default function CadastrarVaga() {
             
             <h1 className='text-3xl mt-10 pl-4 pr-4'>Confira o currículo de {person[0]?.name}</h1>
 
+                        {/* esse */}
             {/* COPIADO DE LANDING-PAGE */}
             <div className="border border-blue-300 rounded-xl p-4 ml-4 mr-4">
                 <div
