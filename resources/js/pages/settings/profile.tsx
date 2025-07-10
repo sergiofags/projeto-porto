@@ -667,43 +667,41 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
             <Head title="Profile settings" />
             <div className="space-y-6">
                 <br/>
-                    <div className="border border-blue-300 rounded-xl p-3">
-                        <div
-                            className="flex justify-between items-center cursor-pointer"
-                            onClick={() => setAbertoInformacoes(!abertoInformacoes)}>
-                            <div className="inline-block">
-                                <h2 className="text-lg font-medium inline-block">Informações Pessoais</h2>
-                            </div>
-                            {abertoInformacoes ? <ChevronUp /> : <ChevronDown />}
+                <div className="flex items-center justify-between">
+                    <HeadingSmall title="Informações do Perfil" description={data.tipo_perfil} />
+
+                    {/* Botão Minhas Candidaturas - apenas para candidatos */}
+                    {auth.user.tipo_perfil === 'Candidato' && (
+                        <Button
+                            variant="outline"
+                            className="flex items-center gap-2 "
+                            onClick={() => {
+                                // Limpar candidaturas antes de abrir o modal para forçar reload
+                                setCandidacies([]);
+                                setCandidaciesLoading(false);
+                                // Fechar qualquer modal de cancelamento aberto
+                                setCancelModal({ open: false, candidacy: null, loading: false, error: null });
+                                setCandidaciesModalOpen(true);
+                            }}
+                        >
+                            <FileText className="h-4 w-4" />
+                            Minhas Candidaturas
+                        </Button>
+                    )}
+                </div>
+                <div className="border border-blue-300 rounded-xl p-3">
+                    <div
+                        className="flex justify-between items-center cursor-pointer"
+                        onClick={() => setAbertoInformacoes(!abertoInformacoes)}>
+                        <div className="inline-block">
+                            <h2 className="text-lg font-medium inline-block">Informações Pessoais</h2>
                         </div>
-                <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                        <HeadingSmall title="Informações do Perfil" description={data.tipo_perfil} />
-
-                        {/* Botão Minhas Candidaturas - apenas para candidatos */}
-                        {auth.user.tipo_perfil === 'Candidato' && (
-                            <Button
-                                variant="outline"
-                                className="flex items-center gap-2 "
-                                onClick={() => {
-                                    // Limpar candidaturas antes de abrir o modal para forçar reload
-                                    setCandidacies([]);
-                                    setCandidaciesLoading(false);
-                                    // Fechar qualquer modal de cancelamento aberto
-                                    setCancelModal({ open: false, candidacy: null, loading: false, error: null });
-                                    setCandidaciesModalOpen(true);
-                                }}
-                            >
-                                <FileText className="h-4 w-4" />
-                                Minhas Candidaturas
-                            </Button>
-                        )}
+                        {abertoInformacoes ? <ChevronUp /> : <ChevronDown />}
                     </div>
-
                         {abertoInformacoes && (
-                            <div>
-                                <form onSubmit={submit} className="space-y-6">
-                                    <div className="grid gap-2">
+                            <>
+                            <form onSubmit={submit} className="space-y-6 mt-4">
+                                <div className="grid gap-2">
                                         <br />
                                         <Label htmlFor="name">Nome *</Label>
                                         <Input
@@ -731,7 +729,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                     </div>
                                     {mustVerifyEmail && auth.user.email_verified_at === null && (
                                         <div>
-                                            <p className="text-muted-foreground -mt-4 text-sm">
+                                            <p className="text-muted-foreground mt-4 text-sm">
                                                 Your email address is unverified.{' '}
                                                 <Link
                                                     href={route('verification.send')}
@@ -936,16 +934,17 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                             leave="transition ease-in-out"
                                             leaveTo="opacity-0"
                                         >
-                                            <p className="text-sm text-neutral-600">Saved</p>
+                                            <p className="text-sm text-neutral-600">Salvo</p>
                                         </Transition>
                                     </div>
                                 </form>
-                            </div>
+                                </>
                         )}
-                    </div>
+                </div>
 
-                    <div className="border border-blue-300 rounded-xl p-3">
-                        <div
+                
+                <div className="border border-blue-300 rounded-xl p-3">
+                    <div
                             className="flex justify-between items-center cursor-pointer"
                             onClick={() => setAbertoSobre(!abertoSobre)}>
                             <div className="inline-block">
@@ -954,9 +953,8 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                             {abertoSobre ? <ChevronUp /> : <ChevronDown />}
                         </div>
 
-                        {abertoSobre && (
-                            <div>
-                                <form onSubmit={submitPessoa} className="space-y-6 mt-8">
+                    {abertoSobre && (
+                                <form onSubmit={submitPessoa} className="space-y-6 mt-4">
                                     <div className="grid gap-2">
                                         <HeadingSmall title="Gênero" />
                                         <Label htmlFor="name">Qual o seu gênero? *</Label>
@@ -1108,7 +1106,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                         />
                                     </div>
 
-                                    <div className="flex items-center gap-4">
+                                   <div className="flex items-center gap-4 mt-4">
                                         <Button disabled={pessoaProcessing} className='cursor-pointer'>Salvar Pessoa <Save /></Button>
                                         <Transition
                                             show={pessoaRecentlySuccessful}
@@ -1117,31 +1115,31 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                             leave="transition ease-in-out"
                                             leaveTo="opacity-0"
                                         >
-                                            <p className="text-sm text-neutral-600">Saved</p>
+                                            <p className="text-sm text-neutral-600">Salvo</p>
                                         </Transition>
                                     </div>
                                 </form>
-                            </div>
                         )}
-                    </div>
+                     </div>
+                </div>
 
-                    {/* --- ACORDEÃO DE EXPERIÊNCIAS (após acordeão Sobre Você) --- */}
-                    <div className="border border-blue-300 rounded-xl p-3">
-                        <div className="flex justify-between items-center cursor-pointer" onClick={() => setAbertoFormulario(!abertoFormulario)}>
-                            <div className="inline-block">
-                                <h2 className="text-lg font-medium inline-block">Experiências</h2>
-                            </div>
-                            {abertoFormulario ? <ChevronUp /> : <ChevronDown />}
+                {/* --- ACORDEÃO DE EXPERIÊNCIAS (após acordeão Sobre Você) --- */}
+                <div className="border border-blue-300 rounded-xl p-3">
+                    <div className="flex justify-between items-center cursor-pointer" onClick={() => setAbertoFormulario(!abertoFormulario)}>
+                        <div className="inline-block">
+                            <h2 className="text-lg font-medium inline-block">Experiências</h2>
                         </div>
-                        {abertoFormulario && (
-                            <div>
-                                <div className="space-y-6 mt-4">
-                                    <div className="inline-block">
+                        {abertoFormulario ? <ChevronUp /> : <ChevronDown />}
+                    </div>
+                    {abertoFormulario && (
+                        <div className="space-y-6 mt-4">
+                            <div className="inline-block">
                                         <h3 className="text-lg font-medium inline-block">Experiências Acadêmicas e/ou Profissionais</h3>
                                         <hr className="mt-2 h-0.5 bg-[#008DD0]" />
                                         <br/>
                                         <HeadingSmall title="Suas experiências já cadastradas:" />
-                                    </div>
+                            </div>
+                            <form>
                                     {experiences.map((experience) => (
                                         <div key={experience.id} className="grid gap-2 border p-4 rounded-md">
                                             {/* Renderize os campos relevantes da experiência */}
@@ -1160,7 +1158,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                             </div>
                                         </div>
                                     ))}
-                                </div>
+                                </form>
                                 {/* Formulário de experiência acadêmica/profissional */}
                                 <form onSubmit={submitExperience} className="space-y-6 mt-8">
                                     <div className="grid gap-2">
@@ -1398,12 +1396,12 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                             leave="transition ease-in-out"
                                             leaveTo="opacity-0"
                                         >
-                                            <p className="text-sm text-neutral-600">Saved</p>
+                                            <p className="text-sm text-neutral-600">Salvo</p>
                                         </Transition>
                                     </div>
                                 </form>
-                                {/* Bloco de experiências complementares dentro da sanfona principal */}
-                                <div className="space-y-6 mt-4">
+                            {/* Bloco de experiências complementares dentro da sanfona principal */}
+                            <div className="space-y-6 mt-4">
                                     <div className="inline-block">
                                         <h3 className="text-lg font-medium inline-block">Experiências Complementares</h3>
                                         <hr className="mt-2 h-0.5 bg-[#008DD0]" />
@@ -1570,13 +1568,12 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                     <div className="flex items-center gap-4">
                                         <Button className="cursor-pointer">Adicionar Experiência Complementar<Plus /></Button>
                                         <Transition show={complementaryRecentlySuccessful} enter="transition ease-in-out" enterFrom="opacity-0" leave="transition ease-in-out" leaveTo="opacity-0">
-                                            <p className="text-sm text-neutral-600">Saved</p>
+                                            <p className="text-sm text-neutral-600">Salvo</p>
                                         </Transition>
                                     </div>
                                 </form>
-                            </div>
-                        )}
-                    </div>
+                        </div>
+                    )}
                 </div>
 
             {/* Modal de Candidaturas */}
@@ -1772,7 +1769,6 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                     </div>
                 </DialogContent>
             </Dialog>
-            </div>
         </AppLayout>
     );
 }
