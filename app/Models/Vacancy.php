@@ -12,6 +12,7 @@ class Vacancy extends Model
     protected $fillable = [
         'id_admin',
         'id_process',
+        'setor_id',
         'titulo',
         'responsabilidades',
         'requisitos',
@@ -21,7 +22,6 @@ class Vacancy extends Model
         'quantidade',
         'data_inicio',
         'data_fim',
-        'tipo_vaga',
         'status',
     ];
 
@@ -48,5 +48,10 @@ class Vacancy extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'id_admin');
+    }
+
+    public function setor()
+    {
+        return $this->belongsTo(Setor::class, 'setor_id');
     }
 }
