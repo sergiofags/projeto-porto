@@ -140,7 +140,7 @@ class VacancyController extends Controller
         }
     }
 
-    public function update(Request $request, $adminId, $processId, $setorId, $vacancyId)
+    public function update(Request $request, $adminId, $processId, $vacancyId, $setorId)
     {
         try {
             $admin = User::where('id', $adminId)->where('tipo_perfil', 'Admin')->first();
