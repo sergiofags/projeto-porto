@@ -11,6 +11,8 @@ use App\Http\Controllers\ComplementaryExperienceController;
 use App\Http\Controllers\CandidacyController;
 use App\Http\Controllers\InterviewController;
 use App\Http\Controllers\ClassificationController;
+use App\Http\Controllers\CourseController;
+use App\Http\Controllers\SetorController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -22,7 +24,7 @@ Route::put('/admin/{adminId}/process/{processId}', [ProcessController::class, 'u
 Route::get('/process/{processId}', [ProcessController::class, 'show'])->name('process.show'); //Retorna um processo específico
 
 Route::get('/process/{processId}/vacancy', [VacancyController::class, 'index'])->name('vacancy.index'); //Retorna todas as vagas de um processo
-Route::post('/admin/{adminId}/process/{processId}/vacancy', [VacancyController::class, 'store'])->name('vacancy.store'); //Cria uma nova vaga
+Route::post('/admin/{adminId}/process/{processId}/vacancy/setor/{setorId}', [VacancyController::class, 'store'])->name('vacancy.store'); //Cria uma nova vaga
 Route::get('/process/{processId}/vacancy/{vacancyId}', [VacancyController::class, 'show'])->name('vacancy.show'); //Retorna uma vaga específica
 Route::put('/admin/{adminId}/process/{processId}/vacancy/{vacancyId}', [VacancyController::class, 'update'])->name('vacancy.update');//Atualiza uma vaga
 Route::delete('/admin/{adminId}/process/{processId}/vacancy/{vacancyId}/delete', [VacancyController::class, 'delete'])->name('vacancy.delete');//Deleta uma vaga
@@ -66,4 +68,17 @@ Route::get('/vacancy/{vacancyId}/classification', [ClassificationController::cla
 Route::post('/admin/{adminId}/candidacy/{candidacyId}/classification', [ClassificationController::class, 'store'])->name('classification.store'); //Cria uma nova classificação para uma candidatura
 Route::get('/vacancy/{vacancyId}/candidacy/{candidacyId}/note', [ClassificationController::class, 'showByCandidacy'])->name('classification.showByCandidacy'); //Retorna a nota/classificação de uma candidatura específica em uma vaga
 Route::put('/admin/{adminId}/candidacy/{candidacyId}/classification/{classificationId}/note', [ClassificationController::class, 'update'])->name('classification.update'); //Atualiza uma classificação para uma candidatura
+Route::get('/process/{processId}/classification', [ClassificationController::class, 'indexByProcess'])->name('classification.indexByProcess'); //Retorna todas as classificações por processo
 
+Route::get('/courses', [CourseController::class, 'index'])->name('course.index');
+Route::get('/courses/{courseId}', [CourseController::class, 'show'])->name('course.show');
+Route::get('/courses/setor/{setorId}', [CourseController::class, 'showBySetor'])->name('course.showBySetor');
+Route::post('/courses/setor/{setorId}', [CourseController::class, 'store'])->name('course.store');
+Route::put('/courses/{courseId}/update', [CourseController::class, 'update'])->name('course.update');
+Route::delete('/courses/{courseId}', [CourseController::class, 'delete'])->name('course.delete');
+
+Route::get('/setores', [SetorController::class, 'index'])->name('course.index');
+Route::get('/setores/{setorId}', [SetorController::class, 'show'])->name('course.show');
+Route::post('/setores', [SetorController::class, 'store'])->name('course.store');
+Route::put('/setores/{setorId}', [SetorController::class, 'update'])->name('course.update');
+Route::delete('/setores/{setorId}', [SetorController::class, 'delete'])->name('course.delete');

@@ -4,7 +4,7 @@ import AppLayout from '@/layouts/app-layout';
 //import { SharedData, type BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 //import TextLink from '@/components/text-link';
-import { Pencil, Trash, TableOfContents, FileDown} from 'lucide-react';
+import { Pencil, Trash, TableOfContents, FileDown, ArrowBigRight} from 'lucide-react';
 
 
 // import { BreadcrumbAuto } from '@/components/ui/breadcrumb-auto'
@@ -243,13 +243,22 @@ export default function Inicio({ processos = [] }: Props) {
 
                     {/* Botão Adicionar Processo */}
                     {auth.user.tipo_perfil === 'Admin' && (
-                        <div className="flex justify-center mt-6 mb-4">
-                            <Link href="/cadastra-processo">
-                                <Button className="p-4 sm:p-6 bg-[#008DD0] hover:bg-[#0072d0] text-sm sm:text-base">
-                                    Adicionar processo <Plus className="ml-2" />
-                                </Button>
-                            </Link>
-                        </div>
+                        <>
+                            <div className="flex justify-center mt-6 mb-4">
+                                <Link href="/cadastra-processo">
+                                    <Button className="p-4 sm:p-6 bg-[#008DD0] hover:bg-[#0072d0] text-sm sm:text-base">
+                                        Adicionar processo <Plus className="ml-2" />
+                                    </Button>
+                                </Link>
+                            </div>
+                            <div className="flex justify-center mt-6 mb-4">
+                                <Link href="/setores">
+                                    <Button className="p-4 sm:p-6 bg-[#008DD0] hover:bg-[#0072d0] text-sm sm:text-base">
+                                        Setores <ArrowBigRight className="ml-2" />
+                                    </Button>
+                                </Link>
+                            </div>
+                        </>
                     )}
                 </>
             )}

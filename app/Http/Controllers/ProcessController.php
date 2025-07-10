@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Process;
+use Dotenv\Exception\ValidationException;
 
 class ProcessController extends Controller
 {
@@ -107,7 +108,7 @@ class ProcessController extends Controller
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Erro de validação.',
-                'error' => $e->error()
+                'error' => $e->getMessage()
             ], 422);
 
         } catch (\Illuminate\Database\QueryException $e) {
@@ -183,7 +184,7 @@ class ProcessController extends Controller
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Erro de validação.',
-                'error' => $e->error()
+                'error' => $e->getMessage()
             ], 422);
 
         } catch (\Illuminate\Database\QueryException $e) {
