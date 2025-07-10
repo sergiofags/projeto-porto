@@ -16,6 +16,7 @@ return new class extends Migration
 
             $table->foreignId('id_process')->constrained('process');
             $table->foreignId('id_admin')->constrained('users');
+            $table->foreignId('setor_id')->constrained('setores');
 
             $table->string('titulo');
             $table->text('responsabilidades')->nullable();
@@ -26,7 +27,6 @@ return new class extends Migration
             $table->integer('quantidade')->nullable();
             $table->date('data_inicio')->nullable();
             $table->date('data_fim')->nullable();
-            $table->enum('tipo_vaga', ['Graduacao', 'Pos-Graduacao']);
             $table->enum('status', ['Aberto', 'Fechado']);
             $table->timestamps();
         });

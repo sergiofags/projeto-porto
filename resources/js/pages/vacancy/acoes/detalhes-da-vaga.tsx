@@ -7,6 +7,11 @@ import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 
+type Setor = {
+    id: string;
+    nome: string;
+};
+
 export default function DetalhesVaga() {
 
     const { auth } = usePage<SharedData>().props;
@@ -14,6 +19,8 @@ export default function DetalhesVaga() {
     const processId = queryParams.get('id-processo');
     const vacancyId = queryParams.get('id-vaga');
     const adminId = auth.user.id;
+    
+    const [setor, setSetor] = useState<Setor>();
 
     const [vaga, setVaga] = useState<Array<{
         id_process: string;
@@ -26,19 +33,24 @@ export default function DetalhesVaga() {
         beneficios: string | null;
         quantidade: number;
         status: 'Aberto' | 'Fechado';
-        tipo_vaga: 'Graduacao' | 'Pos-Graduacao';
+        setor_id: string;
     }>>([]);
 
     useEffect(() => {
         const fetchVacancy = async () => {
             try {
-                const response = await axios.get(`http://localhost:8000/api/process/${processId}/vacancy/${vacancyId}`);
-
-                if (!response.data) {
+                const responseVacancy = await axios.get(`http://localhost:8000/api/process/${processId}/vacancy/${vacancyId}`);
+                
+                if (!responseVacancy.data) {
                     return;
                 }
 
-                setVaga(Array.isArray(response.data) ? response.data : [response.data]);
+                setVaga(Array.isArray(responseVacancy.data) ? responseVacancy.data : [responseVacancy.data]);
+
+                const responseSetor = await axios.get(`http://localhost:8000/api/setores/${responseVacancy.data.setor_id}`);
+
+                setSetor(responseSetor.data);
+
             } catch {
                 alert("An error occurred while fetching the vacancy data.");
                 return;
@@ -138,8 +150,8 @@ export default function DetalhesVaga() {
                             <p>{item.status}</p>
 
                             <br></br>
-                            <h1 className="text-xl text-black">Tipo de Cadastro Reserva:</h1>
-                            <p>{item.tipo_vaga}</p>
+                            <h1 className="text-xl text-black">Setor:</h1>
+                            <p>{setor ? setor.nome : 'Setor não informado'}</p>
                         </div>
                     ))}
 

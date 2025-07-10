@@ -72,7 +72,7 @@ class VacancyController extends Controller
         }
     }
 
-    public function store(Request $request, $adminId, $processId)
+    public function store(Request $request, $adminId, $processId, $setorId)
     {
         try {
             $admin = User::where('id', $adminId)->where('tipo_perfil', 'Admin')->first();
@@ -99,7 +99,6 @@ class VacancyController extends Controller
                 'quantidade' => 'nullable|integer|min:1',
                 'data_inicio' => 'nullable|date|before_or_equal:data_fim',
                 'data_fim' => 'nullable|date|after_or_equal:data_inicio',
-                'tipo_vaga' => 'required|in:Graduacao,Pos-Graduacao',
                 'status' => 'required|in:Aberto,Fechado',
             ]);
 
@@ -115,6 +114,7 @@ class VacancyController extends Controller
 
             $validatedData['id_process'] = $process->id;
             $validatedData['id_admin'] = $adminId;
+            $validatedData['setor_id'] = $setorId;
 
             $vacancy = Vacancy::create($validatedData);
 
@@ -140,7 +140,7 @@ class VacancyController extends Controller
         }
     }
 
-    public function update(Request $request, $adminId, $processId, $vacancyId)
+    public function update(Request $request, $adminId, $processId, $setorId, $vacancyId)
     {
         try {
             $admin = User::where('id', $adminId)->where('tipo_perfil', 'Admin')->first();
@@ -174,7 +174,6 @@ class VacancyController extends Controller
                 'quantidade' => 'nullable|integer|min:1',
                 'data_inicio' => 'nullable|date|before_or_equal:data_fim',
                 'data_fim' => 'nullable|date|after_or_equal:data_inicio',
-                'tipo_vaga' => 'required|in:Graduacao,Pos-Graduacao',
                 'status' => 'required|in:Aberto,Fechado',
             ]);
 
@@ -185,6 +184,8 @@ class VacancyController extends Controller
             }
 
             $validatedData['id_admin'] = $adminId;
+            $validatedData['setor_id'] = $setorId;
+
             $vacancy->update($validatedData);
 
             return response()->json($vacancy);

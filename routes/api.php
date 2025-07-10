@@ -26,7 +26,7 @@ Route::get('/process/{processId}', [ProcessController::class, 'show'])->name('pr
 Route::get('/process/{processId}/vacancy', [VacancyController::class, 'index'])->name('vacancy.index'); //Retorna todas as vagas de um processo
 Route::post('/admin/{adminId}/process/{processId}/vacancy/setor/{setorId}', [VacancyController::class, 'store'])->name('vacancy.store'); //Cria uma nova vaga
 Route::get('/process/{processId}/vacancy/{vacancyId}', [VacancyController::class, 'show'])->name('vacancy.show'); //Retorna uma vaga específica
-Route::put('/admin/{adminId}/process/{processId}/vacancy/{vacancyId}', [VacancyController::class, 'update'])->name('vacancy.update');//Atualiza uma vaga
+Route::put('/admin/{adminId}/process/{processId}/vacancy/{vacancyId}/setor/{setorId}', [VacancyController::class, 'update'])->name('vacancy.update');//Atualiza uma vaga
 Route::delete('/admin/{adminId}/process/{processId}/vacancy/{vacancyId}/delete', [VacancyController::class, 'delete'])->name('vacancy.delete');//Deleta uma vaga
 
 Route::get('/person', [PersonController::class, 'index'])->name('person.index'); //Retorna todas as pessoas (somente para fins de teste, não será utilizado no projeto final)

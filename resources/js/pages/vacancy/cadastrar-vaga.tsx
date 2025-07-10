@@ -13,6 +13,11 @@ import { Button } from '@headlessui/react';
 import { AnimatePresence, motion } from 'framer-motion';
 //import { ChevronLeft, ChevronRight } from 'lucide-react';
 
+type Setor = {
+    id: string;
+    nome: string;
+};
+
 export default function CadastrarVaga() {
     const { auth } = usePage<SharedData>().props;
     const queryParams = new URLSearchParams(window.location.search);
@@ -20,6 +25,9 @@ export default function CadastrarVaga() {
     const adminId = auth.user.id;
     const [carregando] = useState(false);
 
+    const [cursos, setCursos] = useState<{ id: string; nome: string }[]>([]);
+
+    const [setores, setSetores] = useState<Setor[]>([]);
 
     const [vaga, setVaga] = useState({
         id_process: '',
@@ -30,15 +38,29 @@ export default function CadastrarVaga() {
         requisitos: '',
         beneficios: '',
         quantidade: '',
-        tipo_vaga: '',
         status: '',
+        setor_id: '',
     });
 
     useEffect(() => {
+        const fetchSetores = async () => {
+            try {
+              const response = await axios.get(`http://localhost:8000/api/setores`);
+  
+              setSetores(response.data);
+  
+            } catch (error) {
+              alert(error);
+            }
+          };
+      
+          fetchSetores();
+
         if (processId) {
             setVaga((prevState) => ({ ...prevState, id_process: processId }));
         }
     }, []);
+    
     const [modalSucesso, setModalSucesso] = useState(false);
 
     const submitVacancy = async (e: React.FormEvent) => {
@@ -50,7 +72,7 @@ export default function CadastrarVaga() {
         }
 
         try {
-            const response = await axios.post(`http://localhost:8000/api/admin/${adminId}/process/${processId}/vacancy`, vaga);
+            const response = await axios.post(`http://localhost:8000/api/admin/${adminId}/process/${processId}/vacancy/setor/${vaga.setor_id}`, vaga);
             const data = await response.data;
 
             if (data.error) {
@@ -111,19 +133,6 @@ export default function CadastrarVaga() {
                             />
                         </div>
 
-                        <div className="md:col-span-2 mt-2">
-                            <label htmlFor="quantidade" className="block mb-2">Quantidade</label>
-                            <input
-                                type="number"
-                                id="quantidade"
-                                placeholder="Ex: 5"
-                                className="w-full pl-2 pr-2 py-2 border border-[#008DD0] rounded-md focus:outline-none focus:border-[#145F7F] text-black shadow-md"
-                                value={vaga.quantidade}
-                                onChange={(e) => setVaga({ ...vaga, quantidade: e.target.value })}
-                                required
-                            />
-                        </div>
-
                         <div className="md:col-span-6 mt-2">
                             <label htmlFor="responsabilidades" className="block mb-2">Responsabilidades</label>
                             <textarea
@@ -164,45 +173,54 @@ export default function CadastrarVaga() {
                             />
                         </div>
 
-                        <div className="md:col-span-3 mt-2">
-                            <label htmlFor="tipo" className="block mb-2">Tipo de Cadastro Reserva</label>
+                        <div className="grid gap-2">
+                            <label htmlFor="setor" className="block mb-2">Setor</label>
                             <select
-                                id="tipo"
-                                value={vaga.tipo_vaga}
-                                onChange={(e) => setVaga({ ...vaga, tipo_vaga: e.target.value })}
+                                id="setor"
+                                value={vaga.setor_id}
+                                onChange={async (e) => {
+                                    const value = e.target.value;
+                                    setVaga({ ...vaga, setor_id: value });
+                                
+                                    if (!value) {
+                                        setCursos([]);
+                                        return;
+                                    }
+                                
+                                    try {
+                                        const response = await axios.get(`http://localhost:8000/api/courses/setor/${value}`);
+                                        setCursos(response.data);
+                                    } catch (error) {
+                                        return error;
+                                    }
+                                }}
                                 required
                                 className="w-full pl-2 pr-2 py-2 border border-[#008DD0] rounded-md focus:outline-none focus:border-[#145F7F] text-black shadow-md"
                             >
-                                <option value="" disabled hidden>Selecione o tipo</option>
-                                <option value="Graduacao">Graduação</option>
-                                <option value="Pos-Graduacao">Pós-Graduação</option>
+                                <option value="" disabled hidden>Selecione o setor</option>
+                                {setores.map((setor) => (
+                                    <option key={setor.id} value={String(setor.id)}>
+                                        {setor.nome}
+                                    </option>
+                                ))}
                             </select>
                         </div>
+                        <div className="grid gap-2">
+                            {cursos.length > 0 ? (
+                                <div className="grid gap-2">
+                                    <label htmlFor="cursos" className="block mb-2">Cursos</label>
+                                    <div className='flex gap-2'>
+                                        {cursos.map((curso) => (
+                                            <p key={curso.id}>{curso.nome}</p>
+                                        ))}
+                                    </div>
+                                </div>
+                                ) : (
+                                vaga.setor_id && (
+                                    <p className="text-sm text-muted-foreground mt-2">Nenhum curso relacionado encontrado.</p>
+                                )
+                            )}
 
-                        <div className="md:col-span-3 mt-2">
-                            <label htmlFor="remuneracao" className="block mb-2">Valor da Bolsa</label>
-                            <input
-                                type="text"
-                                id="remuneracao"
-                                placeholder="Ex: R$ 3.000,00"
-                                className="w-full pl-2 pr-2 py-2 border border-[#008DD0] rounded-md focus:outline-none focus:border-[#145F7F] text-black shadow-md"
-                                value={vaga.remuneracao}
-                                onChange={(e) => setVaga({ ...vaga, remuneracao: e.target.value })}
-                                required
-                            />
-                        </div>
-
-                        <div className="md:col-span-3 mt-2">
-                            <label htmlFor="carga_horaria" className="block mb-2">Carga Horária</label>
-                            <input
-                                type="text"
-                                id="carga_horaria"
-                                placeholder="Ex: 40h semanais"
-                                className="w-full pl-2 pr-2 py-2 border border-[#008DD0] rounded-md focus:outline-none focus:border-[#145F7F] text-black shadow-md"
-                                value={vaga.carga_horaria}
-                                onChange={(e) => setVaga({ ...vaga, carga_horaria: e.target.value })}
-                                required
-                            />
                         </div>
 
                         <div className="md:col-span-3 mt-2">
