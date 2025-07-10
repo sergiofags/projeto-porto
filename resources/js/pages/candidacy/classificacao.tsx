@@ -94,76 +94,100 @@ export default function VerCandidatos() {
                     </Button>
                 </Link>
             </div> */}
-            <div className="flex items-center justify-between mt-6">
-                <h1 className="text-3xl">Classificação</h1>
-                <Link className="w-fit flex" href={``}>
-                    <Button className="flex items-center gap-2 rounded-md px-4 py-2 text-sm text-white">
-                        Gerar PDF
-                    </Button>
-                </Link>
-            </div>
-            <Table>
-                <ScrollArea className="max-h-[500px] w-full rounded-md border border-[#008DD0] p-4 overflow-auto">
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Classificação</TableHead>
-                            <TableHead className="w-[300px]">Candidato</TableHead>
-                            <TableHead>Nota Coeficiente</TableHead>
-                            <TableHead>Nota Entrevista</TableHead>
-                            <TableHead>Nota Histórico</TableHead>
-                            <TableHead>Nota Total</TableHead>
-                            <TableHead>Situação</TableHead>
-                            <TableHead>Motivo</TableHead>
-                            <TableHead>Ações</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {classificacao
-                            .sort((a, b) => {
-                                const notaFinalA = Number(a.nota_historico || 0) + Number(a.nota_entrevista || 0);
-                                const notaFinalB = Number(b.nota_historico || 0) + Number(b.nota_entrevista || 0);
-                                return notaFinalB - notaFinalA;
-                            })
-                            .map((classificacaoItem, index) => {
-                                const cand = candidatura.find(c => c.id === classificacaoItem.id_candidacy);
-                                const personInfo = cand ? person.find(p => p.id_person === cand.id_person) : null;
-                                
-                                const candidatoId = personInfo ? personInfo.id_person : null;
-                                const notaFinal = (Number(classificacaoItem.nota_historico || 0) + Number(classificacaoItem.nota_entrevista || 0));
+            <div className="flex h-full max-h-full flex-1 flex-col  rounded-xl p-4">
+                <nav className="text-sm text-muted-foreground ">
+                   <ol className="flex items-center space-x-2">
+                        <li>
+                            <Link href="/" className="hover:underline text-[#008DD0]">Início</Link>
+                        </li>
+                        <li>
+                            <span className=" text-[#008DD0]">/</span>
+                            <span className="text-[#008DD0]">Visualizar Cadastros Reserva</span>
+                        </li>
+                        <li>
+                            <span className=" text-[#008DD0] mx-1 ">/</span>
+                            <span className=" text-[#008DD0]">Visualizar Detalhes do Cadastro Reserva</span>
+                        </li>
+                        <li>
+                            <span className=" text-[#008DD0] mx-1 ">/</span>
+                            <span className="font-medium text-[#008DD0]">Classificação</span>
+                        </li>
+                    </ol>
+                </nav>
+                <div className="flex items-center justify-between pb-4">
+                    <div className="mt-2 mb-1 w-fit">
+                        <h1 className="text-2xl text-black">Classificação</h1>
+                        <hr className="mt-1 bg-[#008DD0] h-0.5 " />
+                    </div>
+                    <Link className="w-fit flex" href={``}>
+                        <Button className="flex items-center gap-2 rounded-md px-4 py-2 text-sm text-white bg-[#008DD0] hover:bg-[#0072d0]">
+                            Gerar PDF
+                        </Button>
+                    </Link>
+                </div>
+                <Table>
+                    <ScrollArea className="max-h-[500px] w-full rounded-md border border-[#008DD0] p-4 overflow-auto">
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Classificação</TableHead>
+                                <TableHead className="w-[300px]">Candidato</TableHead>
+                                <TableHead>Nota Coeficiente</TableHead>
+                                <TableHead>Nota Entrevista</TableHead>
+                                <TableHead>Nota Histórico</TableHead>
+                                <TableHead>Nota Total</TableHead>
+                                <TableHead>Situação</TableHead>
+                                <TableHead>Motivo</TableHead>
+                                <TableHead>Ações</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {classificacao
+                                .sort((a, b) => {
+                                    const notaFinalA = Number(a.nota_historico || 0) + Number(a.nota_entrevista || 0);
+                                    const notaFinalB = Number(b.nota_historico || 0) + Number(b.nota_entrevista || 0);
+                                    return notaFinalB - notaFinalA;
+                                })
+                                .map((classificacaoItem, index) => {
+                                    const cand = candidatura.find(c => c.id === classificacaoItem.id_candidacy);
+                                    const personInfo = cand ? person.find(p => p.id_person === cand.id_person) : null;
+                                    
+                                    const candidatoId = personInfo ? personInfo.id_person : null;
+                                    const notaFinal = (Number(classificacaoItem.nota_historico || 0) + Number(classificacaoItem.nota_entrevista || 0));
 
-                                return (
-                                    <TableRow key={classificacaoItem.id_candidacy}>
-                                        <TableCell className="font-medium">{index + 1}º</TableCell>
-                                        <TableCell>{personInfo ? personInfo.name : "Candidato não encontrado"}</TableCell>
-                                        <TableCell>{classificacaoItem.nota_coeficiente_rendimento || "N/A"}</TableCell>
-                                        <TableCell>{classificacaoItem.nota_entrevista || "N/A"}</TableCell>
-                                        <TableCell>{classificacaoItem.nota_historico || "N/A"}</TableCell>
-                                        <TableCell>{notaFinal > 0 ? notaFinal : "N/A"}</TableCell>
-                                        <TableCell>{classificacaoItem.situacao}</TableCell>
-                                        <TableCell>{classificacaoItem.motivo_situacao || ""}</TableCell>
-                                        <TableCell>
-                                            {candidatoId && (
-                                                <Link href={`/processo/vagas/ver-candidatos/candidato-contratacao?id-processo=${processId}&id-vaga=${vancancyId}&id-candidato=${candidatoId}`}>
-                                                    <Button className='bg-yellow-600 hover:bg-yellow-700 cursor-pointer text-white'>
-                                                        <BookText className="mr-2 h-4 w-4" /> Contratação
-                                                    </Button>
-                                                </Link>
-                                            )}
-                                        </TableCell>
-                                    </TableRow>
-                                );
-                            })}
-                    </TableBody>
-                </ScrollArea>
-            </Table>
+                                    return (
+                                        <TableRow key={classificacaoItem.id_candidacy}>
+                                            <TableCell className="font-medium">{index + 1}º</TableCell>
+                                            <TableCell>{personInfo ? personInfo.name : "Candidato não encontrado"}</TableCell>
+                                            <TableCell>{classificacaoItem.nota_coeficiente_rendimento || "N/A"}</TableCell>
+                                            <TableCell>{classificacaoItem.nota_entrevista || "N/A"}</TableCell>
+                                            <TableCell>{classificacaoItem.nota_historico || "N/A"}</TableCell>
+                                            <TableCell>{notaFinal > 0 ? notaFinal : "N/A"}</TableCell>
+                                            <TableCell>{classificacaoItem.situacao}</TableCell>
+                                            <TableCell>{classificacaoItem.motivo_situacao || ""}</TableCell>
+                                            <TableCell>
+                                                {candidatoId && (
+                                                    <Link href={`/processo/vagas/ver-candidatos/candidato-contratacao?id-processo=${processId}&id-vaga=${vancancyId}&id-candidato=${candidatoId}`}>
+                                                        <Button className='bg-yellow-600 hover:bg-yellow-700 cursor-pointer text-white'>
+                                                            <BookText className="mr-2 h-4 w-4" /> Contratação
+                                                        </Button>
+                                                    </Link>
+                                                )}
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })}
+                        </TableBody>
+                    </ScrollArea>
+                </Table>
 
-            <div className="mt-6 mb-6 pl-2">
-                <Link className="w-fit flex" href={`/processo/vagas/detalhes?id-processo=${processId}&id-vaga=${vancancyId}`}>
-                    <Button
-                        className="flex items-center gap-2 rounded-md px-4 py-2 text-sm duration-200 bg-gray-500 text-white shadow-xs hover:bg-gray-600">
-                        <ChevronLeft /> Voltar
-                    </Button>
-                </Link>
+                <div className="mt-6 mb-6">
+                    <Link className="w-fit flex" href={`/processo/vagas/detalhes?id-processo=${processId}&id-vaga=${vancancyId}`}>
+                        <Button
+                            className="flex items-center gap-2 rounded-md px-4 py-2 text-sm duration-200 bg-gray-500 text-white shadow-xs hover:bg-gray-600">
+                            <ChevronLeft /> Voltar
+                        </Button>
+                    </Link>
+                </div>
             </div>
         </AppLayout> 
     );

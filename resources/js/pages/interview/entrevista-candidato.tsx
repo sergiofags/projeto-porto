@@ -49,7 +49,7 @@ export default function EntrevistaCandidato() {
             `&id-vaga=${vacancyId}`
         );
     };
-    
+
     // Função para cancelar a entrevista
     const cancelarEntrevista = async () => {
         try {
@@ -80,9 +80,130 @@ export default function EntrevistaCandidato() {
     return (
         <AppLayout>
             <Head title="Entrevista Candidato" />
-            <div className="flex h-full max-h-full flex-1 flex-col gap-4 rounded-xl p-4">
-                {/* Botão Voltar para ver-candidatos */}
-                <div className="mb-4">
+            <div className="flex h-full max-h-full flex-1 flex-col  rounded-xl p-4">
+                <nav className="text-sm text-muted-foreground ">
+                    <ol className="flex items-center space-x-2">
+                        <li>
+                            <Link href="/" className="hover:underline text-[#008DD0]">Início</Link>
+                        </li>
+                        <li>
+                            <span className=" text-[#008DD0]">/</span>
+                            <span className="text-[#008DD0]">Visualizar Cadastros Reserva</span>
+                        </li>
+                        <li>
+                            <span className=" text-[#008DD0] mx-1 ">/</span>
+                            <span className=" text-[#008DD0]">Visualizar Detalhes do Cadastro Reserva</span>
+                        </li>
+                        <li>
+                            <span className=" text-[#008DD0] mx-1 ">/</span>
+                            <span className="text-[#008DD0]">Ver Candidatos</span>
+                        </li>
+                        <li>
+                            <span className=" text-[#008DD0] mx-1 ">/</span>
+                            <span className="font-medium text-[#008DD0]">Entrevista Candidato</span>
+                        </li>
+                    </ol>
+                </nav>
+                <div className="relative border-sidebar-border/70 dark:border-sidebar-border max-h-[100vh] flex-1 overflow-hidden rounded-xl border md:min-h-min flex items-center justify-center mt-6">
+                    {/* Dados do candidato no canto superior esquerdo */}
+                    <div className="absolute top-4 left-8 text-left">
+                        <h2 className="text-2xl">{nome}</h2>
+                        <p className="text-lg">E-mail: <span >{email}</span></p>
+                        <p className="text-lg">Telefone: <span >{telefone}</span></p>
+                    </div>
+                    <div className="text-center flex items-center justify-center h-full px-8 w-full">
+                        <div className="tracking-wide max-w-3x1 w-full break-words whitespace-normal">
+                            {/* Mensagem acima da linha azul */}
+                            {!carregando && !(entrevista && entrevista.id) && (
+                                <>
+                                    <h2 className="text-xl font-semibold block leading-tight break-words">
+                                        O candidato <b>{nome}</b> não possui entrevista cadastrada
+                                    </h2>
+                                    <hr className="mb-4 w-[500px] mx-auto bg-[#008DD0] h-0.5 rounded" />
+
+                                </>
+                            )}
+                            {carregando ? (
+                                <p>Carregando...</p>
+                            ) : entrevista && entrevista.id ? (
+                                <><div className="w-full flex justify-center">
+                                        <div className="mt-2 mb-4 w-fit text-center">
+                                            <h1 className="text-2xl text-black">Entrevista</h1>
+                                            <hr className="mt-1 bg-[#008DD0] h-0.5" />
+                                        </div>
+                                    </div><form className="grid grid-cols-1 gap-4 md:grid-cols-6">
+                                            <div className="md:col-span-2 mt-2">
+                                                <label className="block mb-2">Data</label>
+                                                <input
+                                                    type="date"
+                                                    className="w-full pl-2 pr-2 py-2 border border-[#008DD0] rounded-md focus:outline-none focus:border-[#145F7F] text-black shadow-md"
+                                                    value={entrevista.data_hora ? new Date(entrevista.data_hora).toISOString().slice(0, 10) : ''}
+                                                    disabled />
+                                            </div>
+                                            <div className="md:col-span-2 mt-2">
+                                                <label className="block mb-2">Horário</label>
+                                                <input
+                                                    type="time"
+                                                    className="w-full pl-2 pr-2 py-2 border border-[#008DD0] rounded-md focus:outline-none focus:border-[#145F7F] text-black shadow-md"
+                                                    value={entrevista.data_hora ? new Date(entrevista.data_hora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : ''}
+                                                    disabled />
+                                            </div>
+                                            <div className="md:col-span-2 mt-2">
+                                                <label className="block mb-2">Local</label>
+                                                <input
+                                                    type="text"
+                                                    className="w-full pl-2 pr-2 py-2 border border-[#008DD0] rounded-md focus:outline-none focus:border-[#145F7F] text-black shadow-md"
+                                                    value={entrevista.localizacao || ''}
+                                                    disabled />
+                                            </div>
+                                            {/* <div className="md:col-span-2 mt-2">
+                                                <label className="block mb-2">Status</label>
+                                                <input
+                                                    type="text"
+                                                    className="w-full pl-2 pr-2 py-2 border border-[#008DD0] rounded-md focus:outline-none focus:border-[#145F7F] text-black shadow-md"
+                                                    value={entrevista.status || ''}
+                                                    disabled />
+                                            </div> */}
+                                            <div className="md:col-span-6 flex justify-center gap-2 mb-2 mt-4">
+                                                <button
+                                                    type="button"
+                                                    className="flex items-center bg-[#20CD4E] hover:bg-green-600 gap-2 rounded-md px-4 py-2 text-sm shadow-md text-white"
+                                                    onClick={handleEditar}
+                                                >
+                                                    <Pencil /> Editar
+                                                </button>
+                                                {entrevista.status === 'Agendada' && (
+                                                    <button
+                                                        type="button"
+                                                        className="flex items-center bg-red-600 hover:bg-red-700 gap-2 rounded-md px-4 py-2 text-sm shadow-md text-white"
+                                                        onClick={() => setModalCancelar(true)}
+                                                    >
+                                                        <Trash /> Cancelar
+                                                    </button>
+                                                )}
+                                            </div>
+
+                                        </form></>
+                            ) : (
+                                <div>
+                                    <p className="text-sm text-[#008DD0] mt-1">
+                                        Clique no botão para adicionar uma entrevista
+                                    </p>
+                                    {auth.user.tipo_perfil === 'Admin' && (
+                                        <Link
+                                            href={`/adicionar-entrevista?id-candidatura=${candidacyId}&nome=${encodeURIComponent(nome)}&email=${encodeURIComponent(email)}&telefone=${encodeURIComponent(telefone)}&id-processo=${processId}&id-vaga=${vacancyId}`}
+                                        >
+                                            <Button className="p-4 sm:p-6 bg-[#008DD0] hover:bg-[#0072d0] mt-4 text-sm sm:text-base">
+                                                Adicionar entrevista <Plus />
+                                            </Button>
+                                        </Link>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+                <div className="mt-6 mb-6">
                     <Link
                         href={`/processo/vagas/ver-candidatos?id-processo=${processId}&id-vaga=${vacancyId}`}
                         className="w-full md:w-auto"
@@ -92,118 +213,6 @@ export default function EntrevistaCandidato() {
                             Voltar
                         </Button>
                     </Link>
-                </div>
-                <nav className="text-sm text-muted-foreground mb-4 items-center">
-                    <ol className="flex items-center space-x-2">
-                        <li>
-                            <Link href={route('inicio-processo')} className="hover:underline">Início</Link>
-                        </li>
-                        <li className="flex items-center space-x-2">
-                            <span>/</span>
-                            <span className="font-medium">Entrevista Candidato</span>
-                        </li>
-                    </ol>
-                </nav>
-                <div className="relative border-sidebar-border/70 dark:border-sidebar-border max-h-[100vh] flex-1 overflow-hidden rounded-xl border md:min-h-min flex items-center justify-center">
-                    {/* Dados do candidato no canto superior esquerdo */}
-                    <div className="absolute top-4 left-8 text-left">
-                        <h2 className="text-2xl font-bold">{nome}</h2>
-                        <p className="text-lg">E-mail: <span className="font-semibold">{email}</span></p>
-                        <p className="text-lg">Telefone: <span className="font-semibold">{telefone}</span></p>
-                    </div>
-                    <div className="text-center flex items-center justify-center h-full px-4 w-full">
-                        <div className="tracking-wide max-w-md w-full break-words whitespace-normal">
-                            {/* Mensagem acima da linha azul */}
-                            {!carregando && !(entrevista && entrevista.id) && (
-                                <>
-                                    <h2 className="text-2xl text-black">
-                                        O candidato <b>{nome}</b> não possui entrevista cadastrada.
-                                    </h2>
-                                    <hr className="mb-4 w-full bg-[#008DD0] h-0.5" />
-                                </>
-                            )}
-                            {carregando ? (
-                                <p>Carregando...</p>
-                            ) : entrevista && entrevista.id ? (
-                                <form className="grid grid-cols-1 gap-4 md:grid-cols-6">
-                                    {/* Botões Editar/Cancelar */}
-                                    <div className="md:col-span-6 flex justify-end gap-2 mb-2">
-                                        <button
-                                            type="button"
-                                            className="flex items-center bg-[#20CD4E] hover:bg-green-600 gap-2 rounded-md px-4 py-2 text-sm shadow-md text-white"
-                                            onClick={handleEditar}
-                                        >
-                                            <Pencil /> Editar
-                                        </button>
-                                        {entrevista.status === 'Agendada' && (
-                                            <button
-                                                type="button"
-                                                className="flex items-center bg-red-600 hover:bg-red-700 gap-2 rounded-md px-4 py-2 text-sm shadow-md text-white"
-                                                onClick={() => setModalCancelar(true)}
-                                            >
-                                                <Trash /> Cancelar
-                                            </button>
-                                        )}
-                                    </div>
-                                    {/* Título "Entrevista" */}
-                                    <div className="md:col-span-6 mb-2">
-                                        <h2 className="text-xl font-bold text-black text-left">Entrevista</h2>
-                                    </div>
-                                    <div className="md:col-span-2 mt-2">
-                                        <label className="block mb-2">Data</label>
-                                        <input
-                                            type="date"
-                                            className="w-full pl-2 pr-2 py-2 border border-[#008DD0] rounded-md focus:outline-none focus:border-[#145F7F] text-black shadow-md"
-                                            value={entrevista.data_hora ? new Date(entrevista.data_hora).toISOString().slice(0, 10) : ''}
-                                            disabled
-                                        />
-                                    </div>
-                                    <div className="md:col-span-2 mt-2">
-                                        <label className="block mb-2">Horário</label>
-                                        <input
-                                            type="time"
-                                            className="w-full pl-2 pr-2 py-2 border border-[#008DD0] rounded-md focus:outline-none focus:border-[#145F7F] text-black shadow-md"
-                                            value={entrevista.data_hora ? new Date(entrevista.data_hora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : ''}
-                                            disabled
-                                        />
-                                    </div>
-                                    <div className="md:col-span-2 mt-2">
-                                        <label className="block mb-2">Local</label>
-                                        <input
-                                            type="text"
-                                            className="w-full pl-2 pr-2 py-2 border border-[#008DD0] rounded-md focus:outline-none focus:border-[#145F7F] text-black shadow-md"
-                                            value={entrevista.localizacao || ''}
-                                            disabled
-                                        />
-                                    </div>
-                                    <div className="md:col-span-2 mt-2">
-                                        <label className="block mb-2">Status</label>
-                                        <input
-                                            type="text"
-                                            className="w-full pl-2 pr-2 py-2 border border-[#008DD0] rounded-md focus:outline-none focus:border-[#145F7F] text-black shadow-md"
-                                            value={entrevista.status || ''}
-                                            disabled
-                                        />
-                                    </div>
-                                </form>
-                            ) : (
-                                <div>
-                                    <p className="text-[#008DD0] mt-1 mb-4 text-lg">
-                                        Clique no botão <b>Adicionar Entrevista</b> para adicionar uma entrevista.
-                                    </p>
-                                    {auth.user.tipo_perfil === 'Admin' && (
-                                        <Link
-                                            href={`/adicionar-entrevista?id-candidatura=${candidacyId}&nome=${encodeURIComponent(nome)}&email=${encodeURIComponent(email)}&telefone=${encodeURIComponent(telefone)}&id-processo=${processId}&id-vaga=${vacancyId}`}
-                                        >
-                                            <Button className="p-4 sm:p-6 bg-[#008DD0] hover:bg-[#0072d0] mt-4 text-base sm:text-lg">
-                                                Adicionar entrevista <Plus />
-                                            </Button>
-                                        </Link>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                    </div>
                 </div>
             </div>
 

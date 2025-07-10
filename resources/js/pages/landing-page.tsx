@@ -55,7 +55,7 @@ const LandingPage: React.FC = () => {
                     
 
                     <main className="flex flex-col items-center">
-                         <section className="max-w-4xl w-full mt-3 space-y-6">
+                         <section className="max-w-7xl w-full mt-3 space-y-6">
                             <div >
                                 <div className="mt-2 mb-3 w-fit">
                                     <h1 className="text-2xl text-black">Programa de Estágio</h1>

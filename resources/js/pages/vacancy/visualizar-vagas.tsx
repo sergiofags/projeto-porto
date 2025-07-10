@@ -126,14 +126,14 @@ export default function CadastrarVaga() {
                         </ol>
         </nav>
           {processo && (
-            <div className="pl-4 pr-4 mt-4">
+            <div className=" pr-4 mt-4">
                 <h2 className="text-2xl font-semibold">
                     {processo.descricao} - {processo.numero_processo}
                 </h2>
             </div>
           )}
 
-            <div className="flex h-full max-h-full flex-1 flex-col gap-4 rounded-xl p-4">
+            <div className="flex h-full max-h-full flex-1 flex-col gap-4 rounded-xl pt-4">
                 <div className="border-sidebar-border/70 dark:border-sidebar-border relative max-h-[100vh] flex-1 overflow-hidden rounded-xl border md:min-h-min flex items-center justify-center">
                         <div className="text-center flex items-center justify-center h-full px-4">
                             <div className="tracking-wide max-w-md w-full break-words whitespace-normal">
@@ -148,7 +148,7 @@ export default function CadastrarVaga() {
                                 {auth.user.tipo_perfil === 'Admin' && (
                                     <Link href={`/processo/cadastrar-vaga?id=${processId}`}>
                                         <Button className="p-4 sm:p-6 bg-[#008DD0] hover:bg-[#0072d0] mt-4 text-sm sm:text-base">
-                                        Adicionar cadastro reserva <Plus />
+                                        Adicionar Cadastro Reserva <Plus />
                                         </Button>
                                     </Link>
                                 )}
@@ -174,7 +174,7 @@ export default function CadastrarVaga() {
                     </nav>
                     <div className="max-w mx-auto w-full bg-white pt-0 pb-10">
                         <div className="mt-2 mb-1 w-fit">
-                                <h1 className="text-2xl text-black">Adicione cadastros reserva ao processo</h1>
+                                <h1 className="text-2xl text-black">Adicione Cadastros Reserva ao Processo</h1>
                                 <hr className="mt-1 bg-[#008DD0] h-0.5" />
                         </div>
                 
@@ -214,7 +214,7 @@ export default function CadastrarVaga() {
                                                         <TableCell className="text-center space-x-2 align-middle">
                                                             <Link href={`/processo/vagas/editar?id-processo=${vaga.id_process}&id-vaga=${vaga.id}`}><Button className='bg-green-600 hover:bg-green-700'><Pen /> Editar</Button></Link>
                                                             <Button onClick={() => setModalFechar({ aberto: true, vagaId: vaga.id })} className='bg-red-600 hover:bg-red-700'><Trash2 /> Excluir</Button>
-                                                            <Link href={`/processo/vagas/detalhes?id-processo=${vaga.id_process}&id-vaga=${vaga.id}`} className='bg-[#008DD0] hover:bg-[#0072d0]'><Button><Eye /> Visualizar</Button></Link>
+                                                            <Link href={`/processo/vagas/detalhes?id-processo=${vaga.id_process}&id-vaga=${vaga.id}`} ><Button className='bg-[#008DD0] hover:bg-[#0072d0]'><Eye /> Visualizar</Button></Link>
                                                             <AnimatePresence>
                                                                 {modalFechar.aberto && modalFechar.vagaId === vaga.id && (
                                                                     <motion.div
