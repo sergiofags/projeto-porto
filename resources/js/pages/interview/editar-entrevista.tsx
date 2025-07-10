@@ -51,6 +51,22 @@ export default function AdicionarEntrevista() {
         setMensagem('');
         setCarregando(true);
 
+        console.log('=== VERIFICAÇÕES INICIAIS ===');
+        console.log('adminId:', adminId);
+        console.log('candidacyId:', candidacyId);
+        console.log('interviewId:', interviewId);
+        console.log('data:', data);
+        console.log('hora:', hora);
+        console.log('local:', local);
+        console.log('status:', status);
+
+        // Verificar se todos os parâmetros necessários estão presentes
+        if (!adminId || !candidacyId || !interviewId) {
+            setMensagem('Parâmetros obrigatórios faltando');
+            setCarregando(false);
+            return;
+        }
+
         // Monta data_hora no formato ISO
         let dataHora = '';
         if (data && hora) {
@@ -64,27 +80,35 @@ export default function AdicionarEntrevista() {
         };
 
         try {
+            console.log('=== INÍCIO EDIÇÃO ENTREVISTA ===');
+            console.log('URL:', `/api/admin/${adminId}/candidacy/${candidacyId}/interview/${interviewId}`);
+            console.log('Payload:', payload);
+            
             const res = await fetch(`/api/admin/${adminId}/candidacy/${candidacyId}/interview/${interviewId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json',
                 },
                 body: JSON.stringify(payload),
                 credentials: 'include',
             });
 
+            console.log('Response status:', res.status);
+            console.log('Response ok:', res.ok);
+            
             if (res.ok) {
+                const responseData = await res.json();
+                console.log('Response data:', responseData);
                 setMensagem('Entrevista editada com sucesso!');
-                setData('');
-                setHora('');
-                setLocal('');
-                setStatus('Agendada');
                 setModalAberto(true);
             } else {
                 const err = await res.json();
+                console.error('Erro response:', err);
                 setMensagem(err.message || 'Erro ao editar entrevista');
             }
-        } catch {
+        } catch (error) {
+            console.error('Erro na requisição:', error);
             setMensagem('Erro ao conectar com o servidor');
         } finally {
             setCarregando(false);
