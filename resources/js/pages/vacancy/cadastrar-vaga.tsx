@@ -121,7 +121,7 @@ export default function CadastrarVaga() {
                     </div>
                     <form onSubmit={submitVacancy} className="grid grid-cols-1 gap-4 md:grid-cols-6">
 
-                        <div className="md:col-span-4 mt-2">
+                        <div className="md:col-span-6 mt-2">
                             <label htmlFor="titulo" className="block mb-2">Título</label>
                             <input
                                 id="titulo"
@@ -173,7 +173,7 @@ export default function CadastrarVaga() {
                             />
                         </div>
 
-                        <div className="grid gap-2">
+                        <div className="md:col-span-3 mt-2">
                             <label htmlFor="setor" className="block mb-2">Setor</label>
                             <select
                                 id="setor"
@@ -205,6 +205,22 @@ export default function CadastrarVaga() {
                                 ))}
                             </select>
                         </div>
+
+                        <div className="md:col-span-3 mt-2">
+                            <label htmlFor="status" className="block mb-2">Status</label>
+                            <select
+                                id="status"
+                                value={vaga.status}
+                                onChange={(e) => setVaga({ ...vaga, status: e.target.value })}
+                                required
+                                className="w-full pl-2 pr-2 py-2 border border-[#008DD0] rounded-md focus:outline-none focus:border-[#145F7F] text-black shadow-md"
+                            >
+                                <option value="" disabled hidden>Selecione o status</option>
+                                <option value="Aberto">Aberto</option>
+                                <option value="Fechado">Fechado</option>
+                            </select>
+                        </div>
+                        
                         <div className="grid gap-2">
                             {cursos.length > 0 ? (
                                 <div className="grid gap-2">
@@ -221,21 +237,6 @@ export default function CadastrarVaga() {
                                 )
                             )}
 
-                        </div>
-
-                        <div className="md:col-span-3 mt-2">
-                            <label htmlFor="status" className="block mb-2">Status</label>
-                            <select
-                                id="status"
-                                value={vaga.status}
-                                onChange={(e) => setVaga({ ...vaga, status: e.target.value })}
-                                required
-                                className="w-full pl-2 pr-2 py-2 border border-[#008DD0] rounded-md focus:outline-none focus:border-[#145F7F] text-black shadow-md"
-                            >
-                                <option value="" disabled hidden>Selecione o status</option>
-                                <option value="Aberto">Aberto</option>
-                                <option value="Fechado">Fechado</option>
-                            </select>
                         </div>
                         <div className="md:col-span-6 flex justify-between gap-2 mt-4">
                             <Link href={route('inicio-processo')} className="w-full md:w-auto">
