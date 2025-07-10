@@ -94,27 +94,43 @@ export default function AdicionarEntrevista() {
     return (
         <AppLayout>
             <div className="flex h-full max-h-full flex-1 flex-col gap-4 rounded-xl p-4">
-                <nav className="text-sm text-muted-foreground mb-4">
+                <nav className="text-sm text-muted-foreground ">
                     <ol className="flex items-center space-x-2">
                         <li>
-                            <Link href={route('inicio-processo')} className="hover:underline">Início</Link>
+                            <Link href="/" className="hover:underline text-[#008DD0]">Início</Link>
                         </li>
                         <li>
-                            <span className="mx-1">/</span>
-                            <span className="font-medium">Editar Entrevista</span>
+                            <span className=" text-[#008DD0]">/</span>
+                            <span className="text-[#008DD0]">Visualizar Cadastros Reserva</span>
+                        </li>
+                        <li>
+                            <span className=" text-[#008DD0] mx-1 ">/</span>
+                            <span className=" text-[#008DD0]">Visualizar Detalhes do Cadastro Reserva</span>
+                        </li>
+                        <li>
+                            <span className=" text-[#008DD0] mx-1 ">/</span>
+                            <span className="text-[#008DD0]">Ver Candidatos</span>
+                        </li>
+                        <li>
+                            <span className=" text-[#008DD0] mx-1 ">/</span>
+                            <span className="font-medium text-[#008DD0]">Entrevista Candidato</span>
+                        </li>
+                         <li>
+                            <span className=" text-[#008DD0] mx-1 ">/</span>
+                            <span className="font-medium text-[#008DD0]">Editar Entrevista</span>
                         </li>
                     </ol>
                 </nav>
-                <div className="max-w mx-auto w-full bg-white p-10">
+                 <div className="mt-2 mb-1 w-fit">
+                    <h1 className="text-2xl text-black">Editar Entrevista</h1>
+                    <hr className="mt-1 bg-[#008DD0] h-0.5 " />
+                </div>
+                <div className="max-w mx-auto w-full bg-white">
                     {/* Dados do candidato no canto superior esquerdo */}
-                    <div className="mb-6 text-left">
-                        <h2 className="text-2xl font-bold">{nome}</h2>
-                        <p className="text-lg">E-mail: <span className="font-semibold">{email}</span></p>
-                        <p className="text-lg">Telefone: <span className="font-semibold">{telefone}</span></p>
-                    </div>
-                    <div className="mt-2 mb-1 w-fit">
-                        <h1 className="text-2xl text-black">Editar Entrevista</h1>
-                        <hr className="mt-1 bg-[#008DD0] h-0.5" />
+                    <div className="mb-6 mt-6 text-left">
+                        <h2 className="text-2xl">{nome}</h2>
+                        <p className="text-lg">E-mail: <span>{email}</span></p>
+                        <p className="text-lg">Telefone: <span>{telefone}</span></p>
                     </div>
                     <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 md:grid-cols-6">
                         <div className="md:col-span-2 mt-5">

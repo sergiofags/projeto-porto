@@ -14,83 +14,97 @@ export default function DetalhesVaga() {
     const processId = queryParams.get('id-processo');
     const vacancyId = queryParams.get('id-vaga');
     const adminId = auth.user.id;
-    
-        const [vaga, setVaga] = useState<Array<{
-            id_process: string;
-            id: string;
-            titulo: string;
-            responsabilidades: string | null;
-            requisitos: string | null;
-            carga_horaria: string;
-            remuneracao: number;
-            beneficios: string | null;
-            quantidade: number;
-            status: 'Aberto' | 'Fechado';
-            tipo_vaga: 'Graduacao' | 'Pos-Graduacao';
-        }>>([]);
-    
-        useEffect(() => {
-            const fetchVacancy = async () => {
-                try {
-                    const response = await axios.get(`http://localhost:8000/api/process/${processId}/vacancy/${vacancyId}`);
 
-                    if (!response.data) {
-                        return;
-                    }
+    const [vaga, setVaga] = useState<Array<{
+        id_process: string;
+        id: string;
+        titulo: string;
+        responsabilidades: string | null;
+        requisitos: string | null;
+        carga_horaria: string;
+        remuneracao: number;
+        beneficios: string | null;
+        quantidade: number;
+        status: 'Aberto' | 'Fechado';
+        tipo_vaga: 'Graduacao' | 'Pos-Graduacao';
+    }>>([]);
 
-                    setVaga(Array.isArray(response.data) ? response.data : [response.data]);
-                } catch {
-                    alert("An error occurred while fetching the vacancy data.");
+    useEffect(() => {
+        const fetchVacancy = async () => {
+            try {
+                const response = await axios.get(`http://localhost:8000/api/process/${processId}/vacancy/${vacancyId}`);
+
+                if (!response.data) {
                     return;
                 }
-            };
-    
-            fetchVacancy();
-        }, []);
 
-        const [modalConfirmar, setModalConfirmar] = useState<{ aberto: boolean; vagaId?: string }>({ aberto: false, vagaId: undefined });
-        const [modalSucesso, setModalSucesso] = useState(false);
-
-        async function handleDelete(vagaId: string) {
-            if (!processId || !vagaId) {
-                alert("Id do processo ou vaga inválido");
+                setVaga(Array.isArray(response.data) ? response.data : [response.data]);
+            } catch {
+                alert("An error occurred while fetching the vacancy data.");
                 return;
             }
+        };
 
-            try {
-                await axios.delete(`http://localhost:8000/api/admin/${adminId}/process/${processId}/vacancy/${vagaId}/delete`);
-                setModalConfirmar({ aberto: false, vagaId: undefined });
-                setModalSucesso(true);
-            } catch {
-                return
-            }
+        fetchVacancy();
+    }, []);
+
+    const [modalConfirmar, setModalConfirmar] = useState<{ aberto: boolean; vagaId?: string }>({ aberto: false, vagaId: undefined });
+    const [modalSucesso, setModalSucesso] = useState(false);
+
+    async function handleDelete(vagaId: string) {
+        if (!processId || !vagaId) {
+            alert("Id do processo ou vaga inválido");
+            return;
         }
+
+        try {
+            await axios.delete(`http://localhost:8000/api/admin/${adminId}/process/${processId}/vacancy/${vagaId}/delete`);
+            setModalConfirmar({ aberto: false, vagaId: undefined });
+            setModalSucesso(true);
+        } catch {
+            return
+        }
+    }
 
     return (
         <AppLayout>
             <Head title="Detalhes da Vaga" />
+            <nav className="text-sm text-muted-foreground ml-4 mt-4 mb-4">
+                <ol className="flex items-center space-x-2">
+                    <li>
+                        <Link href="/" className="hover:underline text-[#008DD0]">Início</Link>
+                    </li>
+                    <li>
+                        <span className="mx-1 text-[#008DD0]">/</span>
+                        <span className="text-[#008DD0]">Visualizar Cadastros Reserva</span>
+                    </li>
+                    <li>
+                        <span className="mx-1 text-[#008DD0]">/</span>
+                        <span className="font-medium text-[#008DD0]">Visualizar Detalhes do Cadastro Reserva</span>
+                    </li>
+                </ol>
+            </nav>
+            <div className="grid gap-4 pl-4 pr-4">
+                <div className="border rounded p-4 pl-10 pr-10 ">
 
-            <div className="grid gap-4 p-4">
-                <div className="border rounded p-4 pl-10 pr-10">
-                
                     {vaga.map((item) => (
                         <div key={item.id}>
-                            <h1 className="text-3xl  mt-6">{item.titulo}</h1>
+                            <h1 className="text-2xl text-black">{item.titulo}</h1>
 
                             <div className="flex flex-col sm:flex-row gap-2 mt-6 mb-6">
-                                <Button type="button" className="flex-1 p-4 sm:p-6 bg-[#008DD0] hover:bg-[#0072d0] mt-4 text-sm">
+                                <Button type="button" className="flex-1 p-4 sm:p-6 bg-[#008DD0] hover:bg-[#0072d0] text-xs mt-4 text-sm">
                                     <Link href={`/processo/vagas/ver-candidatos?id-processo=${item.id_process}&id-vaga=${item.id}`} className="w-full">
-                                    Ver candidatos
+                                        Ver candidatos
                                     </Link>
                                 </Button>
-                                <Button type="button" className="flex-1 p-4 sm:p-6  bg-[#008DD0] hover:bg-[#0072d0] mt-4 text-sm ">
+                                <Button type="button" className="flex-1 p-4 sm:p-6  bg-[#CD5C20] hover:bg-[#943400] mt-4 text-sm ">
                                     <Link href={`/processo/vagas/classificacao?id-processo=${item.id_process}&id-vaga=${item.id}`} className="w-full">
-                                    Classificação
+                                        Classificação
                                     </Link>
                                 </Button>
                                 <Button type="button" className="flex-1 p-4 sm:p-6 bg-green-500 hover:bg-green-600 mt-4 text-sm ">
                                     <Link href={`/processo/vagas/editar?id-processo=${item.id_process}&id-vaga=${item.id}`} className="w-full">
-                                    Editar
+                                        Editar
                                     </Link>
                                 </Button>
                                 <Button type="button" className="flex-1 p-4 sm:p-6  bg-red-600 hover:bg-red-800 mt-4 text-sm ">
@@ -102,39 +116,43 @@ export default function DetalhesVaga() {
                                     </span>
                                 </Button>
                             </div>
+                            <h1 className="text-xl text-black">Descrição:</h1>
+                            <p>A SCPAR Porto de Imbituba torna pública a realização de processo seletivo simplificado para estágio curricular não obrigatório para estudantes dos cursos acima referidos, durante o período de 01 (um) ano, podendo ser prorrogado por igual período.</p>
 
-                            <h1 className="text-xl"><strong>Responsabilidades:</strong></h1>
-                            <p>{item.responsabilidades || 'Não informado'}</p>
-                            
                             <br></br>
-                            <h1 className="text-xl"><strong>Requisitos:</strong></h1>
+                            <h1 className="text-xl text-black">Responsabilidades:</h1>
+                            <p>{item.responsabilidades || 'Não informado'}</p>
+
+                            <br></br>
+                            <h1 className="text-xl text-black">Requisitos:</h1>
                             <p>{item.requisitos || 'Não informado'}</p>
 
-                            {/* <p><strong>Carga Horária:</strong> <br></br>{item.carga_horaria}</p>
-                            <p><strong>Remuneração:</strong> <br></br>R$ {item.remuneracao.toFixed(2)}</p> */}
+                            {/* <p>Carga Horária: <br></br>{item.carga_horaria}</p>
+                            <p>Remuneração: <br></br>R$ {item.remuneracao.toFixed(2)}</p> */}
                             <br></br>
-                            <h1 className="text-xl"><strong>Benefícios:</strong></h1>
+                            <h1 className="text-xl text-black">Benefícios:</h1>
                             <p>{item.beneficios || 'Não informado'}</p>
 
                             <br></br>
-                            <h1 className="text-xl"><strong>Status:</strong></h1>
+                            <h1 className="text-xl text-black">Status:</h1>
                             <p>{item.status}</p>
 
                             <br></br>
-                            <h1 className="text-xl"><strong>Tipo de Vaga:</strong></h1>
+                            <h1 className="text-xl text-black">Tipo de Cadastro Reserva:</h1>
                             <p>{item.tipo_vaga}</p>
                         </div>
                     ))}
-                    
 
-                    <div className="mt-6 mb-6">
+
+                   
+                </div>
+                <div className="mt-6 mb-6">
                         <Link className="w-fit flex" href={`/processo/vagas?id=${processId}`}>
                             <Button
                                 className="flex items-center gap-2 rounded-md px-4 py-2 text-sm duration-200 bg-gray-500 text-white shadow-xs hover:bg-gray-600">
                                 <ChevronLeft /> Voltar
                             </Button>
                         </Link>
-                    </div>
                 </div>
             </div>
             <AnimatePresence>
@@ -154,7 +172,7 @@ export default function DetalhesVaga() {
                             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                             onClick={e => e.stopPropagation()}>
                             <div>
-                                <h2 className="text-xl font-semibold mb-4 text-red-600">Você tem certeza que deseja excluir esta vaga?</h2>
+                                <h2 className="text-xl font-semibold mb-4 text-red-600">Você tem certeza que deseja excluir este cadastro reserva?</h2>
                                 <div className="flex gap-4 mt-2">
                                     <button
                                         className="mt-2 px-6 py-2 bg-[#008DD0] hover:bg-[#0072d0] text-white rounded shadow"
@@ -192,17 +210,17 @@ export default function DetalhesVaga() {
                             exit={{ scale: 0.9, opacity: 0 }}
                             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                             onClick={e => e.stopPropagation()}>
-                            <h2 className="text-xl font-semibold mb-4 text-green-600">Vaga encerrada com sucesso!</h2>
+                            <h2 className="text-xl font-semibold mb-4 text-green-600"> Cadastro reserva encerrado com sucesso!</h2>
                             <button
                                 className="mt-2 px-6 py-2 bg-[#008DD0] hover:bg-[#0072d0] text-white rounded shadow"
                                 onClick={() => router.visit(`/processo/vagas?id=${processId}`)}
                             >
-                                Voltar para Vagas
+                                Voltar para Cadastros reserva
                             </button>
                         </motion.div>
                     </motion.div>
                 )}
             </AnimatePresence>
-        </AppLayout> 
+        </AppLayout>
     );
 }
