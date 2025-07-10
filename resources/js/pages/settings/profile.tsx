@@ -10,22 +10,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
-// import SettingsLayout from '@/layouts/settings/layout';
-import { ChevronDown, ChevronUp, Save } from 'lucide-react';
-=======
-import SettingsLayout from '@/layouts/settings/layout';
-import { Save, FileText, MapPin, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Save, FileText, MapPin, AlertCircle, CheckCircle, Loader2, X } from 'lucide-react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { useEffect } from 'react';
 import { Trash2, Plus } from '@/components/ui/icons';
-=======
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { X } from 'lucide-react';
 import { candidacyEventBus, type CandidacyEventData } from '@/utils/candidacy-events';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -85,6 +79,10 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
         candidacy: null,
         loading: false,
         error: null
+    });
+    const [successModal, setSuccessModal] = useState<{ open: boolean; candidacy: Candidacy | null }>({
+        open: false,
+        candidacy: null
     });
 
     // Carregar candidaturas quando o modal for aberto
@@ -305,12 +303,10 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                     setCandidacies(prev => prev.filter(c => c.id !== cancelModal.candidacy?.id));
                 }
                 
-                setCancelModal(prev => ({ 
-                    ...prev, 
-                    loading: false, 
-                    error: null,
-                    candidacy: prev.candidacy ? { ...prev.candidacy, status: 'Cancelado' as const } : null
-                }));
+                // Fechar modal de confirmação e abrir modal de sucesso
+                const cancelledCandidacy = cancelModal.candidacy;
+                setCancelModal({ open: false, candidacy: null, loading: false, error: null });
+                setSuccessModal({ open: true, candidacy: cancelledCandidacy });
 
                 // Emitir evento para sincronizar com outras páginas
                 candidacyEventBus.emit({
@@ -679,17 +675,16 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                 <h2 className="text-lg font-medium inline-block">Informações Pessoais</h2>
                             </div>
                             {abertoInformacoes ? <ChevronUp /> : <ChevronDown />}
-
-            <SettingsLayout>
+                        </div>
                 <div className="space-y-6">
                     <div className="flex items-center justify-between">
                         <HeadingSmall title="Informações do Perfil" description={data.tipo_perfil} />
-                        
+
                         {/* Botão Minhas Candidaturas - apenas para candidatos */}
                         {auth.user.tipo_perfil === 'Candidato' && (
                             <Button
                                 variant="outline"
-                                className="flex items-center gap-2"
+                                className="flex items-center gap-2 "
                                 onClick={() => {
                                     // Limpar candidaturas antes de abrir o modal para forçar reload
                                     setCandidacies([]);
@@ -704,40 +699,6 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                             </Button>
                         )}
                     </div>
-
-                    <form onSubmit={submit} className="space-y-6">
-                        <div className="grid gap-2">
-                            <Label htmlFor="name">Nome *</Label>
-
-                            <Input
-                                id="name"
-                                className="mt-1 block w-full"
-                                value={data.name}
-                                onChange={(e) => setData('name', e.target.value)}
-                                required
-                                autoComplete="name"
-                                placeholder="Full name"
-                            />
-
-                            <InputError className="mt-2" message={errors.name} />
-                        </div>
-
-                        <div className="grid gap-2">
-                            <Label htmlFor="email">Endereço de Email *</Label>
-
-                            <Input
-                                id="email"
-                                type="email"
-                                className="mt-1 block w-full"
-                                value={data.email}
-                                onChange={(e) => setData('email', e.target.value)}
-                                required
-                                autoComplete="username"
-                                placeholder="Email address"
-                            />
-
-                            <InputError className="mt-2" message={errors.email} />
-                        </div>
 
                         {abertoInformacoes && (
                             <div>
@@ -1617,7 +1578,6 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                         )}
                     </div>
                 </div>
-            </SettingsLayout>
 
             {/* Modal de Candidaturas */}
             {auth.user.tipo_perfil === 'Candidato' && (
@@ -1629,10 +1589,11 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                             // Limpar dados quando fechar o modal
                             setCandidacies([]);
                             setCancelModal({ open: false, candidacy: null, loading: false, error: null });
+                            setSuccessModal({ open: false, candidacy: null });
                         }
                     }}
                 >
-                    <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                    <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto w-[95vw]">
                         <DialogHeader>
                             <DialogTitle>Minhas Candidaturas</DialogTitle>
                             <DialogDescription>
@@ -1716,6 +1677,17 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
 
                                             <div className="flex gap-2">
                                                 <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => {
+                                                        // Função vazia por enquanto
+                                                        console.log('Enviar documentos da contratação para candidatura:', candidacy.id);
+                                                    }}
+                                                >
+                                                    <FileText className="h-4 w-4 mr-2" />
+                                                    Enviar Documentos da Contratação
+                                                </Button>
+                                                <Button
                                                     variant="destructive"
                                                     size="sm"
                                                     onClick={() => abrirModalCancelamento(candidacy)}
@@ -1739,15 +1711,11 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>
-                            {cancelModal.error ? 'Erro ao cancelar' : 
-                             !cancelModal.candidacy || cancelModal.candidacy.status === 'Cancelado' ? 
-                             'Candidatura cancelada com sucesso!' : 'Confirmar cancelamento'}
+                            {cancelModal.error ? 'Erro ao cancelar' : 'Confirmar cancelamento'}
                         </DialogTitle>
                         <DialogDescription>
                             {cancelModal.error ? 
                                 cancelModal.error :
-                                !cancelModal.candidacy || cancelModal.candidacy.status === 'Cancelado' ?
-                                'Sua candidatura foi cancelada. Agora você pode se candidatar a outra vaga.' :
                                 `Deseja cancelar sua candidatura para "${cancelModal.candidacy?.vacancy?.titulo}"? Esta ação não pode ser desfeita.`
                             }
                         </DialogDescription>
@@ -1758,10 +1726,9 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                             onClick={() => setCancelModal(prev => ({ ...prev, open: false }))}
                             disabled={cancelModal.loading}
                         >
-                            {cancelModal.error ? 'Fechar' : 
-                             !cancelModal.candidacy || cancelModal.candidacy.status === 'Cancelado' ? 'Entendido' : 'Não, manter'}
+                            {cancelModal.error ? 'Fechar' : 'Não, manter candidatura'}
                         </Button>
-                        {!cancelModal.error && cancelModal.candidacy && cancelModal.candidacy.status !== 'Cancelado' && (
+                        {!cancelModal.error && (
                             <Button 
                                 variant="destructive" 
                                 onClick={handleCancel}
@@ -1784,6 +1751,28 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                     </div>
                 </DialogContent>
             </Dialog>
+
+            {/* Modal de Sucesso de Cancelamento */}
+            <Dialog open={successModal.open} onOpenChange={() => setSuccessModal(prev => ({ ...prev, open: false }))}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle className="text-green-600">
+                            Candidatura cancelada com sucesso!
+                        </DialogTitle>
+                        <DialogDescription>
+                            Sua candidatura para "{successModal.candidacy?.vacancy?.titulo}" foi cancelada. Agora você pode se candidatar a outra vaga.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex justify-end">
+                        <Button 
+                            onClick={() => setSuccessModal(prev => ({ ...prev, open: false }))}
+                        >
+                            Entendido
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
+            </div>
         </AppLayout>
     );
 }
