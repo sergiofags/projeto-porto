@@ -38,6 +38,7 @@ Route::get('/person/{personId}/document', [DocumentController::class, 'index'])-
 Route::post('/person/{personId}/document', [DocumentController::class, 'store'])->name('document.store');; //Cria um novo documento
 Route::get('/person/{personId}/document/{documentId}', [DocumentController::class, 'show'])->name('document.show'); //Retorna um documento específico
 Route::put('/person/{personId}/document/{documentId}', [DocumentController::class, 'update'])->name('document.update');; //Atualiza um documento
+Route::post('/person/{personId}/document/{documentId}', [DocumentController::class, 'update'])->name('document.update.post'); //Atualiza um documento via POST com _method
 
 Route::get('/person/{personId}/experience', [ExperienceController::class, 'index'])->name('experience.index'); //Retorna todas as experiências de uma pessoa
 Route::post('/person/{personId}/experience', [ExperienceController::class, 'store'])->name('experience.store'); //Cria uma nova experiência 
@@ -57,6 +58,7 @@ Route::get('/vacancy/{vacancyId}/candidacy', [CandidacyController::class, 'allCa
 Route::get('/vacancy/{vacancyId}/candidacy/{candidacyId}', [CandidacyController::class, 'specificCandidacyByVacancy'])->name('candidacy.specificCandidacyByVacancy'); //Retorna uma candidatura especifica de uma vaga
 Route::post('/person/{personId}/vacancy/{vacancyId}/candidacy', [CandidacyController::class, 'store'])->name('candidacy.store'); //Cria uma nova candidatura
 Route::put('/person/{personId}/candidacy/{candidacyId}', [CandidacyController::class, 'update'])->name('candidacy.update'); //Atualiza uma candidatura
+Route::delete('/person/{personId}/candidacy/{candidacyId}', [CandidacyController::class, 'cancel'])->name('candidacy.cancel'); //Cancela uma candidatura
 
 Route::get('/candidacy/{candidacyId}/interview', [InterviewController::class, 'index'])->name('interview.index'); //Retorna a entrevista relacionada a candidatura
 Route::post('/admin/{adminId}/candidacy/{candidacyId}/interview', [InterviewController::class, 'store'])->name('interview.store'); //Cria uma nova entrevista

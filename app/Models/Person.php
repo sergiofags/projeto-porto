@@ -10,11 +10,10 @@ class Person extends Model
 {
     protected $table = 'person';
     protected $primaryKey = 'id';
-    public $incrementing = false;
+    public $incrementing = true;
     protected $keyType = 'int';
 
     protected $fillable = [
-        'id',
         'id_user',
         'foto_perfil',
         'sobre',

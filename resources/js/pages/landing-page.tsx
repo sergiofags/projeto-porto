@@ -52,47 +52,36 @@ const LandingPage: React.FC = () => {
                 <Head title="Início" />
                 <div className="flex h-full max-h-full flex-1 flex-col gap-4 rounded-xl p-4">
                     {/* Breadcrumb */}
-                    <nav className="text-sm text-muted-foreground mb-4">
-                        <ol className="flex items-center space-x-2">
-                            <li>
-                                <Link href="/inicio-processo" className="hover:underline">Início</Link>
-                            </li>
-                            {segments.map((segment, index) => {
-                                const href = '/' + segments.slice(0, index + 1).join('/');
-                                const isLast = index === segments.length - 1;
-                                const label = segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
-
-                                return (
-                                    <li key={href} className="flex items-center space-x-2">
-                                        <span className="mx-1">/</span>
-                                        {isLast ? (
-                                            <span className="font-medium">{label}</span>
-                                        ) : (
-                                            <Link href={href} className="hover:underline">{label}</Link>
-                                        )}
-                                    </li>
-                                );
-                            })}
-                        </ol>
-                    </nav>
+                    
 
                     <main className="flex flex-col items-center">
-                        <section className="max-w-4xl w-full mt-4 space-y-6">
-                            <div>
-                                <h1 className="text-xl font-semibold">Programa de estágio</h1>
-                                <hr className="mt-4 mb-4 w-full bg-[#008DD0] h-0.5" />
+                         <section className="max-w-7xl w-full mt-3 space-y-6">
+                            <div >
+                                <div className="mt-2 mb-3 w-fit">
+                                    <h1 className="text-2xl text-black">Programa de Estágio</h1>
+                                    <hr className="mt-1 bg-[#008DD0] h-0.5 " />
+                                </div>
+
                                 <p className="text-md text-gray-700">
-                                    São oferecidas oportunidades de estágio de ensino superior nas diversas áreas que formam a administração portuária (Comunicação, Compras, Engenharia, Financeiro, Jurídico, Licitações, Meio Ambiente, Operações Logísticas, Recursos Humanos e Segurança do Trabalho). A seleção para cadastro reserva de estágio é realizada via Edital. Confira abaixo os processos seletivos abertos:
+                                    São oferecidas oportunidades de estágio de ensino superior nas diversas áreas que formam a administração portuária (Comunicação, Compras, Engenharia, Financeiro, Jurídico, Licitações, Meio Ambiente, Operações Logísticas, Recursos Humanos, Segurança do Trabalho e Tecnologia da Informação). A seleção para cadastro reserva de estágio é realizada via Edital. Confira abaixo os processos seletivos abertos:
                                 </p>
                             </div>
+
                             {/* Accordion - Editais em aberto */}
-                            <div className="border border-blue-300 rounded-xl p-4">
+                            <div className="border border-[#008DD0]  rounded-xl p-4">
+                               <div>
                                 <div
                                     className="flex justify-between items-center cursor-pointer"
-                                    onClick={() => setAbertoEditais(!abertoEditais)}>
-                                    <h2 className="text-lg font-medium">Editais em aberto</h2>
+                                    onClick={() => setAbertoEditais(!abertoEditais)}
+                                >
+                                    <div className="inline-block">
+                                    <h2 className="text-lg font-medium inline-block">Editais em aberto</h2>
+                                    <hr className="mt-2 h-0.5 bg-[#008DD0]" />
+                                    </div>
                                     {abertoEditais ? <ChevronUp /> : <ChevronDown />}
                                 </div>
+                                </div>
+
 
                                 {abertoEditais && (
                                     <div className="mt-4 space-y-6 transition-all duration-300">
@@ -112,19 +101,20 @@ const LandingPage: React.FC = () => {
                                                             <div key={processo.numero_processo}>
                                                                 <div className="space-y-6 space-x-2">
                                                                     <ul>   
-                                                                        <h3 className="font-semibold">{processo.descricao} - {processo.numero_processo}</h3>
-                                                                        <li className="list-disc list-inside text-blue-600 underline">
-                                                                            <a
-                                                                                href={`/storage/${processo.edital}`}
-                                                                                target="_blank"
-                                                                                rel="noopener noreferrer">
+                                                                    <h3 >{processo.descricao} - {processo.numero_processo}</h3>
+                                                                    <li className="list-disc list-inside text-black underline">
+                                                                        <a className="text-black"
+                                                                        href={`/storage/${processo.edital}`}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer">
+                                                                            {/* <Button className="p-4 sm:p-6 bg-blue-500 hover:bg-blue-600 text-sm sm:text-base"> */}
                                                                                 {processo.edital ? 'Edital' : 'Edital'}
-                                                                            </a>
-                                                                        </li>
-                                                                        <button className="mt-2 px-4 py-1 text-white bg-blue-500 rounded-full hover:bg-blue-600">
-                                                                            <Link href={`/process/inicio-vaga?id=${processo.id}`}>Visualizar</Link>
-                                                                        </button>
-                                                                    </ul>
+                                                                        </a>
+                                                                    </li>
+                                                                    <button className="mt-2 px-4 py-1 text-white rounded-full bg-[#008DD0] hover:bg-[#145F7F]">
+                                                                        <Link href={`/process/inicio-vaga?id=${processo.id}`}>Visualizar</Link>
+                                                                    </button>
+                                                                </ul>
                                                                 </div>
                                                             </div>
                                                         ))
@@ -137,14 +127,20 @@ const LandingPage: React.FC = () => {
                             
 
                             {/* Accordion - Editais encerrados */}
-                            <div className="border border-blue-300 rounded-xl p-4">
-                                <div
-                                    className="flex justify-between items-center cursor-pointer"
-                                    onClick={() => setAbertoEncerrados(!abertoEncerrados)}
-                                >
-                                    <h2 className="text-lg font-medium">Editais Encerrados</h2>
-                                    {abertoEncerrados ? <ChevronUp /> : <ChevronDown />}
+                              <div className="border border-[#008DD0]  rounded-xl p-4">
+                                <div>
+                                    <div
+                                        className="flex justify-between items-center cursor-pointer"
+                                        onClick={() => setAbertoEncerrados(!abertoEncerrados)}
+                                    >
+                                        <div className="inline-block">
+                                        <h2 className="text-lg font-medium inline-block">Editais Encerrados</h2>
+                                        <hr className="mt-2 h-0.5 bg-[#008DD0] mb-0" />
+                                        </div>
+                                        {abertoEncerrados ? <ChevronUp /> : <ChevronDown />}
+                                    </div>
                                 </div>
+
 
                                 {abertoEncerrados && (
                                     <div className="mt-4 space-y-6 transition-all duration-300">

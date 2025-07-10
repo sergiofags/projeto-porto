@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, usePage, router } from '@inertiajs/react';
+import { Link, usePage, router, Head } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { SharedData } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -64,21 +64,22 @@ export default function CadastraProcesso() {
 
     return (
         <AppLayout>
+            <Head title="Cadastrar Processo" />
             <div className="flex h-full max-h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 <nav className="text-sm text-muted-foreground mb-4">
                     <ol className="flex items-center space-x-2">
                         <li>
-                            <Link href="/" className="hover:underline">Início</Link>
+                            <Link href="/" className="hover:underline text-[#008DD0]">Início</Link>
                         </li>
                         <li>
-                            <span className="mx-1">/</span>
-                            <span className="font-medium">Cadastro do Processo</span>
+                            <span className="mx-1 text-[#008DD0]">/</span>
+                            <span className="font-medium text-[#008DD0]">Cadastar Processo</span>
                         </li>
                     </ol>
                 </nav>
-                <div className="max-w mx-auto w-full bg-white p-10">
+                <div className="max-w mx-auto w-full bg-white pt-0 pb-10">
                    <div className="mt-2 mb-1 w-fit">
-                        <h1 className="text-2xl text-black">Cadastro do Processo</h1>
+                        <h1 className="text-2xl text-black">Cadastrar Processo</h1>
                         <hr className="mt-1 bg-[#008DD0] h-0.5" />
                     </div>
                 <form onSubmit={handleSubmit} encType="multipart/form-data" className="grid grid-cols-1 gap-4 md:grid-cols-6">

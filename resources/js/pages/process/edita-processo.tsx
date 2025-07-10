@@ -95,15 +95,15 @@ export default function EditaProcesso() {
                     <nav className="text-sm text-muted-foreground mb-4">
                         <ol className="flex items-center space-x-2">
                             <li>
-                                <Link href="/" className="hover:underline">Início</Link>
+                                <Link href="/" className="hover:underline text-[#008DD0]">Início</Link>
                             </li>
                             <li>
-                                <span className="mx-1">/</span>
-                                <span className="font-medium">Editar Processo</span>
+                                <span className="mx-1 text-[#008DD0]">/</span>
+                                <span className="font-medium text-[#008DD0]">Editar Processo</span>
                             </li>
                         </ol>
                     </nav>
-                <div className="max-w mx-auto w-full bg-white p-10">
+                <div className="max-w mx-auto w-full bg-white pb-10 pt-0">
                     <div className="mt-2 mb-1 w-fit">
                         <h1 className="text-2xl text-black">Editar Processo</h1>
                         <hr className="mt-1 bg-[#008DD0] h-0.5" />
@@ -225,7 +225,7 @@ export default function EditaProcesso() {
                                 </Button>
                             </Link>
                             <Button type="submit" className="flex items-center bg-[#008DD0] hover:bg-[#145F7F] gap-2 rounded-md px-4 py-2 text-sm shadow-md transition-colors duration-200 text-white" disabled={carregando}>
-                                {carregando ? 'Salvando...' : 'Salvar alterações'}
+                                {carregando ? 'Salvando...' : 'Editar Processo'}
                                 <ChevronRight />
                             </Button>
                         </div>
