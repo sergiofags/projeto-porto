@@ -47,6 +47,30 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('candidacy/classificacao');
     })->middleware(['auth', 'verified']);
 
+    Route::get('/setores', function () {
+        return Inertia::render('setores/setores');
+    })->middleware(['auth', 'verified']);
+
+    Route::get('/setores/cadastrar', function () {
+        return Inertia::render('setores/setores-cadastrar');
+    })->middleware(['auth', 'verified']);
+
+    Route::get('/setores/editar', function () {
+        return Inertia::render('setores/setores-editar');
+    })->middleware(['auth', 'verified']);
+
+    Route::get('/setores/cursos', function () {
+        return Inertia::render('cursos/cursos');
+    })->middleware(['auth', 'verified']);
+
+    Route::get('/setores/cursos/cadastrar', function () {
+        return Inertia::render('cursos/cursos-cadastrar');
+    })->middleware(['auth', 'verified']);
+
+    Route::get('/setores/cursos/editar', function () {
+        return Inertia::render('cursos/cursos-editar');
+    })->middleware(['auth', 'verified']);
+
     Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/process/edita-processo', function () {
             return Inertia::render('process/edita-processo');
