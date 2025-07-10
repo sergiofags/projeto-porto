@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { FormEventHandler, useState, useEffect } from 'react';
@@ -122,304 +122,307 @@ export default function ComplementaryExperience() {
             }
         } 
 
+    // Estado para controlar o efeito sanfona
+    const [abertoFormulario, setAbertoFormulario] = useState(false);
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Profile settings" />
-
             <SettingsLayout>
                 <div className="space-y-6">
-                    <HeadingSmall title="Experiências Complementares" description="Adicione seus idiomas e cursos" />
-
-                    <div className="space-y-6">
-                        {experiences.map((experience) => (
+                    <HeadingSmall title="Suas Experiências Complementares" description="Adicione seus cursos e/ou idiomas" />
+                    <div className="border border-blue-300 rounded-xl p-4">
+                        <div
+                            className="flex justify-between items-center cursor-pointer"
+                            onClick={() => setAbertoFormulario(!abertoFormulario)}>
+                            <div className="inline-block">
+                                <h2 className="text-lg font-medium inline-block">Experiências Complementares</h2>
+                                <hr className="mt-2 h-0.5 bg-[#008DD0]" />
+                            </div>
+                            {abertoFormulario ? <ChevronUp /> : <ChevronDown />}
+                        </div>
+                        {abertoFormulario && (
                             <>
-                                <div key={experience.id} className="grid gap-2 border p-4 rounded-md">
+                                <div className="space-y-6 mt-4">
+                                    {experiences.map((experience) => (
+                                        <>
+                                            <HeadingSmall title="Seus cursos e/ou idiomas já cadastrados:" />
+                                            <div key={experience.id} className="grid gap-2 border p-4 rounded-md">
+                                            {experience.tipo_experiencia === 'Idioma' && (
+                                                <div>
+                                                    <p><strong>Tipo:</strong> {experience.tipo_experiencia}</p>
+                                                    <p><strong>Titulo:</strong> {experience.titulo}</p>
+                                                    <p><strong>Instituição:</strong> {experience.instituicao}</p>
+                                                    <p><strong>Descrição:</strong> {experience.descricao}</p>
+                                                    <p><strong>Nivel:</strong> {experience.nivel_idioma}</p>
+                                                    <p><strong>Status:</strong> {experience.status}</p>
+                                                    <p><strong>Data Início:</strong> {experience.data_inicio}</p>
+                                                    {experience.data_fim && <p><strong>Data Fim:</strong> {experience.data_fim}</p>}
+                                                    <div>
+                                                        <Button
+                                                            onClick={() => deleteExperience(experience.id)}
+                                                            className='bg-red-500 hover:bg-red-600 cursor-pointer transition-colors duration-200'
+                                                        >
+                                                            Excluir <Trash2 />
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {experience.tipo_experiencia === 'Curso' && (
+                                                <div>
+                                                    <p><strong>Tipo:</strong> {experience.tipo_experiencia}</p>
+                                                    <p><strong>Titulo:</strong> {experience.titulo}</p>
+                                                    <p><strong>Instituição:</strong> {experience.instituicao}</p>
+                                                    <p><strong>Descrição:</strong> {experience.descricao}</p>
+                                                    <p><strong>Status:</strong> {experience.status}</p>
+                                                    <p><strong>Data Início:</strong> {experience.data_inicio}</p>
+                                                    {experience.data_fim && <p><strong>Data Fim:</strong> {experience.data_fim}</p>}
+                                                    <div>
+                                                        <Button
+                                                            onClick={() => deleteExperience(experience.id)}
+                                                            className='bg-red-500 hover:bg-red-600 cursor-pointer transition-colors duration-200'
+                                                        >
+                                                            Excluir <Trash2 />
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div></>
+                                    ))}
+                                </div>
+                                <form onSubmit={submitExperience} className="space-y-6 mt-8">
+                                    <div className="grid gap-2">
+                                        <HeadingSmall title="Adicione seus cursos e/ou idiomas:" />
+                                        <Label htmlFor="tipo_experiencia">Tipo experiência</Label>
+                                        <Select
+                                            value={experiencia.tipo_experiencia}
+                                            onValueChange={(value) => setExperiencia({ ...experiencia, tipo_experiencia: value })}
+                                            required
+                                        >
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Selecione o tipo de experiência" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectGroup>
+                                                    <SelectLabel>Tipos</SelectLabel>
+                                                    <SelectItem value="Idioma">Idioma</SelectItem>
+                                                    <SelectItem value="Curso">Curso</SelectItem>
+                                                </SelectGroup>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
                                     
-
-                                    {experience.tipo_experiencia === 'Idioma' && (
-                                        <div>
-                                            <p><strong>Tipo:</strong> {experience.tipo_experiencia}</p>
-                                            
-                                            <p><strong>Titulo:</strong> {experience.titulo}</p>
-                                            <p><strong>Instituição:</strong> {experience.instituicao}</p>
-                                            <p><strong>Descrição:</strong> {experience.descricao}</p>
-                                            <p><strong>Nivel:</strong> {experience.nivel_idioma}</p>
-                                            <p><strong>Status:</strong> {experience.status}</p>
-                                            <p><strong>Data Início:</strong> {experience.data_inicio}</p>
-                                            {experience.data_fim && <p><strong>Data Fim:</strong> {experience.data_fim}</p>}
-                                            <div>
-                                                <Button 
-                                                    onClick={() => deleteExperience(experience.id)}
-                                                    className='bg-red-500 cursor-pointer'
-                                                >
-                                                    Excluir <Trash2 />
-                                                </Button>
+                                    {experiencia.tipo_experiencia === 'Idioma' && (
+                                        <>
+                                            <div className="grid gap-2">
+                                                <Label htmlFor="titulo">Titulo</Label>
+                                                <Input
+                                                    id="titulo"
+                                                    value={experiencia.titulo}
+                                                    onChange={(e) => setExperiencia({ ...experiencia, titulo: e.target.value })}
+                                                    placeholder="Titulo"
+                                                />
                                             </div>
-                                        </div>
+
+                                            <div className="grid gap-2">
+                                                <Label htmlFor="instituicao">Instituição</Label>
+                                                <Input
+                                                    id="instituicao"
+                                                    value={experiencia.instituicao}
+                                                    onChange={(e) => setExperiencia({ ...experiencia, instituicao: e.target.value })}
+                                                    placeholder="Instituição"
+                                                />
+                                            </div>
+
+                                            <div className="grid gap-2">
+                                                <Label htmlFor="descricao">Descrição</Label>
+                                                <Input
+                                                    id="descricao"
+                                                    value={experiencia.descricao}
+                                                    onChange={(e) => setExperiencia({ ...experiencia, descricao: e.target.value })}
+                                                    placeholder="Descrição"
+                                                />
+                                            </div>
+
+                                            <div className="grid gap-2">
+                                                <Label htmlFor="nivel_idioma">Nível</Label>
+                                                <Select
+                                                    value={experiencia.nivel_idioma}
+                                                    onValueChange={(value) => setExperiencia({ ...experiencia, nivel_idioma: value })}
+                                                    required
+                                                >
+                                                    <SelectTrigger className="w-full">
+                                                        <SelectValue placeholder="Selecione o nivel de idioma" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectGroup>
+                                                            <SelectLabel>Tipos</SelectLabel>
+                                                            <SelectItem value="Básico">Básico</SelectItem>
+                                                            <SelectItem value="Intermediário">Intermediário</SelectItem>
+                                                            <SelectItem value="Avançado">Avançado</SelectItem>
+                                                            <SelectItem value="Fluente/Nativo">Fluente/Nativo</SelectItem>
+                                                        </SelectGroup>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+
+                                            <div className="grid gap-2">
+                                                <Label htmlFor="status">Status</Label>
+                                                <Select
+                                                    value={experiencia.status}
+                                                    onValueChange={(value) => setExperiencia({ ...experiencia, status: value })}
+                                                    required
+                                                >
+                                                    <SelectTrigger className="w-full">
+                                                        <SelectValue placeholder="Selecione o status" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectGroup>
+                                                            <SelectLabel>Tipos</SelectLabel>
+                                                            <SelectItem value="Cursando">Cursando</SelectItem>
+                                                            <SelectItem value="Concluido">Concluido</SelectItem>
+                                                        </SelectGroup>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+
+                                            <div className="grid gap-2">
+                                                <Label htmlFor="data_inicio">Data início</Label>
+                                                <Input
+                                                    id="data_inicio"
+                                                    value={experiencia.data_inicio}
+                                                    onChange={(e) => {
+                                                        let value = e.target.value.replace(/\D/g, '');
+                                                        if (value.length > 2) value = value.slice(0, 2) + '/' + value.slice(2);
+                                                        if (value.length > 5) value = value.slice(0, 5) + '/' + value.slice(5, 9);
+                                                        setExperiencia({ ...experiencia, data_inicio: value });
+                                                    }}
+                                                    placeholder="Data início"
+                                                    required
+                                                />
+                                            </div>
+
+                                            {experiencia.status === 'Concluido' && (
+                                                <div className="grid gap-2">
+                                                    <Label htmlFor="data_fim">Data fim</Label>
+                                                    <Input
+                                                        id="data_fim"
+                                                        value={experiencia.data_fim ?? ''}
+                                                        onChange={(e) => {
+                                                            let value = e.target.value.replace(/\D/g, '');
+                                                            if (value.length > 2) value = value.slice(0, 2) + '/' + value.slice(2);
+                                                            if (value.length > 5) value = value.slice(0, 5) + '/' + value.slice(5, 9);
+                                                            setExperiencia({ ...experiencia, data_fim: value });
+                                                        }}
+                                                        placeholder="Data fim"
+                                                    />
+                                                </div>
+                                            )}
+                                        </>
                                     )}
 
-                                    {experience.tipo_experiencia === 'Curso' && (
-                                        <div>
-                                            <p><strong>Tipo:</strong> {experience.tipo_experiencia}</p>
-                                            <p><strong>Titulo:</strong> {experience.titulo}</p>
-                                            <p><strong>Instituição:</strong> {experience.instituicao}</p>
-                                            <p><strong>Descrição:</strong> {experience.descricao}</p>
-                                            <p><strong>Status:</strong> {experience.status}</p>
-                                            <p><strong>Data Início:</strong> {experience.data_inicio}</p>
-                                            {experience.data_fim && <p><strong>Data Fim:</strong> {experience.data_fim}</p>}
-                                            <div>
-                                                <Button 
-                                                    onClick={() => deleteExperience(experience.id)}
-                                                    className='bg-red-500 cursor-pointer'
-                                                >
-                                                    Excluir <Trash2 />
-                                                </Button>
+                                    {experiencia.tipo_experiencia === 'Curso' && (
+                                        <>
+                                            <div className="grid gap-2">
+                                                <Label htmlFor="titulo">Titulo</Label>
+                                                <Input
+                                                    id="titulo"
+                                                    value={experiencia.titulo}
+                                                    onChange={(e) => setExperiencia({ ...experiencia, titulo: e.target.value })}
+                                                    placeholder="Titulo"
+                                                />
                                             </div>
-                                        </div>
+
+                                            <div className="grid gap-2">
+                                                <Label htmlFor="instituicao">Instituição</Label>
+                                                <Input
+                                                    id="instituicao"
+                                                    value={experiencia.instituicao}
+                                                    onChange={(e) => setExperiencia({ ...experiencia, instituicao: e.target.value })}
+                                                    placeholder="Instituição"
+                                                />
+                                            </div>
+
+                                            <div className="grid gap-2">
+                                                <Label htmlFor="descricao">Descrição</Label>
+                                                <Input
+                                                    id="descricao"
+                                                    value={experiencia.descricao}
+                                                    onChange={(e) => setExperiencia({ ...experiencia, descricao: e.target.value })}
+                                                    placeholder="Descrição"
+                                                />
+                                            </div>
+
+                                            <div className="grid gap-2">
+                                                <Label htmlFor="status">Status</Label>
+                                                <Select
+                                                    value={experiencia.status}
+                                                    onValueChange={(value) => setExperiencia({ ...experiencia, status: value })}
+                                                    required
+                                                >
+                                                    <SelectTrigger className="w-full">
+                                                        <SelectValue placeholder="Selecione o status" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectGroup>
+                                                            <SelectLabel>Tipos</SelectLabel>
+                                                            <SelectItem value="Cursando">Cursando</SelectItem>
+                                                            <SelectItem value="Concluido">Concluido</SelectItem>
+                                                        </SelectGroup>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+
+                                            <div className="grid gap-2">
+                                                <Label htmlFor="data_inicio">Data início</Label>
+                                                <Input
+                                                    id="data_inicio"
+                                                    value={experiencia.data_inicio}
+                                                    onChange={(e) => {
+                                                        let value = e.target.value.replace(/\D/g, '');
+                                                        if (value.length > 2) value = value.slice(0, 2) + '/' + value.slice(2);
+                                                        if (value.length > 5) value = value.slice(0, 5) + '/' + value.slice(5, 9);
+                                                        setExperiencia({ ...experiencia, data_inicio: value });
+                                                    }}
+                                                    placeholder="Data início"
+                                                    required
+                                                />
+                                            </div>
+
+                                            {experiencia.status === 'Concluido' && (
+                                                <div className="grid gap-2">
+                                                    <Label htmlFor="data_fim">Data fim</Label>
+                                                    <Input
+                                                        id="data_fim"
+                                                        value={experiencia.data_fim ?? ''}
+                                                        onChange={(e) => {
+                                                            let value = e.target.value.replace(/\D/g, '');
+                                                            if (value.length > 2) value = value.slice(0, 2) + '/' + value.slice(2);
+                                                            if (value.length > 5) value = value.slice(0, 5) + '/' + value.slice(5, 9);
+                                                            setExperiencia({ ...experiencia, data_fim: value });
+                                                        }}
+                                                        placeholder="Data fim"
+                                                    />
+                                                </div>
+                                            )}
+                                        </>
                                     )}
-                                </div>
-                                
+                                    <div className="flex items-center gap-4">
+                                        <Button className="cursor-pointer">Adicionar Experiência <Plus /></Button>
+                                        <Transition
+                                            show={experienceRecentlySuccessful}
+                                            enter="transition ease-in-out"
+                                            enterFrom="opacity-0"
+                                            leave="transition ease-in-out"
+                                            leaveTo="opacity-0"
+                                        >
+                                            <p className="text-sm text-neutral-600">Saved</p>
+                                        </Transition>
+                                    </div>
+                                </form>
                             </>
-                        ))}
+                        )}
                     </div>
-
-                    <form onSubmit={submitExperience} className="space-y-6">
-                        <div className="grid gap-2">
-                            <Label htmlFor="tipo_experiencia">Tipo experiência</Label>
-                            <Select
-                                value={experiencia.tipo_experiencia}
-                                onValueChange={(value) => setExperiencia({ ...experiencia, tipo_experiencia: value })}
-                                required
-                            >
-                                <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Selecione o tipo de experiência" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectGroup>
-                                        <SelectLabel>Tipos</SelectLabel>
-                                        <SelectItem value="Idioma">Idioma</SelectItem>
-                                        <SelectItem value="Curso">Curso</SelectItem>
-                                    </SelectGroup>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        
-                        {experiencia.tipo_experiencia === 'Idioma' && (
-                            <>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="titulo">Titulo</Label>
-                                    <Input
-                                        id="titulo"
-                                        value={experiencia.titulo}
-                                        onChange={(e) => setExperiencia({ ...experiencia, titulo: e.target.value })}
-                                        placeholder="Titulo"
-                                    />
-                                </div>
-
-                                <div className="grid gap-2">
-                                    <Label htmlFor="instituicao">Instituição</Label>
-                                    <Input
-                                        id="instituicao"
-                                        value={experiencia.instituicao}
-                                        onChange={(e) => setExperiencia({ ...experiencia, instituicao: e.target.value })}
-                                        placeholder="Instituição"
-                                    />
-                                </div>
-
-                                <div className="grid gap-2">
-                                    <Label htmlFor="descricao">Descrição</Label>
-                                    <Input
-                                        id="descricao"
-                                        value={experiencia.descricao}
-                                        onChange={(e) => setExperiencia({ ...experiencia, descricao: e.target.value })}
-                                        placeholder="Descrição"
-                                    />
-                                </div>
-
-                                <div className="grid gap-2">
-                                    <Label htmlFor="nivel_idioma">Nível</Label>
-                                    <Select
-                                        value={experiencia.nivel_idioma}
-                                        onValueChange={(value) => setExperiencia({ ...experiencia, nivel_idioma: value })}
-                                        required
-                                    >
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Selecione o nivel de idioma" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectGroup>
-                                                <SelectLabel>Tipos</SelectLabel>
-                                                <SelectItem value="Básico">Básico</SelectItem>
-                                                <SelectItem value="Intermediário">Intermediário</SelectItem>
-                                                <SelectItem value="Avançado">Avançado</SelectItem>
-                                                <SelectItem value="Fluente/Nativo">Fluente/Nativo</SelectItem>
-                                            </SelectGroup>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
-                                <div className="grid gap-2">
-                                    <Label htmlFor="status">Status</Label>
-                                    <Select
-                                        value={experiencia.status}
-                                        onValueChange={(value) => setExperiencia({ ...experiencia, status: value })}
-                                        required
-                                    >
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Selecione o status" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectGroup>
-                                                <SelectLabel>Tipos</SelectLabel>
-                                                <SelectItem value="Cursando">Cursando</SelectItem>
-                                                <SelectItem value="Concluido">Concluido</SelectItem>
-                                            </SelectGroup>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
-                                <div className="grid gap-2">
-                                    <Label htmlFor="data_inicio">Data início</Label>
-                                    <Input
-                                        id="data_inicio"
-                                        value={experiencia.data_inicio}
-                                        onChange={(e) => {
-                                            let value = e.target.value.replace(/\D/g, ''); // Remove non-numeric characters
-                                            if (value.length > 2) value = value.slice(0, 2) + '/' + value.slice(2);
-                                            if (value.length > 5) value = value.slice(0, 5) + '/' + value.slice(5, 9);
-                                            setExperiencia({ ...experiencia, data_inicio: value });
-                                        }}
-                                        placeholder="Data início"
-                                        required
-                                    />
-                                </div>
-
-                                {experiencia.status === 'Concluido' && (
-                                    <>
-                                        <div className="grid gap-2">
-                                            <Label htmlFor="data_fim">Data fim</Label>
-                                            <Input
-                                                id="data_fim"
-                                                value={experiencia.data_fim ?? ''}
-                                                onChange={(e) => {
-                                                    let value = e.target.value.replace(/\D/g, ''); // Remove non-numeric characters
-                                                    if (value.length > 2) value = value.slice(0, 2) + '/' + value.slice(2);
-                                                    if (value.length > 5) value = value.slice(0, 5) + '/' + value.slice(5, 9);
-                                                    setExperiencia({ ...experiencia, data_fim: value });
-                                                }}
-                                                placeholder="Data fim"
-                                            />
-                                        </div>
-                                    </>
-                                )}
-                                
-                            </>
-                        )}
-
-                        {experiencia.tipo_experiencia === 'Curso' && (
-                            <>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="titulo">Titulo</Label>
-                                    <Input
-                                        id="titulo"
-                                        value={experiencia.titulo}
-                                        onChange={(e) => setExperiencia({ ...experiencia, titulo: e.target.value })}
-                                        placeholder="Titulo"
-                                    />
-                                </div>
-
-                                <div className="grid gap-2">
-                                    <Label htmlFor="instituicao">Instituição</Label>
-                                    <Input
-                                        id="instituicao"
-                                        value={experiencia.instituicao}
-                                        onChange={(e) => setExperiencia({ ...experiencia, instituicao: e.target.value })}
-                                        placeholder="Instituição"
-                                    />
-                                </div>
-
-                                <div className="grid gap-2">
-                                    <Label htmlFor="descricao">Descrição</Label>
-                                    <Input
-                                        id="descricao"
-                                        value={experiencia.descricao}
-                                        onChange={(e) => setExperiencia({ ...experiencia, descricao: e.target.value })}
-                                        placeholder="Descrição"
-                                    />
-                                </div>
-
-                                <div className="grid gap-2">
-                                    <Label htmlFor="status">Status</Label>
-                                    <Select
-                                        value={experiencia.status}
-                                        onValueChange={(value) => setExperiencia({ ...experiencia, status: value })}
-                                        required
-                                    >
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Selecione o status" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectGroup>
-                                                <SelectLabel>Tipos</SelectLabel>
-                                                <SelectItem value="Cursando">Cursando</SelectItem>
-                                                <SelectItem value="Concluido">Concluido</SelectItem>
-                                            </SelectGroup>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
-                                <div className="grid gap-2">
-                                    <Label htmlFor="data_inicio">Data início</Label>
-                                    <Input
-                                        id="data_inicio"
-                                        value={experiencia.data_inicio}
-                                        onChange={(e) => {
-                                            let value = e.target.value.replace(/\D/g, ''); // Remove non-numeric characters
-                                            if (value.length > 2) value = value.slice(0, 2) + '/' + value.slice(2);
-                                            if (value.length > 5) value = value.slice(0, 5) + '/' + value.slice(5, 9);
-                                            setExperiencia({ ...experiencia, data_inicio: value });
-                                        }}
-                                        placeholder="Data início"
-                                        required
-                                    />
-                                </div>
-
-                                {experiencia.status === 'Concluido' && (
-                                    <>
-                                        <div className="grid gap-2">
-                                            <Label htmlFor="data_fim">Data fim</Label>
-                                            <Input
-                                                id="data_fim"
-                                                value={experiencia.data_fim ?? ''}
-                                                onChange={(e) => {
-                                                    let value = e.target.value.replace(/\D/g, ''); // Remove non-numeric characters
-                                                    if (value.length > 2) value = value.slice(0, 2) + '/' + value.slice(2);
-                                                    if (value.length > 5) value = value.slice(0, 5) + '/' + value.slice(5, 9);
-                                                    setExperiencia({ ...experiencia, data_fim: value });
-                                                }}
-                                                placeholder="Data fim"
-                                            />
-                                        </div>
-                                    </>
-                                )}
-                                
-                                
-                            </>
-                        )}
-
-                        <div className="flex items-center gap-4">
-                            <Button className="cursor-pointer">Adicionar Experiência <Plus /></Button>
-                            <Transition
-                                show={experienceRecentlySuccessful}
-                                enter="transition ease-in-out"
-                                enterFrom="opacity-0"
-                                leave="transition ease-in-out"
-                                leaveTo="opacity-0"
-                            >
-                                <p className="text-sm text-neutral-600">Saved</p>
-                            </Transition>
-                        </div>
-                    </form>
                 </div>
             </SettingsLayout>
         </AppLayout>

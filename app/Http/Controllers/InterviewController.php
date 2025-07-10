@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 use App\Models\Candidacy;
 use App\Models\Interview;
@@ -88,7 +89,7 @@ class InterviewController extends Controller
         }
     }
 
-    public function update(Request $request, $adminId, $candidacyId)
+    public function update(Request $request, $adminId, $candidacyId, $interviewId)
     {
         try {
             $admin = User::where('id', $adminId)->where('tipo_perfil', 'Admin')->first();

@@ -31,6 +31,7 @@ class PersonController extends Controller
                 ];
 
                 $personData = [
+                    'id' => optional($person)->id, // Adicionar o ID do Person
                     'foto_perfil' => optional($person)->foto_perfil,
                     'sobre' => optional($person)->sobre,
                     'linkedin' => optional($person)->linkedin,
@@ -78,19 +79,38 @@ class PersonController extends Controller
     public function show(Request $request, $personId)
     {
         try {
-            $user = User::find($personId);
+            // Primeiro, tenta encontrar a pessoa pelo ID direto
+            $person = Person::find($personId);
+            
+            // Se não encontrar, tenta encontrar pelo id_user
+            if (!$person) {
+                $person = Person::where('id_user', $personId)->first();
+            }
+            
+            // Se ainda não encontrou, tenta encontrar o usuário pelo ID
+            if (!$person) {
+                $user = User::find($personId);
+                if (!$user) {
+                    return response()->json([
+                        'message' => 'Usuário não encontrado.'
+                    ], 404);
+                }
+                $person = Person::where('id_user', $user->id)->first();
+            }
+
+            // Buscar dados do usuário
+            $user = $person ? User::find($person->id_user) : User::find($personId);
             if (!$user) {
                 return response()->json([
                     'message' => 'Usuário não encontrado.'
                 ], 404);
             }
 
-            $person = Person::where('id_user', $user->id)->first();
-
             $result = [
                 'id_user' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'person_exists' => $person !== null, // Indicador se o registro Person existe
                 'foto_perfil' => optional($person)->foto_perfil,
                 'sobre' => optional($person)->sobre,
                 'linkedin' => optional($person)->linkedin,
@@ -152,9 +172,9 @@ class PersonController extends Controller
                 'instagram' => 'nullable|string|max:255',
                 'facebook' => 'nullable|string|max:255',
                 'twitter' => 'nullable|string|max:255',
-                'cpf' => 'required|string|max:14|unique:person,cpf',
+                'cpf' => 'nullable|string|max:14|unique:person,cpf',
                 'data_nascimento' => 'nullable|date',
-                'genero' => 'required|in:Masculino,Feminino,Outro',
+                'genero' => 'nullable|in:Masculino,Feminino,Outro',
                 'deficiencia' => 'nullable|in:true,false',
                 'qual_deficiencia' => 'nullable|string|max:255',
                 'servico_militar' => 'nullable|in:true,false',
@@ -170,14 +190,17 @@ class PersonController extends Controller
                 'estou_ciente' => 'nullable|in:true,false',
             ]);
 
-            $cpf = $validatedData['cpf'];
-            if (!$this->validCPF($cpf)) {
-                return response()->json([
-                    'message' => 'CPF inválido.'
-                ], 422);
+            // Só valida CPF se foi fornecido
+            if (!empty($validatedData['cpf'])) {
+                $cpf = $validatedData['cpf'];
+                if (!$this->validCPF($cpf)) {
+                    return response()->json([
+                        'message' => 'CPF inválido.'
+                    ], 422);
+                }
             }
 
-            $validatedData['id'] = $validatedData['id_user'];
+            // Remover a linha que define o id manualmente
             $person = Person::create($validatedData);
 
             // Cria a pasta do candidato
