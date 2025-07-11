@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Transition } from '@headlessui/react';
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { FormEventHandler, useState } from 'react';
+import { Head, Link, useForm, usePage, router } from '@inertiajs/react';
+import { FormEventHandler, useState, useEffect, useCallback } from 'react';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
@@ -11,16 +11,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import { ChevronDown, ChevronUp, Save, FileText, MapPin, AlertCircle, CheckCircle, Loader2, X } from 'lucide-react';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
-import { useEffect } from 'react';
 import { Trash2, Plus } from '@/components/ui/icons';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { candidacyEventBus, type CandidacyEventData } from '@/utils/candidacy-events';
+import { AnimatePresence, motion } from 'framer-motion';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -412,6 +412,10 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
             try {
                 const response = await axios.get(`http://localhost:8000/api/person/${auth.user.id}`);
                 setPessoaData(response.data);
+                setPessoaData({
+                    ...response.data,
+                    data_nascimento: response.data.data_nascimento.split("-").reverse().join("/"),
+                })
             } catch (error: unknown) {
                 if (error instanceof Error && error.message === 'Erro ao acessar o banco de dados.') {
                     alert('Erro ao acessar o banco de dados.');
@@ -661,50 +665,97 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
 
     const [abertoFormulario, setAbertoFormulario] = useState(false);
     
+    const documentos = [
+  { label: 'Atestado de matrícula ou frequência', name: 'AtestadoMatricula' },
+  { label: 'Histórico escolar', name: 'HistoricoEscolar' },
+  { label: 'Currículo', name: 'Curriculo' },
+  { label: 'Coeficiente de Rendimento (CR)', name: 'CoeficienteRendimento' },
+];
+
+const [abertoDocumentos, setAbertoDocumentos] = useState(false);
+const [personId, setPersonId] = useState<number | null>(null);
+const [files, setFiles] = useState<{ [key: string]: File | null }>({});
+const [existingDocuments, setExistingDocuments] = useState<{ [key: string]: { id: number; documento: string; nome_documento: string } }>({});
+const [loading, setLoading] = useState(false);
+const [error, setError] = useState<string | null>(null);
+const [modalSucesso, setModalSucesso] = useState(false);
+
+const initializePerson = useCallback(async () => {
+  try {
+    const response = await axios.get(`http://localhost:8000/api/person`);
+    const userPerson = response.data.find((p: any) => p.id_user === auth.user.id);
+    if (userPerson && userPerson.id) {
+      setPersonId(userPerson.id);
+    } else {
+      const createResponse = await axios.post(`http://localhost:8000/api/person`, { id_user: auth.user.id });
+      setPersonId(createResponse.data.id);
+    }
+  } catch (err) {
+    console.error('Erro ao inicializar Person:', err);
+  }
+}, [auth.user.id]);
+
+const loadExistingDocuments = useCallback(async (personId: number) => {
+  try {
+    const response = await axios.get(`http://localhost:8000/api/person/${personId}/document`);
+    const documentsMap: any = {};
+    response.data.forEach((doc: any) => {
+      documentsMap[doc.nome_documento] = doc;
+    });
+    setExistingDocuments(documentsMap);
+  } catch (err) {
+    setExistingDocuments({});
+  }
+}, []);
+
+useEffect(() => {
+  initializePerson();
+}, [initializePerson]);
+
+useEffect(() => {
+  if (personId) loadExistingDocuments(personId);
+}, [personId, loadExistingDocuments]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Profile settings" />
             <div className="space-y-6">
                 <br/>
-                    <div className="border border-blue-300 rounded-xl p-3">
-                        <div
-                            className="flex justify-between items-center cursor-pointer"
-                            onClick={() => setAbertoInformacoes(!abertoInformacoes)}>
-                            <div className="inline-block">
-                                <h2 className="text-lg font-medium inline-block">Informações Pessoais</h2>
-                            </div>
-                            {abertoInformacoes ? <ChevronUp /> : <ChevronDown />}
+                <div className="flex items-center justify-between">
+                    <HeadingSmall title={`Olá, ${data.name}`} description={data.tipo_perfil} />
+
+                    {/* Botão Minhas Candidaturas - apenas para candidatos */}
+                    {auth.user.tipo_perfil === 'Candidato' && (
+                        <Button
+                            variant="outline"
+                            className="flex items-center gap-2 "
+                            onClick={() => {
+                                // Limpar candidaturas antes de abrir o modal para forçar reload
+                                setCandidacies([]);
+                                setCandidaciesLoading(false);
+                                // Fechar qualquer modal de cancelamento aberto
+                                setCancelModal({ open: false, candidacy: null, loading: false, error: null });
+                                setCandidaciesModalOpen(true);
+                            }}
+                        >
+                            <FileText className="h-4 w-4" />
+                            Minhas Candidaturas
+                        </Button>
+                    )}
+                </div>
+                <div className="border border-blue-300 rounded-xl p-3">
+                    <div
+                        className="flex justify-between items-center cursor-pointer"
+                        onClick={() => setAbertoInformacoes(!abertoInformacoes)}>
+                        <div className="inline-block">
+                            <h2 className="text-lg font-medium inline-block">Informações Pessoais</h2>
                         </div>
-                <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                        <HeadingSmall title="Informações do Perfil" description={data.tipo_perfil} />
-
-                        {/* Botão Minhas Candidaturas - apenas para candidatos */}
-                        {auth.user.tipo_perfil === 'Candidato' && (
-                            <Button
-                                variant="outline"
-                                className="flex items-center gap-2 "
-                                onClick={() => {
-                                    // Limpar candidaturas antes de abrir o modal para forçar reload
-                                    setCandidacies([]);
-                                    setCandidaciesLoading(false);
-                                    // Fechar qualquer modal de cancelamento aberto
-                                    setCancelModal({ open: false, candidacy: null, loading: false, error: null });
-                                    setCandidaciesModalOpen(true);
-                                }}
-                            >
-                                <FileText className="h-4 w-4" />
-                                Minhas Candidaturas
-                            </Button>
-                        )}
+                        {abertoInformacoes ? <ChevronUp /> : <ChevronDown />}
                     </div>
-
                         {abertoInformacoes && (
-                            <div>
-                                <form onSubmit={submit} className="space-y-6">
-                                    <div className="grid gap-2">
-                                        <br />
+                            <>
+                            <form onSubmit={submit} className="space-y-6 mt-4">
+                                <div className="grid gap-2">
                                         <Label htmlFor="name">Nome *</Label>
                                         <Input
                                             id="name"
@@ -731,7 +782,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                     </div>
                                     {mustVerifyEmail && auth.user.email_verified_at === null && (
                                         <div>
-                                            <p className="text-muted-foreground -mt-4 text-sm">
+                                            <p className="text-muted-foreground mt-4 text-sm">
                                                 Your email address is unverified.{' '}
                                                 <Link
                                                     href={route('verification.send')}
@@ -936,16 +987,17 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                             leave="transition ease-in-out"
                                             leaveTo="opacity-0"
                                         >
-                                            <p className="text-sm text-neutral-600">Saved</p>
+                                            <p className="text-sm text-neutral-600">Salvo</p>
                                         </Transition>
                                     </div>
                                 </form>
-                            </div>
+                                </>
                         )}
-                    </div>
+                </div>
 
-                    <div className="border border-blue-300 rounded-xl p-3">
-                        <div
+                
+                <div className="border border-blue-300 rounded-xl p-3">
+                    <div
                             className="flex justify-between items-center cursor-pointer"
                             onClick={() => setAbertoSobre(!abertoSobre)}>
                             <div className="inline-block">
@@ -954,9 +1006,8 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                             {abertoSobre ? <ChevronUp /> : <ChevronDown />}
                         </div>
 
-                        {abertoSobre && (
-                            <div>
-                                <form onSubmit={submitPessoa} className="space-y-6 mt-8">
+                    {abertoSobre && (
+                                <form onSubmit={submitPessoa} className="space-y-6 mt-4">
                                     <div className="grid gap-2">
                                         <HeadingSmall title="Gênero" />
                                         <Label htmlFor="name">Qual o seu gênero? *</Label>
@@ -1108,7 +1159,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                         />
                                     </div>
 
-                                    <div className="flex items-center gap-4">
+                                   <div className="flex items-center gap-4 mt-4">
                                         <Button disabled={pessoaProcessing} className='cursor-pointer'>Salvar Pessoa <Save /></Button>
                                         <Transition
                                             show={pessoaRecentlySuccessful}
@@ -1117,31 +1168,31 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                             leave="transition ease-in-out"
                                             leaveTo="opacity-0"
                                         >
-                                            <p className="text-sm text-neutral-600">Saved</p>
+                                            <p className="text-sm text-neutral-600">Salvo</p>
                                         </Transition>
                                     </div>
                                 </form>
-                            </div>
                         )}
-                    </div>
+                     </div>
+                </div>
 
-                    {/* --- ACORDEÃO DE EXPERIÊNCIAS (após acordeão Sobre Você) --- */}
-                    <div className="border border-blue-300 rounded-xl p-3">
-                        <div className="flex justify-between items-center cursor-pointer" onClick={() => setAbertoFormulario(!abertoFormulario)}>
-                            <div className="inline-block">
-                                <h2 className="text-lg font-medium inline-block">Experiências</h2>
-                            </div>
-                            {abertoFormulario ? <ChevronUp /> : <ChevronDown />}
+                {/* --- ACORDEÃO DE EXPERIÊNCIAS (após acordeão Sobre Você) --- */}
+                <div className="border border-blue-300 rounded-xl p-3">
+                    <div className="flex justify-between items-center cursor-pointer" onClick={() => setAbertoFormulario(!abertoFormulario)}>
+                        <div className="inline-block">
+                            <h2 className="text-lg font-medium inline-block">Experiências</h2>
                         </div>
-                        {abertoFormulario && (
-                            <div>
-                                <div className="space-y-6 mt-4">
-                                    <div className="inline-block">
+                        {abertoFormulario ? <ChevronUp /> : <ChevronDown />}
+                    </div>
+                    {abertoFormulario && (
+                        <div className="space-y-6 mt-4">
+                            <div className="inline-block">
                                         <h3 className="text-lg font-medium inline-block">Experiências Acadêmicas e/ou Profissionais</h3>
                                         <hr className="mt-2 h-0.5 bg-[#008DD0]" />
                                         <br/>
                                         <HeadingSmall title="Suas experiências já cadastradas:" />
-                                    </div>
+                            </div>
+                            <form>
                                     {experiences.map((experience) => (
                                         <div key={experience.id} className="grid gap-2 border p-4 rounded-md">
                                             {/* Renderize os campos relevantes da experiência */}
@@ -1160,7 +1211,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                             </div>
                                         </div>
                                     ))}
-                                </div>
+                                </form>
                                 {/* Formulário de experiência acadêmica/profissional */}
                                 <form onSubmit={submitExperience} className="space-y-6 mt-8">
                                     <div className="grid gap-2">
@@ -1398,12 +1449,12 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                             leave="transition ease-in-out"
                                             leaveTo="opacity-0"
                                         >
-                                            <p className="text-sm text-neutral-600">Saved</p>
+                                            <p className="text-sm text-neutral-600">Salvo</p>
                                         </Transition>
                                     </div>
                                 </form>
-                                {/* Bloco de experiências complementares dentro da sanfona principal */}
-                                <div className="space-y-6 mt-4">
+                            {/* Bloco de experiências complementares dentro da sanfona principal */}
+                            <div className="space-y-6 mt-4">
                                     <div className="inline-block">
                                         <h3 className="text-lg font-medium inline-block">Experiências Complementares</h3>
                                         <hr className="mt-2 h-0.5 bg-[#008DD0]" />
@@ -1570,14 +1621,107 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                     <div className="flex items-center gap-4">
                                         <Button className="cursor-pointer">Adicionar Experiência Complementar<Plus /></Button>
                                         <Transition show={complementaryRecentlySuccessful} enter="transition ease-in-out" enterFrom="opacity-0" leave="transition ease-in-out" leaveTo="opacity-0">
-                                            <p className="text-sm text-neutral-600">Saved</p>
+                                            <p className="text-sm text-neutral-600">Salvo</p>
                                         </Transition>
                                     </div>
                                 </form>
-                            </div>
-                        )}
-                    </div>
+                        </div>
+                    )}
                 </div>
+                <div className="border border-blue-300 rounded-xl p-3">
+  <div className="flex justify-between items-center cursor-pointer" onClick={() => setAbertoDocumentos(!abertoDocumentos)}>
+    <h2 className="text-lg font-medium inline-block">Documentos</h2>
+    {abertoDocumentos ? <ChevronUp /> : <ChevronDown />}
+  </div>
+
+  {abertoDocumentos && (
+    <form onSubmit={async (e) => {
+      e.preventDefault();
+      if (!personId) {
+        setError('Perfil não carregado.');
+        return;
+      }
+      const hasFiles = Object.values(files).some(f => f !== null);
+      const hasExisting = Object.keys(existingDocuments).length > 0;
+      if (!hasFiles && !hasExisting) {
+        setError('Selecione pelo menos um documento.');
+        return;
+      }
+      setLoading(true);
+      setError(null);
+      try {
+        for (const doc of documentos) {
+          const file = files[doc.name];
+          const existing = existingDocuments[doc.name];
+          if (file) {
+            const formData = new FormData();
+            formData.append('tipo_documento', 'Candidatura');
+            formData.append('nome_documento', doc.name);
+            formData.append('documento', file);
+            if (existing) {
+              formData.append('_method', 'PUT');
+              await axios.post(`http://localhost:8000/api/person/${personId}/document/${existing.id}`, formData);
+            } else {
+              await axios.post(`http://localhost:8000/api/person/${personId}/document`, formData);
+            }
+          }
+        }
+        setModalSucesso(true);
+        setFiles({});
+        loadExistingDocuments(personId);
+      } catch (err) {
+        setError('Erro ao enviar documentos.');
+      } finally {
+        setLoading(false);
+      }
+    }} className="space-y-4 mt-4">
+      {documentos.map((doc) => {
+        const existing = existingDocuments[doc.name];
+        const hasExisting = !!existing;
+        const hasNew = !!files[doc.name];
+        return (
+          <div key={doc.name} className="flex flex-col gap-2">
+            <label className="font-semibold">{doc.label}</label>
+            {hasExisting && !hasNew && (
+              <div className="p-3 bg-green-50 border border-green-200 rounded-lg flex justify-between items-center">
+                <span className="text-green-700 text-sm">Documento já enviado</span>
+                <a href={`http://localhost:8000/storage/${existing.documento}`} target="_blank" rel="noreferrer" className="text-blue-600 underline text-sm">Visualizar</a>
+              </div>
+            )}
+            {hasNew && (
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
+                Novo arquivo: {files[doc.name]?.name}
+              </div>
+            )}
+            <input
+              type="file"
+              accept="application/pdf"
+              onChange={(e) => setFiles({ ...files, [doc.name]: e.target.files?.[0] || null })}
+              className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            />
+          </div>
+        );
+      })}
+      <Button type="submit" disabled={loading}>{loading ? 'Enviando...' : 'Salvar Documentos'}</Button>
+      {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
+    </form>
+  )}
+</div>
+<AnimatePresence>
+  {modalSucesso && (
+    <motion.div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setModalSucesso(false)}>
+      <motion.div className="bg-white w-full max-w-md rounded-xl shadow-lg p-6 relative flex flex-col items-center" initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 25 }} onClick={(e) => e.stopPropagation()}>
+        <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
+          <CheckCircle className="w-8 h-8 text-green-600" />
+        </div>
+        <h3 className="text-lg font-semibold mb-2 text-center">Documentos salvos com sucesso!</h3>
+        <p className="text-sm text-gray-600 text-center mb-6">Seus documentos foram enviados e armazenados.</p>
+        <Button onClick={() => setModalSucesso(false)} className="w-full">OK</Button>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
+
 
             {/* Modal de Candidaturas */}
             {auth.user.tipo_perfil === 'Candidato' && (
@@ -1680,8 +1824,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                                     variant="outline"
                                                     size="sm"
                                                     onClick={() => {
-                                                        // Função vazia por enquanto
-                                                        console.log('Enviar documentos da contratação para candidatura:', candidacy.id);
+                                                        router.visit(route('documents_hiring', { candidacy_id: candidacy.id }));
                                                     }}
                                                 >
                                                     <FileText className="h-4 w-4 mr-2" />
@@ -1772,7 +1915,6 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                     </div>
                 </DialogContent>
             </Dialog>
-            </div>
         </AppLayout>
     );
 }

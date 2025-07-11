@@ -31,4 +31,8 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('settings/documents');
     })->name('documents');
 
+    Route::get('settings/documents_hiring', function () {
+        return Inertia::render('settings/documents_hiring');
+    })->name('documents_hiring');
+
 });

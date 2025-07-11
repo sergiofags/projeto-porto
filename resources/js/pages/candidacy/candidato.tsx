@@ -2,7 +2,7 @@ import axios from 'axios';
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-import { ChevronDown, ChevronUp, FileDown, ChevronLeft, Paperclip } from 'lucide-react';
+import { ChevronDown, ChevronUp, ChevronLeft, Paperclip } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 type Person = {
@@ -121,7 +121,7 @@ export default function CadastrarVaga() {
         };
 
         fetchVacancy();
-    }, []);
+    }, [candidatoId]);
 
     return (
         <AppLayout>
@@ -142,7 +142,7 @@ export default function CadastrarVaga() {
                         );
 
                         const valorInput = documento
-                        ? documento.documento
+                        ? documento.documento?.split('/').pop() || 'Documento anexado'
                         : 'Documento não informado';
 
                         return (
@@ -150,7 +150,7 @@ export default function CadastrarVaga() {
                             <p className="mb-2 break-words min-h-[48px]">{label}</p>
                             {documento ? (
                             <a
-                                href={`/storage/app/public/${documento.documento}`}
+                                href={`/storage/${documento.documento}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 title="Clique para visualizar o documento"

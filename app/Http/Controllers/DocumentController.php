@@ -98,14 +98,18 @@ class DocumentController extends Controller
             $validatedData = $request->validate([
                 'tipo_documento' => 'required|in:Candidatura,Contratacao',
                 'documento' => 'required|file|mimes:pdf|max:20480', // 20MB e só PDF
-                'nome_documento' => 'required|in:AtestadoMatricula,HistoricoEscolar,Curriculo,CoeficienteRendimento',
+                'nome_documento' => 'required|in:AtestadoMatricula,HistoricoEscolar,Curriculo,CoeficienteRendimento,Foto3x4,CedulaIdentidadeOuCNH,CadastroPessoaFisica,CTPS,CarteiraDeReservista,ComprovanteDeResidencia,AntecedentesCriminaisECivel,AntecedentesCriminaisPoliciaFederal,VacinacaFebreAmarela,VacinacaCovid19,GrupoSanguineo,ComprovanteMatricula,AtestadadoFrequencia',
             ]);
 
             $validatedData['id_person'] = $person->id;
 
-            // Cria a pasta do candidato se não existir
+            // Definir a pasta baseada no tipo de documento
             $userId = $person->id_user ?? $person->id;
-            $folder = "Documentos_Candidato/Candidato{$userId}";
+            if ($validatedData['tipo_documento'] === 'Candidatura') {
+                $folder = "Candidato{$userId}/Documentos_Candidato";
+            } else {
+                $folder = "Candidato{$userId}/Documentos_Contratacao";
+            }
             Storage::disk('public')->makeDirectory($folder); // Garante a criação da pasta
 
             if ($request->hasFile('documento')) {
@@ -113,10 +117,25 @@ class DocumentController extends Controller
                 
                 // Mapear nomes dos documentos para nomes de arquivo
                 $nomeArquivoMap = [
+                    // Documentos de Candidatura
                     'AtestadoMatricula' => 'Atestado_de_matricula',
                     'HistoricoEscolar' => 'Historico_escolar',
                     'Curriculo' => 'Curriculo',
-                    'CoeficienteRendimento' => 'Coeficiente_de_rendimento'
+                    'CoeficienteRendimento' => 'Coeficiente_de_rendimento',
+                    // Documentos de Contratação
+                    'Foto3x4' => 'Foto3x4',
+                    'CedulaIdentidadeOuCNH' => 'CedulaIdentidadeOuCNH',
+                    'CadastroPessoaFisica' => 'CadastroPessoaFisica',
+                    'CTPS' => 'CTPS',
+                    'CarteiraDeReservista' => 'CarteiraReservista',
+                    'ComprovanteDeResidencia' => 'ComprovanteResidencia',
+                    'AntecedentesCriminaisECivel' => 'AntecedentesCriminaisCivel',
+                    'AntecedentesCriminaisPoliciaFederal' => 'AntecedentesCriminaisPolFederal',
+                    'VacinacaFebreAmarela' => 'VacinacaoFebreAmarela',
+                    'VacinacaCovid19' => 'VacinaCovid19',
+                    'GrupoSanguineo' => 'GrupoSanguineo',
+                    'ComprovanteMatricula' => 'ComprovanteMatricula',
+                    'AtestadadoFrequencia' => 'AtestadoFrequencia',
                 ];
                 
                 $nomeDocumento = $validatedData['nome_documento'];
@@ -180,7 +199,7 @@ class DocumentController extends Controller
             $validatedData = $request->validate([
                 'tipo_documento' => 'required|in:Candidatura,Contratacao',
                 'documento' => 'nullable|file|mimes:pdf|max:20480', // 20MB e só PDF
-                'nome_documento' => 'nullable|in:AtestadoMatricula,HistoricoEscolar,Curriculo,CoeficienteRendimento',    
+                'nome_documento' => 'nullable|in:AtestadoMatricula,HistoricoEscolar,Curriculo,CoeficienteRendimento,Foto3x4,CedulaIdentidadeOuCNH,CadastroPessoaFisica,CTPS,CarteiraDeReservista,ComprovanteDeResidencia,AntecedentesCriminaisECivel,AntecedentesCriminaisPoliciaFederal,VacinacaFebreAmarela,VacinacaCovid19,GrupoSanguineo,ComprovanteMatricula,AtestadadoFrequencia',    
             ]);
 
             // Se um novo arquivo foi enviado, processar o upload
@@ -189,10 +208,25 @@ class DocumentController extends Controller
                 
                 // Mapear nomes dos documentos para nomes de arquivo
                 $nomeArquivoMap = [
+                    // Documentos de Candidatura
                     'AtestadoMatricula' => 'Atestado_de_matricula',
                     'HistoricoEscolar' => 'Historico_escolar',
                     'Curriculo' => 'Curriculo',
-                    'CoeficienteRendimento' => 'Coeficiente_de_rendimento'
+                    'CoeficienteRendimento' => 'Coeficiente_de_rendimento',
+                    // Documentos de Contratação
+                    'Foto3x4' => 'Foto3x4',
+                    'CedulaIdentidadeOuCNH' => 'CedulaIdentidadeOuCNH',
+                    'CadastroPessoaFisica' => 'CadastroPessoaFisica',
+                    'CTPS' => 'CTPS',
+                    'CarteiraDeReservista' => 'CarteiraReservista',
+                    'ComprovanteDeResidencia' => 'ComprovanteResidencia',
+                    'AntecedentesCriminaisECivel' => 'AntecedentesCriminaisCivel',
+                    'AntecedentesCriminaisPoliciaFederal' => 'AntecedentesCriminaisPolFederal',
+                    'VacinacaFebreAmarela' => 'VacinacaoFebreAmarela',
+                    'VacinacaCovid19' => 'VacinaCovid19',
+                    'GrupoSanguineo' => 'GrupoSanguineo',
+                    'ComprovanteMatricula' => 'ComprovanteMatricula',
+                    'AtestadadoFrequencia' => 'AtestadoFrequencia',
                 ];
                 
                 // Usar o nome_documento fornecido ou manter o existente
@@ -201,9 +235,14 @@ class DocumentController extends Controller
                 $extensao = $file->getClientOriginalExtension();
                 $nomeCompleto = $nomeArquivo . '.' . $extensao;
                 
-                // Criar pasta se necessário
+                // Definir a pasta baseada no tipo de documento
                 $userId = $person->id_user ?? $person->id;
-                $folder = "Documentos_Candidato/Candidato{$userId}";
+                $tipoDocumento = $validatedData['tipo_documento'] ?? $document->tipo_documento;
+                if ($tipoDocumento === 'Candidatura') {
+                    $folder = "Candidato{$userId}/Documentos_Candidato";
+                } else {
+                    $folder = "Candidato{$userId}/Documentos_Contratacao";
+                }
                 Storage::disk('public')->makeDirectory($folder);
                 
                 // Deletar arquivo antigo se existir
