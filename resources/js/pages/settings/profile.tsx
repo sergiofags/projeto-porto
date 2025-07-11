@@ -412,6 +412,10 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
             try {
                 const response = await axios.get(`http://localhost:8000/api/person/${auth.user.id}`);
                 setPessoaData(response.data);
+                setPessoaData({
+                    ...response.data,
+                    data_nascimento: response.data.data_nascimento.split("-").reverse().join("/"),
+                })
             } catch (error: unknown) {
                 if (error instanceof Error && error.message === 'Erro ao acessar o banco de dados.') {
                     alert('Erro ao acessar o banco de dados.');
