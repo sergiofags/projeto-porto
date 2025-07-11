@@ -4,8 +4,8 @@ import { Head, usePage } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { Button } from '@/components/ui/button';
-import HeadingSmall from '@/components/heading-small';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 const documentos = [
   { label: 'Atestado de matrícula ou frequência', name: 'AtestadoMatricula' },
@@ -232,88 +232,102 @@ export default function Documents() {
       setLoading(false);
     }
   };
+  
+  const [abertoDocumentos, setAbertoDocumentos] = useState(false);
 
   return (
     <AppLayout>
       <Head title="Documentos" />
       <SettingsLayout>
         <div className="space-y-6">
-          <HeadingSmall title="Documentos" description="Anexe seus documentos em PDF" />
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {documentos.map((doc) => {
-              const existingDoc = existingDocuments[doc.name];
-              const hasExistingDoc = !!existingDoc;
-              const hasNewFile = !!files[doc.name];
-              
-              return (
-                <div key={doc.name} className="flex flex-col gap-2">
-                  <label className="font-semibold">{doc.label}</label>
-                  
-                  {hasExistingDoc && !hasNewFile && (
-                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                          <span className="text-green-700 text-sm font-medium">
-                            Documento já enviado
-                          </span>
-                        </div>
-                        <a 
-                          href={`http://localhost:8000/storage/${existingDoc.documento}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-800 text-sm underline"
-                        >
-                          Visualizar
-                        </a>
-                      </div>
-                      <p className="text-green-600 text-xs mt-1">
-                        Selecione um novo arquivo se desejar substituir
-                      </p>
-                    </div>
-                  )}
-                  
-                  {hasNewFile && (
-                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                      <div className="flex items-center gap-2">
-                        <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        <span className="text-blue-700 text-sm font-medium">
-                          Novo arquivo selecionado: {files[doc.name]?.name}
-                        </span>
-                      </div>
-                      {hasExistingDoc && (
-                        <p className="text-blue-600 text-xs mt-1">
-                          Este arquivo substituirá o documento existente
-                        </p>
-                      )}
-                    </div>
-                  )}
-                  
-                  <input
-                    type="file"
-                    accept="application/pdf"
-                    onChange={e => handleFileChange(e, doc.name)}
-                    className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                  />
+          {/* <HeadingSmall title="Documentos" description="Anexe seus documentos em PDF" /> */}
+          <div className="border border-blue-300 rounded-xl p-3">
+            <div
+                className="flex justify-between items-center cursor-pointer"
+                onClick={() => setAbertoDocumentos(!abertoDocumentos)}>
+                <div className="inline-block">
+                    <h2 className="text-lg font-medium inline-block">Documentos</h2>
                 </div>
-              );
-            })}
-            
-            <Button 
-              type="submit" 
-              disabled={loading || initializingPerson || !personId || (!Object.values(files).some(file => file !== null) && Object.keys(existingDocuments).length > 0)}
-              className="w-full"
-            >
-              {loading ? 'Enviando...' : 
-               Object.values(files).some(file => file !== null) ? 'Atualizar Documentos' : 
-               Object.keys(existingDocuments).length > 0 ? 'Documentos Salvos' : 'Salvar Documentos'}
-            </Button>
-            {error && <p className="text-red-600 text-center mt-2">{error}</p>}
-          </form>
+                {abertoDocumentos ? <ChevronUp /> : <ChevronDown />}
+            </div>
+            {abertoDocumentos && (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {documentos.map((doc) => {
+                  const existingDoc = existingDocuments[doc.name];
+                  const hasExistingDoc = !!existingDoc;
+                  const hasNewFile = !!files[doc.name];
+                  
+                  return (
+                    <div key={doc.name} className="flex flex-col gap-2">
+                      <label className="font-semibold">{doc.label}</label>
+                      
+                      {hasExistingDoc && !hasNewFile && (
+                        <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              <span className="text-green-700 text-sm font-medium">
+                                Documento já enviado
+                              </span>
+                            </div>
+                            <a 
+                              href={`http://localhost:8000/storage/${existingDoc.documento}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-800 text-sm underline"
+                            >
+                              Visualizar
+                            </a>
+                          </div>
+                          <p className="text-green-600 text-xs mt-1">
+                            Selecione um novo arquivo se desejar substituir
+                          </p>
+                        </div>
+                      )}
+                      
+                      {hasNewFile && (
+                        <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                          <div className="flex items-center gap-2">
+                            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span className="text-blue-700 text-sm font-medium">
+                              Novo arquivo selecionado: {files[doc.name]?.name}
+                            </span>
+                          </div>
+                          {hasExistingDoc && (
+                            <p className="text-blue-600 text-xs mt-1">
+                              Este arquivo substituirá o documento existente
+                            </p>
+                          )}
+                        </div>
+                      )}
+                      
+                      <input
+                        type="file"
+                        accept="application/pdf"
+                        onChange={e => handleFileChange(e, doc.name)}
+                        className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                      />
+                    </div>
+                  );
+                })}
+                
+                <Button 
+                  type="submit" 
+                  disabled={loading || initializingPerson || !personId || (!Object.values(files).some(file => file !== null) && Object.keys(existingDocuments).length > 0)}
+                  className="w-full"
+                >
+                  {loading ? 'Enviando...' : 
+                  Object.values(files).some(file => file !== null) ? 'Atualizar Documentos' : 
+                  Object.keys(existingDocuments).length > 0 ? 'Documentos Salvos' : 'Salvar Documentos'}
+                </Button>
+                {error && <p className="text-red-600 text-center mt-2">{error}</p>}
+              </form>
+            )}
+          </div>
         </div>
 
         <AnimatePresence>
