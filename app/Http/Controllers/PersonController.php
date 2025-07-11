@@ -205,8 +205,10 @@ class PersonController extends Controller
 
             // Cria a pasta do candidato
             $userId = $person->id_user ?? $person->id;
-            $folder = "Documentos_Candidato/Candidato{$userId}";
-            Storage::disk('public')->makeDirectory($folder);
+            $folderCandidatura = "Candidato{$userId}/Documentos_Candidato";
+            $folderContratacao = "Candidato{$userId}/Documentos_Contratacao";
+            Storage::disk('public')->makeDirectory($folderCandidatura);
+            Storage::disk('public')->makeDirectory($folderContratacao);
 
             return response()->json($person, 201);
 
