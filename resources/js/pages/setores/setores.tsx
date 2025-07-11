@@ -81,7 +81,7 @@ export default function Setores() {
                             <div className='flex gap-2 justify-end'>
                                 <Link href={`/setores/editar?id-setor=${setor.id}`}><Button className='bg-green-600 hover:bg-green-700'><Pen /> Editar</Button></Link>
                                 <Button onClick={() => handleDelete(setor.id, setor.nome)} className='bg-red-600 hover:bg-red-700'><Trash2 /> Excluir</Button>
-                                <Link href={`/setores/cursos?id-setor=${setor.id}`}><Button className='bg-blue-600 hover:bg-blue-700'><Eye /> Vizualizar</Button></Link>
+                                <Link href={`/setores/cursos?id-setor=${setor.id}`}><Button className='bg-blue-600 hover:bg-blue-700'><Eye /> Visualizar</Button></Link>
                             </div>
                             </TableCell>
                         </TableRow>
