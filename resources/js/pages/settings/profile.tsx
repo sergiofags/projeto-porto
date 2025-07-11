@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Transition } from '@headlessui/react';
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, usePage, router } from '@inertiajs/react';
 import { FormEventHandler, useState } from 'react';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import HeadingSmall from '@/components/heading-small';
@@ -1680,8 +1680,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                                     variant="outline"
                                                     size="sm"
                                                     onClick={() => {
-                                                        // Função vazia por enquanto
-                                                        console.log('Enviar documentos da contratação para candidatura:', candidacy.id);
+                                                        router.visit(route('documents_hiring', { candidacy_id: candidacy.id }));
                                                     }}
                                                 >
                                                     <FileText className="h-4 w-4 mr-2" />

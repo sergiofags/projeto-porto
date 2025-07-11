@@ -1,19 +1,32 @@
 import axios from 'axios';
 import React, { useState } from 'react';
-import { Head, usePage } from '@inertiajs/react';
+import { Head, usePage, router } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import HeadingSmall from '@/components/heading-small';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft } from 'lucide-react';
 
-const documentos = [
-  { label: 'Atestado de matrícula ou frequência', name: 'AtestadoMatricula' },
-  { label: 'Histórico escolar', name: 'HistoricoEscolar' },
-  { label: 'Currículo', name: 'Curriculo' },
+const documentosContratacao = [
+  { label: 'Foto 3x4', name: 'Foto3x4' },
+  { label: 'Cédula de Identidade ou CNH', name: 'CedulaIdentidadeOuCNH' },
+  { label: 'Cadastro Pessoa Física (CPF)', name: 'CadastroPessoaFisica' },
+  { label: 'CTPS (Carteira de Trabalho)', name: 'CTPS' },
+  { label: 'Carteira de Reservista', name: 'CarteiraDeReservista' },
+  { label: 'Comprovante de Residência', name: 'ComprovanteDeResidencia' },
+  { label: 'Antecedentes Criminais e Cível', name: 'AntecedentesCriminaisECivel' },
+  { label: 'Antecedentes Criminais Polícia Federal', name: 'AntecedentesCriminaisPoliciaFederal' },
+  { label: 'Vacinação Febre Amarela', name: 'VacinacaFebreAmarela' },
+  { label: 'Vacina Covid-19', name: 'VacinacaCovid19' },
+  { label: 'Grupo Sanguíneo', name: 'GrupoSanguineo' },
+  { label: 'Atestado de Frequência', name: 'AtestadadoFrequencia' },
 ];
 
-export default function Documents() {
+export default function DocumentsHiring() {
   const { auth } = usePage().props as unknown as { auth: { user: { id: number } } };
+  const urlParams = new URLSearchParams(window.location.search);
+  const candidacyId = urlParams.get('candidacy_id');
+  
   const [personId, setPersonId] = useState<number | null>(null);
   const [files, setFiles] = useState<{ [key: string]: File | null }>({});
   const [existingDocuments, setExistingDocuments] = useState<{ [key: string]: { id: number; documento: string; nome_documento: string } }>({});
@@ -61,7 +74,6 @@ export default function Documents() {
         console.log('Tentando criar Person com id_user:', auth.user.id);
         const createResponse = await axios.post(`http://localhost:8000/api/person`, {
           id_user: auth.user.id,
-          // Outros campos podem ser adicionados aqui se necessário
         });
         console.log('Person criado:', createResponse.data);
         setPersonId(createResponse.data.id);
@@ -93,22 +105,25 @@ export default function Documents() {
   // Função para buscar documentos existentes
   const loadExistingDocuments = React.useCallback(async (personId: number) => {
     try {
-      console.log('Carregando documentos existentes para pessoa:', personId);
+      console.log('Carregando documentos de contratação existentes para pessoa:', personId);
       const response = await axios.get(`http://localhost:8000/api/person/${personId}/document`);
       console.log('Documentos encontrados:', response.data);
       
-      // Organizar documentos por nome_documento
+      // Filtrar apenas documentos de contratação e organizar por nome_documento
       const documentsMap: { [key: string]: { id: number; documento: string; nome_documento: string } } = {};
       if (Array.isArray(response.data)) {
-        response.data.forEach((doc: { id: number; documento: string; nome_documento: string }) => {
-          documentsMap[doc.nome_documento] = doc;
+        response.data.forEach((doc: { id: number; documento: string; nome_documento: string; tipo_documento: string }) => {
+          // Filtrar apenas documentos de contratação
+          if (doc.tipo_documento === 'Contratacao') {
+            documentsMap[doc.nome_documento] = doc;
+          }
         });
       }
       
       setExistingDocuments(documentsMap);
-      console.log('Documentos organizados:', documentsMap);
+      console.log('Documentos de contratação organizados:', documentsMap);
     } catch (err) {
-      console.log('Nenhum documento encontrado ou erro ao carregar:', err);
+      console.log('Nenhum documento de contratação encontrado ou erro ao carregar:', err);
       // Se não encontrar documentos, não é um erro crítico
       setExistingDocuments({});
     }
@@ -127,16 +142,6 @@ export default function Documents() {
     }
   }, [personId, loadExistingDocuments]);
 
-  // Debug do estado
-  React.useEffect(() => {
-    console.log('Estado atualizado:', {
-      personId,
-      initializingPerson,
-      loading,
-      auth: auth?.user?.id
-    });
-  }, [personId, initializingPerson, loading, auth]);
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, name: string) => {
     setFiles({ ...files, [name]: e.target.files?.[0] || null });
   };
@@ -149,11 +154,10 @@ export default function Documents() {
       return;
     }
 
-    // Verificar se pelo menos um arquivo foi selecionado ou já existe
+    // Verificar se pelo menos um arquivo foi selecionado
     const hasFiles = Object.values(files).some(file => file !== null);
-    const hasExistingDocs = Object.keys(existingDocuments).length > 0;
     
-    if (!hasFiles && !hasExistingDocs) {
+    if (!hasFiles) {
       setError('Selecione pelo menos um documento para enviar.');
       return;
     }
@@ -162,33 +166,27 @@ export default function Documents() {
     setError(null);
 
     try {
-      for (const doc of documentos) {
+      for (const doc of documentosContratacao) {
         const file = files[doc.name];
         const existingDoc = existingDocuments[doc.name];
         
         if (file) {
           const formData = new FormData();
-          formData.append('tipo_documento', 'Candidatura');
+          formData.append('tipo_documento', 'Contratacao');
           formData.append('nome_documento', doc.name);
           formData.append('documento', file);
 
           // Debug: verificar os dados do FormData
-          console.log(`Processando documento ${doc.name}:`, {
+          console.log(`Processando documento de contratação ${doc.name}:`, {
             hasExistingDoc: !!existingDoc,
             fileName: file.name,
             fileSize: file.size,
             fileType: file.type
           });
 
-          // Debug: listar todos os campos do FormData
-          console.log('FormData criado com os seguintes campos:');
-          for (const [key, value] of formData.entries()) {
-            console.log(`${key}:`, value);
-          }
-
           if (existingDoc) {
             // Se já existe um documento, usar POST com _method para simular PUT
-            console.log(`Atualizando documento existente: ${existingDoc.id}`);
+            console.log(`Atualizando documento de contratação existente: ${existingDoc.id}`);
             formData.append('_method', 'PUT');
             await axios.post(
               `http://localhost:8000/api/person/${personId}/document/${existingDoc.id}`,
@@ -196,7 +194,7 @@ export default function Documents() {
             );
           } else {
             // Se é um novo documento, usar POST para criar
-            console.log('Criando novo documento');
+            console.log('Criando novo documento de contratação');
             await axios.post(
               `http://localhost:8000/api/person/${personId}/document`,
               formData
@@ -213,14 +211,8 @@ export default function Documents() {
       }
     } catch (err: unknown) {
       console.error('Erro detalhado:', err);
-      if (err instanceof Error) {
-        console.error('Mensagem de erro:', err.message);
-      }
       if (axios.isAxiosError(err)) {
         console.error('Resposta do servidor:', err.response?.data);
-        console.error('Status do erro:', err.response?.status);
-        console.error('Headers da resposta:', err.response?.headers);
-        
         const errorMessage = err.response?.data?.error || err.response?.data?.message || err.message;
         setError(`Erro ao enviar documentos: ${errorMessage}`);
       } else {
@@ -231,24 +223,57 @@ export default function Documents() {
     }
   };
 
+  const handleVoltar = () => {
+    router.visit(route('profile'));
+  };
+
   return (
     <AppLayout>
-      <Head title="Documentos" />
+      <Head title="Documentos de Contratação" />
+      <div className="max-w-4xl mx-auto py-6 px-4">
         <div className="space-y-6">
-          <HeadingSmall title="Documentos" description="Anexe seus documentos em PDF" />
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="outline" 
+              onClick={handleVoltar}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Voltar
+            </Button>
+            <div>
+              <HeadingSmall 
+                title="Documentos de Contratação" 
+                description="Anexe os documentos necessários para sua contratação em PDF"
+              />
+              {candidacyId && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  Candidatura ID: {candidacyId}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h3 className="font-semibold text-blue-800 mb-2">Documentos Obrigatórios</h3>
+            <p className="text-blue-700 text-sm">
+              Para completar o processo de contratação, é necessário enviar todos os documentos listados abaixo. 
+              Certifique-se de que os arquivos estejam em formato PDF e sejam legíveis.
+            </p>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {documentos.map((doc) => {
+            {documentosContratacao.map((doc) => {
               const existingDoc = existingDocuments[doc.name];
               const hasExistingDoc = !!existingDoc;
               const hasNewFile = !!files[doc.name];
               
               return (
-                <div key={doc.name} className="space-y-2">
-                  <p className="pb-2">{doc.label}</p>
+                <div key={doc.name} className="flex flex-col gap-2">
+                  <label className="font-semibold">{doc.label}</label>
                   
                   {hasExistingDoc && !hasNewFile && (
-                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg mb-2">
+                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -274,7 +299,7 @@ export default function Documents() {
                   )}
                   
                   {hasNewFile && (
-                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg mb-2">
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
                       <div className="flex items-center gap-2">
                         <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -295,25 +320,20 @@ export default function Documents() {
                     type="file"
                     accept="application/pdf"
                     onChange={e => handleFileChange(e, doc.name)}
-                    className="w-full rounded-md border border-blue-400 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                    className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                   />
                 </div>
               );
             })}
-            </div>
             
-            <div className="pt-6">
-              <Button 
-                type="submit" 
-                disabled={loading || initializingPerson || !personId || (!Object.values(files).some(file => file !== null) && Object.keys(existingDocuments).length > 0)}
-                className="w-full"
-              >
-                {loading ? 'Enviando...' : 
-                 Object.values(files).some(file => file !== null) ? 'Atualizar Documentos' : 
-                 Object.keys(existingDocuments).length > 0 ? 'Documentos Salvos' : 'Salvar Documentos'}
-              </Button>
-              {error && <p className="text-red-600 text-center mt-2">{error}</p>}
-            </div>
+            <Button 
+              type="submit" 
+              disabled={loading || initializingPerson || !personId || !Object.values(files).some(file => file !== null)}
+              className="w-full"
+            >
+              {loading ? 'Enviando...' : 'Enviar Documentos de Contratação'}
+            </Button>
+            {error && <p className="text-red-600 text-center mt-2">{error}</p>}
           </form>
         </div>
 
@@ -352,23 +372,33 @@ export default function Documents() {
                 </div>
                 
                 <h3 className="text-lg font-semibold text-gray-900 mb-2 text-center">
-                  Documentos salvos com sucesso!
+                  Documentos de contratação enviados!
                 </h3>
                 
                 <p className="text-gray-600 text-center mb-6">
-                  Seus documentos foram enviados e salvos com sucesso.
+                  Seus documentos de contratação foram enviados com sucesso. Em breve entraremos em contato.
                 </p>
                 
-                <Button 
-                  onClick={() => setModalSucesso(false)}
-                  className="w-full"
-                >
-                  Continuar
-                </Button>
+                <div className="flex gap-2 w-full">
+                  <Button 
+                    onClick={() => setModalSucesso(false)}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    Continuar
+                  </Button>
+                  <Button 
+                    onClick={handleVoltar}
+                    className="flex-1"
+                  >
+                    Voltar ao Perfil
+                  </Button>
+                </div>
               </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
+      </div>
     </AppLayout>
   );
 }
