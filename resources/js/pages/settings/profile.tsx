@@ -2,8 +2,8 @@ import axios from 'axios';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Transition } from '@headlessui/react';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { FormEventHandler, useState } from 'react';
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { FormEventHandler, useState, useCallback, useEffect } from 'react';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -11,16 +11,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import { ChevronDown, ChevronUp, Save, FileText, MapPin, AlertCircle, CheckCircle, Loader2, X } from 'lucide-react';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
-import { useEffect } from 'react';
 import { Trash2, Plus } from '@/components/ui/icons';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { candidacyEventBus, type CandidacyEventData } from '@/utils/candidacy-events';
+import { AnimatePresence, motion } from 'framer-motion';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -661,6 +661,56 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
 
     const [abertoFormulario, setAbertoFormulario] = useState(false);
     
+    const documentos = [
+  { label: 'Atestado de matrícula ou frequência', name: 'AtestadoMatricula' },
+  { label: 'Histórico escolar', name: 'HistoricoEscolar' },
+  { label: 'Currículo', name: 'Curriculo' },
+  { label: 'Coeficiente de Rendimento (CR)', name: 'CoeficienteRendimento' },
+];
+
+const [abertoDocumentos, setAbertoDocumentos] = useState(false);
+const [personId, setPersonId] = useState<number | null>(null);
+const [files, setFiles] = useState<{ [key: string]: File | null }>({});
+const [existingDocuments, setExistingDocuments] = useState<{ [key: string]: { id: number; documento: string; nome_documento: string } }>({});
+const [loading, setLoading] = useState(false);
+const [error, setError] = useState<string | null>(null);
+const [modalSucesso, setModalSucesso] = useState(false);
+
+const initializePerson = useCallback(async () => {
+  try {
+    const response = await axios.get(`http://localhost:8000/api/person`);
+    const userPerson = response.data.find((p: any) => p.id_user === auth.user.id);
+    if (userPerson && userPerson.id) {
+      setPersonId(userPerson.id);
+    } else {
+      const createResponse = await axios.post(`http://localhost:8000/api/person`, { id_user: auth.user.id });
+      setPersonId(createResponse.data.id);
+    }
+  } catch (err) {
+    console.error('Erro ao inicializar Person:', err);
+  }
+}, [auth.user.id]);
+
+const loadExistingDocuments = useCallback(async (personId: number) => {
+  try {
+    const response = await axios.get(`http://localhost:8000/api/person/${personId}/document`);
+    const documentsMap: any = {};
+    response.data.forEach((doc: any) => {
+      documentsMap[doc.nome_documento] = doc;
+    });
+    setExistingDocuments(documentsMap);
+  } catch (err) {
+    setExistingDocuments({});
+  }
+}, []);
+
+useEffect(() => {
+  initializePerson();
+}, [initializePerson]);
+
+useEffect(() => {
+  if (personId) loadExistingDocuments(personId);
+}, [personId, loadExistingDocuments]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -668,7 +718,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
             <div className="space-y-6">
                 <br/>
                 <div className="flex items-center justify-between">
-                    <HeadingSmall title="Informações do Perfil" description={data.tipo_perfil} />
+                    <HeadingSmall title={`Olá, ${data.name}`} description={data.tipo_perfil} />
 
                     {/* Botão Minhas Candidaturas - apenas para candidatos */}
                     {auth.user.tipo_perfil === 'Candidato' && (
@@ -702,7 +752,6 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                             <>
                             <form onSubmit={submit} className="space-y-6 mt-4">
                                 <div className="grid gap-2">
-                                        <br />
                                         <Label htmlFor="name">Nome *</Label>
                                         <Input
                                             id="name"
@@ -1575,6 +1624,100 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                         </div>
                     )}
                 </div>
+                <div className="border border-blue-300 rounded-xl p-3">
+  <div className="flex justify-between items-center cursor-pointer" onClick={() => setAbertoDocumentos(!abertoDocumentos)}>
+    <h2 className="text-lg font-medium inline-block">Documentos</h2>
+    {abertoDocumentos ? <ChevronUp /> : <ChevronDown />}
+  </div>
+
+  {abertoDocumentos && (
+    <form onSubmit={async (e) => {
+      e.preventDefault();
+      if (!personId) {
+        setError('Perfil não carregado.');
+        return;
+      }
+      const hasFiles = Object.values(files).some(f => f !== null);
+      const hasExisting = Object.keys(existingDocuments).length > 0;
+      if (!hasFiles && !hasExisting) {
+        setError('Selecione pelo menos um documento.');
+        return;
+      }
+      setLoading(true);
+      setError(null);
+      try {
+        for (const doc of documentos) {
+          const file = files[doc.name];
+          const existing = existingDocuments[doc.name];
+          if (file) {
+            const formData = new FormData();
+            formData.append('tipo_documento', 'Candidatura');
+            formData.append('nome_documento', doc.name);
+            formData.append('documento', file);
+            if (existing) {
+              formData.append('_method', 'PUT');
+              await axios.post(`http://localhost:8000/api/person/${personId}/document/${existing.id}`, formData);
+            } else {
+              await axios.post(`http://localhost:8000/api/person/${personId}/document`, formData);
+            }
+          }
+        }
+        setModalSucesso(true);
+        setFiles({});
+        loadExistingDocuments(personId);
+      } catch (err) {
+        setError('Erro ao enviar documentos.');
+      } finally {
+        setLoading(false);
+      }
+    }} className="space-y-4 mt-4">
+      {documentos.map((doc) => {
+        const existing = existingDocuments[doc.name];
+        const hasExisting = !!existing;
+        const hasNew = !!files[doc.name];
+        return (
+          <div key={doc.name} className="flex flex-col gap-2">
+            <label className="font-semibold">{doc.label}</label>
+            {hasExisting && !hasNew && (
+              <div className="p-3 bg-green-50 border border-green-200 rounded-lg flex justify-between items-center">
+                <span className="text-green-700 text-sm">Documento já enviado</span>
+                <a href={`http://localhost:8000/storage/${existing.documento}`} target="_blank" rel="noreferrer" className="text-blue-600 underline text-sm">Visualizar</a>
+              </div>
+            )}
+            {hasNew && (
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
+                Novo arquivo: {files[doc.name]?.name}
+              </div>
+            )}
+            <input
+              type="file"
+              accept="application/pdf"
+              onChange={(e) => setFiles({ ...files, [doc.name]: e.target.files?.[0] || null })}
+              className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            />
+          </div>
+        );
+      })}
+      <Button type="submit" disabled={loading}>{loading ? 'Enviando...' : 'Salvar Documentos'}</Button>
+      {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
+    </form>
+  )}
+</div>
+<AnimatePresence>
+  {modalSucesso && (
+    <motion.div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setModalSucesso(false)}>
+      <motion.div className="bg-white w-full max-w-md rounded-xl shadow-lg p-6 relative flex flex-col items-center" initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 25 }} onClick={(e) => e.stopPropagation()}>
+        <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
+          <CheckCircle className="w-8 h-8 text-green-600" />
+        </div>
+        <h3 className="text-lg font-semibold mb-2 text-center">Documentos salvos com sucesso!</h3>
+        <p className="text-sm text-gray-600 text-center mb-6">Seus documentos foram enviados e armazenados.</p>
+        <Button onClick={() => setModalSucesso(false)} className="w-full">OK</Button>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
+
 
             {/* Modal de Candidaturas */}
             {auth.user.tipo_perfil === 'Candidato' && (
